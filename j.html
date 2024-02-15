@@ -1,0 +1,573 @@
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" >
+<link rel="stylesheet" href="j.css" >
+<script src="j.js" ></script>
+<script src="jszip.min.js" ></script>
+<script src="canvas-to-blob.min.js" ></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" ></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" ></script>
+<script src= "https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"> </script>
+</head>
+<body>
+<div id='header' class="my-0 py-0">
+<h2>JGD Kundli</h2>
+<p>Jai gurudev v0.1</p>
+</div>
+
+<div class="row w-100 text-black" style="background-color:#ffffe9;">
+    <div class="col-2" id="first_col">
+	<br>
+	<span class='text-primary h5'>Lagna</span>
+	<select onchange = "{ var lagna = document.getElementById('lagna').value; 
+		for(let i=1; i<=12; i++) { 
+		var rnum = (parseInt(lagna)+i-1)%12;
+		if (rnum==0) {rnum=12};
+		document.getElementById('rashi_in_h'+i.toString()).innerHTML = rnum.toString(); }}"
+	    name="lagna" id="lagna">
+	    <option value="XX">XX</option>
+	    <option value="1">1:Mesha/Aires</option>
+	    <option value="2">2:Vrishabha/Tauraus</option>
+	    <option value="3">3:Mithuna/Gemini</option>
+	    <option value="4">4:Karka/Cancer</option>
+	    <option value="5">5:Simha/Leo</option>
+	    <option value="6">6:Kanya/Virgo</option>
+	    <option value="7">7:Tula/Libra</option>
+	    <option value="8">8:Vrischika/Scorpio</option>
+	    <option value="9">9:Dhanu/Saggitarius</option>
+	   <option value="10">10:Makara/Capricorn</option>
+	   <option value="11">11:Kumbha/Aquarius</option>
+	   <option value="12">12:Meen/Pisces</option>
+	</select>
+	<br> <br>
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Su'><br>Su</span>
+	<span class='text-danger h5'>Su</span>
+	<select onchange = "{ 
+		var su_h = document.getElementById('h_su').value; 
+		$('#Su').detach().prependTo('#'+su_h); 
+		$('#Su').removeClass('d-none');}"
+	    name="h_su" id="h_su">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	<br>
+	<span class='h3 graha font-weight-bold text-success d-none' 
+	    style="font-size: 180%;" id='Mo'><br>Mo</span>
+	<span class='text-success h5'>Mo</span>
+	<select onchange = "{ 
+		var mo_h = document.getElementById('h_mo').value; 
+		$('#Mo').detach().prependTo('#'+mo_h); 
+		$('#Mo').removeClass('d-none');}"
+	    name="h_mo" id="h_mo">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	<br>
+	<br>
+	<span class='h3 graha graha font-weight-bold text-success d-none' 
+	    style="font-size: 180%;" id='Ju'><br>Ju
+	    <span id='ju_retro' class='h6 text-danger border-danger d-none'>(R)</span>
+	</span>
+	<span class='text-success h5'>Ju</span>
+	<select onchange = "{ 
+		var j_h = document.getElementById('h_ju').value; 
+		$('#Ju').detach().prependTo('#'+j_h); 
+		$('#Ju').removeClass('d-none');}"
+	    name="h_ju" id="h_ju">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	<input type=checkbox onclick="addRetro('ju');" id="ju_retrocbox" name="ju_retrocbox">
+
+	<br>
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Sa'><br>Sa
+	    <span id='sa_retro' class='h6 text-danger border-danger d-none'>(R)</span>
+	</span>
+	    <!-- <span onclick ="{  -->
+	    <!-- const ctx = document.getElementById('myCanvas').getContext('2d');  -->
+	    <!-- ctx.beginPath(); -->
+	    <!-- ctx.moveTo(0, 0); -->
+	    <!-- ctx.lineTo(300, 150); -->
+	    <!-- }" -->
+	    <!-- class='small font-weight-bold'>D</span> -->
+	<span class='text-danger h5'>Sa</span>
+	<select onchange = "{ 
+		var sa_h = document.getElementById('h_sa').value; 
+		$('#Sa').detach().prependTo('#'+sa_h); 
+		$('#Sa').removeClass('d-none');}"
+	    name="h_sa" id="h_sa">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	<input type=checkbox onclick="addRetro('sa');" id="sa_retrocbox" name="sa_retrocbox">
+
+	<br>
+	<span class='h3 graha font-weight-bold text-success d-none' 
+	    style="font-size: 180%;" id='Me'><br>Me
+	    <span id='me_retro' class='h6 text-danger border-danger d-none'>(R)</span>
+	</span>
+	<span class='text-success h5'>Me</span>
+	<select onchange = "{ 
+		var me_h = document.getElementById('h_me').value; 
+		$('#Me').detach().prependTo('#'+me_h); 
+		$('#Me').removeClass('d-none');}"
+	    name="h_me" id="h_me">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	<input type=checkbox onclick="addRetro('me');" id="me_retrocbox" name="me_retrocbox">
+
+	<br>
+	<span class='h3 graha font-weight-bold text-success d-none' 
+	    style="font-size: 180%;" id='Ve'><br>Ve
+	    <span id='ve_retro' class='h6 text-danger border-danger d-none'>(R)</span>
+	</span>
+	<span class='text-success h5'>Ve</span>
+	<select onchange = "{ 
+		var ve_h = document.getElementById('h_ve').value; 
+		$('#Ve').detach().prependTo('#'+ve_h); 
+		$('#Ve').removeClass('d-none');}"
+	    name="h_ve" id="h_ve">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	<input type=checkbox onclick="addRetro('ve');" id="ve_retrocbox" name="ve_retrocbox">
+
+	<br>
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Ma'><br>Ma
+	    <span id='ma_retro' class='h6 text-danger border-danger d-none'>(R)</span>
+	</span>
+	<span class='text-danger h5'>Ma</span>
+	<select onchange = "{ 
+		var ma_h = document.getElementById('h_ma').value; 
+		$('#Ma').detach().prependTo('#'+ma_h); 
+		$('#Ma').removeClass('d-none');}"
+	    name="h_ma" id="h_ma">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	<input type=checkbox onclick="addRetro('ma');" id="ma_retrocbox" name="ma_retrocbox">
+
+	<br>
+	<br>
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Ra'><br>Ra</span>
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Ke'><br>Ke</span>
+	<span class='text-danger h5'>Ra</span>
+	<select onchange = "{ 
+		var ra_h = 'h' + document.getElementById('h_ra').value; 
+		var ke_val = (parseInt(document.getElementById('h_ra').value)+6)%12
+		if (ke_val==0) { ke_val=12; }
+		var ke_h = 'h' + ke_val.toString(); 
+		$('#Ra').detach().prependTo('#'+ra_h); 
+		$('#Ra').removeClass('d-none');
+		$('#Ke').detach().prependTo('#'+ke_h); 
+		$('#Ke').removeClass('d-none');
+		}"
+	    name="h_ra" id="h_ra">
+	    <option value="0">XX</option>
+	    <option value="1">H1</option>
+	    <option value="2">H2</option>
+	    <option value="3">H3</option>
+	    <option value="4">H4</option>
+	    <option value="5">H5</option>
+	    <option value="6">H6</option>
+	    <option value="7">H7</option>
+	    <option value="8">H8</option>
+	    <option value="9">H9</option>
+	    <option value="10">H10</option>
+	    <option value="11">H11</option>
+	    <option value="12">H12</option>
+	</select>
+	<br>
+	<hr>
+	<button class='btn btn-primary my-0 py-0' onclick="saveData();">Save</button>
+	<br><span class='text-info font-weight-bold'>Load:</span>
+	<input type="file" name="file-input" id="file-input" multiple>
+	<br><pre id="file-content"></pre>
+	<hr>
+	<!-- onclick="download('the content of the file', 'filename.txt', 'text/plain');" -->
+	<!-- <button  id='startDraw' class='btn btn-primary my-0 py-0'  -->
+	    <!-- onclick="{ -->
+		  <!-- // ctx.canvas.width = document.getElementById('empty_image').offsetWidth; -->
+		  <!-- // ctx.canvas.height = document.getElementById('empty_image').offsetHeight; -->
+		<!-- document.getElementById('canvas').style.zIndex = '20'; -->
+	      <!-- }" -->
+	    <!-- >StartDrawing</button> -->
+	<button  id='clearCanvas' class='btn btn-warning my-0 py-0' 
+	    onclick="{
+		ctx.clearRect(0, 0, canvas.width, canvas.height); 
+		document.getElementById('canvas').style.zIndex = '1';
+	      }"
+	    >ClearDrawing</button>
+	    <br>
+	    <span id='strokeColor' class='d-none'>green</span>
+	    <span id='blue' 
+		onclick="document.getElementById('strokeColor').innerHTML = 'blue';"
+		class='btn btn-primary my-0 py-0 mx-0 px-0'> Bl </span>
+	    <span id='green' 
+		onclick="document.getElementById('strokeColor').innerHTML = 'green';"
+		class='btn btn-success my-0 py-0 mx-0 px-0'> Gr </span>
+	    <span id='red' 
+		onclick="document.getElementById('strokeColor').innerHTML = 'red';"
+		class='btn btn-danger my-0 py-0 mx-0 px-0'> Re </span>
+	    <span id='magenta' 
+		onclick="document.getElementById('strokeColor').innerHTML = 'magenta';"
+		style="background-color:magenta;"
+		class='btn my-0 py-0 mx-0 px-0'> Pin </span>
+	<hr>
+	<button  id='Screenshot'
+	    class='btn btn-primary my-0 py-0' onclick="takeShot();">Screenshot</button>
+	<button  id='ClearScreenshot'
+	    class='btn btn-warning my-0 py-0 d-none' onclick="clearShot()">Clear-Screenshot</button>
+	<br><span class='text-info font-weight-bold'>Gochar:</span>
+	<img id='gochar_clear' src="minus_c.png" alt="clear Gochar" 
+	                onclick="removeAllGocharGr();" height='18' />
+	<input type="file" name="gochar-input" id="gochar-input">
+	<span id="g_loc"></span>
+	<span id="g_date"></span>
+	<span id="g_time"></span>
+	<div class='my-1'>
+	      <img id='plus_font' src="plus_c.png" alt="RashiNumIncrFontSize" 
+		onclick="incr_font_size('rashinum',10);" height='18'
+		/>Rashi-Font<img id='minus_font' src="minus_c.png" alt="RashiNumDescrontSize" 
+		onclick="incr_font_size('rashinum',-10);" height='18'
+		/>
+	      <br>
+	      <img id='plus_fontr' src="plus_c.png" alt="GrahaIncrFontSize" 
+		onclick="incr_font_size('graha',10);" height='18'
+		/>Graha-Font<img id='minus_fontr' src="minus_c.png" alt="GrahaDescrontSize" 
+		onclick="incr_font_size('graha',-10);" height='18'
+		/>
+	      <br>
+	      <img id='plus_fontg' src="plus_c.png" alt="GocharGrIncrFontSize" 
+		onclick="incr_font_size('ggraha',10);" height='18'
+		/>GocharGr-Font<img id='minus_fontg' src="minus_c.png" alt="GocharGrDescrontSize" 
+		onclick="incr_font_size('ggraha',-10);" height='18'
+		/>
+	</div>
+    </div>
+    <div class="col-10 m-0 p-0">
+	<div class="row w-100 m-0 p-0 bg-white border border-5 border-info">
+	    <div class="col-12 m-0 p-0" id='j_opened'></div>
+	</div>
+	<div id ='main_disp' class="row w-100 m-0 p-0">
+	<div id ='printme' class="row w-100 m-0 p-0">
+	    <div id='drawme' class="col-8 m-0 p-0">
+	      <img id='empty_image' src="empty.png" alt="Snow" 
+	      style="width:100%;position:absolute;z-index:1;">
+	      <canvas crossOrigin='anonymous' id="canvas" style='position:relative;z-index:1;'></canvas>  
+		  <div class="rb1 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h1'>1</div>
+		  <div class="rb2 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h2'>2</div>
+		  <div class="rb3 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h3'>3</div>
+		  <div class="rb4 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h4'>4</div>
+		  <div class="rb5 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h5'>5</div>
+		  <div class="rb6 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h6'>6</div>
+		  <div class="rb7 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h7'>7</div>
+		  <div class="rb8 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h8'>8</div>
+		  <div class="rb9 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h9'>9</div>
+		  <div class="rb10 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h10'>10</div>
+		  <div class="rb11 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h11'>11</div>
+		  <div class="rb12 h5 rashinum font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='rashi_in_h12'>12</div>
+	      <div class="b1" style="z-index:2;" id='h1'><br><b>ASC</b> </div>
+	      <span onclick=rotate(2); style="z-index:2;" id='make_ascndnt_h2' 
+		  title='rotate_make_this_H1' class='small rotb2'>m</span> 
+	      <div class="b2" style="z-index:2;" id='h2'><br> </div>
+	      <span onclick=rotate(3); style="z-index:2;" id='make_ascndnt_h3' 
+		  title='rotate_make_this_H1' class='small rotb3'>m</span>
+	      <div class="b3" style="z-index:2;" id='h3'><br> </div>
+	      <span onclick=rotate(4); style="z-index:2;" id='make_ascndnt_h4' 
+		  title='rotate_make_this_H1' class='small rotb4'>m</span>
+	      <div class="b4" style="z-index:2;" id='h4'><br> </div>
+	      <span onclick=rotate(5); style="z-index:2;" id='make_ascndnt_h5' 
+		  title='rotate_make_this_H1' class='small rotb5'>m</span>
+	      <div class="b5" style="z-index:2;" id='h5'><br> </div>
+	      <span onclick=rotate(6); style="z-index:2;" id='make_ascndnt_h6' 
+		  title='rotate_make_this_H1' class='small rotb6'>m</span>
+	      <div class="b6" style="z-index:2;" id='h6'><br> </div>
+	      <span onclick=rotate(7); style="z-index:2;" id='make_ascndnt_h7' 
+		  title='rotate_make_this_H1' class='small rotb7'>m</span>
+	      <div class="b7" style="z-index:2;" id='h7'><br> </div>
+	      <span onclick=rotate(8); style="z-index:2;" id='make_ascndnt_h8' 
+		  title='rotate_make_this_H1' class='small rotb8'>m</span>
+	      <div class="b8" style="z-index:2;" id='h8'><br> </div>
+	      <span onclick=rotate(9); style="z-index:2;" id='make_ascndnt_h9' 
+		  title='rotate_make_this_H1' class='small rotb9'>m</span>
+	      <div class="b9" style="z-index:2;" id='h9'><br> </div>
+	      <span onclick=rotate(10); style="z-index:2;" id='make_ascndnt_h10' 
+		  title='rotate_make_this_H1' class='small rotb10'>m</span>
+	      <div class="b10" style="z-index:2;" id='h10'><br> </div>
+	      <span onclick=rotate(11); style="z-index:2;" id='make_ascndnt_h11' 
+		  title='rotate_make_this_H1' class='small rotb11'>m</span>
+	      <div class="b11" style="z-index:2;" id='h11'><br> </div>
+	      <span onclick=rotate(12); style="z-index:2;" id='make_ascndnt_h12' 
+		  title='rotate_make_this_H1' class='small rotb12'>m</span>
+	      <div class="b12" style="z-index:2;" id='h12'><br> </div>
+
+
+	      <div class="gb1 ggraha" 
+			  style="font-size: 90%;z-index:2;" id='gh1'> </div>
+	      <div class="gb2 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh2'> </div>
+	      <div class="gb3 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh3'> </div>
+	      <div class="gb4 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh4'> </div>
+	      <div class="gb5 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh5'> </div>
+	      <div class="gb6 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh6'> </div>
+	      <div class="gb7 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh7'> </div>
+	      <div class="gb8 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh8'> </div>
+	      <div class="gb9 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh9'> </div>
+	      <div class="gb10 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh10'> </div>
+	      <div class="gb11 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh11'> </div>
+	      <div class="gb12 ggraha" 
+		  style="font-size: 90%;z-index:2;" id='gh12'> </div>
+
+
+
+	      <!-- <div class="bottom-left">Bottom Left</div> -->
+	      <!-- <div class="top-left">Top Left</div> -->
+	      <!-- <div class="top-right">Top Right</div> -->
+	      <!-- <div class="bottom-right">Bottom Right</div> -->
+	      <!-- <div class="centered">Centered</div> -->
+	    </div>
+	    <div class="col-4 m-0 p-0 text-primary">
+	    FileName: <input id='j_filename' type="text" class='w-50 text-primary font-weight-bold h6'/>
+	    <hr class='m-0 p-0 border-info'>
+	    Title: <input id='j_title' type="text" class='w-100 text-primary font-weight-bold h6'/>
+	    Notes: <textarea class='w-100 text-primary h6' rows='21' id='j_notes'></textarea>
+	    Comments: <textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
+	    </div>
+	</div>
+	</div>
+	<div class="row w-100 m-0 p-0 bg-white border border-5 border-info">
+	    <div class="col-12 m-0 p-0 d-none" id="j_screenshots">
+	    <button id='bprintme' onclick="disp_ss('printme');" 
+		    class="font-weight-bold bg-warning btn-link border border-primary py-0 px-1 mx-0">M</button>
+	    </div>
+	</div>
+    </div>
+</div>
+<hr>
+<div id="output"></div>
+
+<script type="text/javascript">
+    const o_data = {};
+    const el = document.getElementById('file-input');
+    // if (el) { el.addEventListener('change', readSingleFile, false);}
+    if (el) { el.addEventListener('change', readMultipleFiles, false); }
+    const elg = document.getElementById('gochar-input');
+    if (elg) { elg.addEventListener('change', readGocharFile, false); }
+
+window.addEventListener('load', ()=>{
+    resize(); // Resizes the canvas once the window loads
+    document.addEventListener('mousedown', startPainting);
+    document.addEventListener('mouseup', stopPainting);
+    document.addEventListener('mousemove', sketch);
+    window.addEventListener('resize', resize);
+});
+//
+const canvas = document.querySelector('#canvas');
+// Context for the canvas for 2 dimensional operations
+const ctx = canvas.getContext('2d');
+// Resizes the canvas to the available size of the window.
+function resize(){
+  // ctx.canvas.width = window.innerWidth;
+  // ctx.canvas.height = window.innerHeight;
+  // ctx.canvas.width = document.getElementById('printme').innerWidth;
+  // ctx.canvas.height = document.getElementById('printme').innerHeight;
+  ctx.canvas.width = document.getElementById('empty_image').offsetWidth;
+  ctx.canvas.height = document.getElementById('empty_image').offsetHeight;
+  // ctx.canvas.offsetLeft = document.getElementById('first_col').offsetWidth;
+  // alert(document.getElementById('first_col').offsetWidth);
+}
+// Stores the initial position of the cursor
+let coord = {x:0 , y:0};
+// This is the flag that we are going to use to
+// trigger drawing
+let paint = false;
+// Updates the coordianates of the cursor when
+// an event e is triggered to the coordinates where
+// the said event is triggered.
+function getPosition(event){
+    // coord.x = event.clientX - canvas.offsetLeft;
+    // coord.y = event.clientY - canvas.offsetTop;
+    // coord.x = event.clientX;
+    // coord.y = event.clientY;
+    // alert(coord.x);
+    coord.x = event.clientX - document.getElementById('first_col').offsetWidth;
+    coord.y = event.clientY - document.getElementById('header').offsetHeight - document.getElementById('j_opened').offsetHeight-document.getElementById('j_screenshots').offsetHeight;
+}
+// The following functions toggle the flag to start
+// and stop drawing
+function startPainting(event){
+    paint = true;
+    getPosition(event);
+}
+function stopPainting(){
+    paint = false;	
+}
+
+var count = 0
+function sketch(event){
+  if (!paint) return;
+  ctx.beginPath();
+  count += 1
+  ctx.lineWidth = 5;
+  // Sets the end of the lines drawn
+  // to a round shape.
+  ctx.lineCap = 'round';
+  var strokeColor = document.getElementById('strokeColor').innerHTML;
+  ctx.strokeStyle = strokeColor;
+  // The cursor to start drawing
+  // moves to this coordinate
+  ctx.moveTo(coord.x, coord.y);
+  // The position of the cursor
+  // gets updated as we move the
+  // mouse around.
+  getPosition(event);
+  // A line is traced from start
+  // coordinate to this coordinate
+  if (coord.x>0) { 
+      ctx.lineTo(coord.x , coord.y);
+      // Draws the line.
+      ctx.stroke();
+  }
+  console.log(count)
+}
+
+
+
+
+
+</script>
+</body>
+</html>
+
+<!-- 
+ <body>
+     <div class="container" style="position:relative;text-align: center; color: red;">
+  <img src="empty.png" alt="Snow" style="width:100%;">
+  <div class="bottom-left">Bottom Left</div>
+  <div class="top-left">Top Left</div>
+  <div class="top-right">Top Right</div>
+  <div class="bottom-right">Bottom Right</div>
+  <div class="centered">Centered</div>
+</div>
+ </body>
+</html>
+
+-->
