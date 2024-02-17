@@ -499,6 +499,8 @@ let coord = {x:0 , y:0};
 // This is the flag that we are going to use to
 // trigger drawing
 let paint = false;
+  // 2D Array. First dimension is the line number. Second dimension stores that line's x,y coordinates.
+let lines = []
 // Updates the coordianates of the cursor when
 // an event e is triggered to the coordinates where
 // the said event is triggered.
@@ -516,9 +518,11 @@ function getPosition(event){
 function startPainting(event){
     paint = true;
     getPosition(event);
+    lines.push([]);
 }
 function stopPainting(){
-    paint = false;	
+    paint = false;
+    console.log(lines) // For debugging. 
 }
 
 var count = 0
@@ -546,7 +550,7 @@ function sketch(event){
       // Draws the line.
       ctx.stroke();
   }
-  console.log(count)
+    lines[lines.length-1].push([coord.x, coord.y])
 }
 
 
