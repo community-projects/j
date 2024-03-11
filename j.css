@@ -66,3 +66,21 @@
     .gb10 { position: absolute; bottom: 41%; left: 68%; }
     .gb11 { position: absolute; bottom: 66%; left: 77%; }
     .gb12 { position: absolute; bottom: 82%; left: 74%; }
+
+
+.close {
+color: #aaaaaa;
+float: right;
+font-size: 28px;
+font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+color: #000;
+text-decoration: none;
+cursor: pointer;
+}
+
+
+

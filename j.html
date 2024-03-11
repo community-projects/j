@@ -3,28 +3,41 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" >
 <link rel="stylesheet" href="j.css" >
 <script src="j.js" ></script>
-<script src="jszip.min.js" ></script>
-<script src="canvas-to-blob.min.js" ></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" ></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" ></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" ></script>
 <script src= "https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"> </script>
+<script type="text/javascript">
+    let lines = [];
+    let views = {};
+    let drawings = {};
+    views['Basic'] = {};
+    let lines_by_color = [];
+    let grahas_in_rashi = {};
+    let retro_planet_list = [];
+    let ascendant_rashi_num = "1";
+    let curr_h1_rashi_num = "";
+</script>
 </head>
 <body>
 <div id='header' class="my-0 py-0">
 <h2>JGD Kundli</h2>
 <p>Jai gurudev v0.1</p>
 </div>
+<div id="modal2B" style="display:none; " class="modal" >
+<div class="col-3 modal-content float-top float-right">
+<span class="close"
+onclick = "{document.getElementById('modal2B').style.display = 'none';}"
+>&times;</span>
+<p id="modal2M">Panduranga Naamamu Parama Punya Dhaaamamu..</p>
+</div>
+</div>
 
 <div class="row w-100 text-black" style="background-color:#ffffe9;">
     <div class="col-2" id="first_col">
 	<br>
-	<span class='text-primary h5'>Lagna</span>
-	<select onchange = "{ var lagna = document.getElementById('lagna').value; 
-		for(let i=1; i<=12; i++) { 
-		var rnum = (parseInt(lagna)+i-1)%12;
-		if (rnum==0) {rnum=12};
-		document.getElementById('rashi_in_h'+i.toString()).innerHTML = rnum.toString(); }}"
+	<span class='text-primary h5'>Lagna</span><br>
+	<select onchange = "change_ascendant(document.getElementById('lagna').value);"
 	    name="lagna" id="lagna">
 	    <option value="XX">XX</option>
 	    <option value="1">1:Mesha/Aires</option>
@@ -46,6 +59,7 @@
 	<span class='text-danger h5'>Su</span>
 	<select onchange = "{ 
 		var su_h = document.getElementById('h_su').value; 
+		place_graha_in_house('Su',su_h);
 		$('#Su').detach().prependTo('#'+su_h); 
 		$('#Su').removeClass('d-none');}"
 	    name="h_su" id="h_su">
@@ -69,6 +83,7 @@
 	<span class='text-success h5'>Mo</span>
 	<select onchange = "{ 
 		var mo_h = document.getElementById('h_mo').value; 
+		place_graha_in_house('Mo',mo_h);
 		$('#Mo').detach().prependTo('#'+mo_h); 
 		$('#Mo').removeClass('d-none');}"
 	    name="h_mo" id="h_mo">
@@ -90,11 +105,11 @@
 	<br>
 	<span class='h3 graha graha font-weight-bold text-success d-none' 
 	    style="font-size: 180%;" id='Ju'><br>Ju
-	    <span id='ju_retro' class='h6 text-danger border-danger d-none'>(R)</span>
 	</span>
 	<span class='text-success h5'>Ju</span>
 	<select onchange = "{ 
 		var j_h = document.getElementById('h_ju').value; 
+		place_graha_in_house('Ju',j_h);
 		$('#Ju').detach().prependTo('#'+j_h); 
 		$('#Ju').removeClass('d-none');}"
 	    name="h_ju" id="h_ju">
@@ -112,12 +127,10 @@
 	    <option value="h11">H11</option>
 	    <option value="h12">H12</option>
 	</select>
-	<input type=checkbox onclick="addRetro('ju');" id="ju_retrocbox" name="ju_retrocbox">
-
+	<input type=checkbox onclick="retro_flag('Ju');" id="Ju_retrocbox" name="Ju_retrocbox">
 	<br>
 	<span class='h3 graha font-weight-bold text-danger d-none' 
 	    style="font-size: 180%;" id='Sa'><br>Sa
-	    <span id='sa_retro' class='h6 text-danger border-danger d-none'>(R)</span>
 	</span>
 	    <!-- <span onclick ="{  -->
 	    <!-- const ctx = document.getElementById('myCanvas').getContext('2d');  -->
@@ -129,6 +142,7 @@
 	<span class='text-danger h5'>Sa</span>
 	<select onchange = "{ 
 		var sa_h = document.getElementById('h_sa').value; 
+		place_graha_in_house('Sa',sa_h);
 		$('#Sa').detach().prependTo('#'+sa_h); 
 		$('#Sa').removeClass('d-none');}"
 	    name="h_sa" id="h_sa">
@@ -146,16 +160,16 @@
 	    <option value="h11">H11</option>
 	    <option value="h12">H12</option>
 	</select>
-	<input type=checkbox onclick="addRetro('sa');" id="sa_retrocbox" name="sa_retrocbox">
+	<input type=checkbox onclick="retro_flag('Sa');" id="Sa_retrocbox" name="Sa_retrocbox">
 
 	<br>
 	<span class='h3 graha font-weight-bold text-success d-none' 
 	    style="font-size: 180%;" id='Me'><br>Me
-	    <span id='me_retro' class='h6 text-danger border-danger d-none'>(R)</span>
 	</span>
 	<span class='text-success h5'>Me</span>
 	<select onchange = "{ 
 		var me_h = document.getElementById('h_me').value; 
+		place_graha_in_house('Me',me_h);
 		$('#Me').detach().prependTo('#'+me_h); 
 		$('#Me').removeClass('d-none');}"
 	    name="h_me" id="h_me">
@@ -173,16 +187,16 @@
 	    <option value="h11">H11</option>
 	    <option value="h12">H12</option>
 	</select>
-	<input type=checkbox onclick="addRetro('me');" id="me_retrocbox" name="me_retrocbox">
+	<input type=checkbox onclick="retro_flag('Me');" id="Me_retrocbox" name="Me_retrocbox">
 
 	<br>
 	<span class='h3 graha font-weight-bold text-success d-none' 
 	    style="font-size: 180%;" id='Ve'><br>Ve
-	    <span id='ve_retro' class='h6 text-danger border-danger d-none'>(R)</span>
 	</span>
 	<span class='text-success h5'>Ve</span>
 	<select onchange = "{ 
 		var ve_h = document.getElementById('h_ve').value; 
+		place_graha_in_house('Ve',ve_h);
 		$('#Ve').detach().prependTo('#'+ve_h); 
 		$('#Ve').removeClass('d-none');}"
 	    name="h_ve" id="h_ve">
@@ -200,16 +214,16 @@
 	    <option value="h11">H11</option>
 	    <option value="h12">H12</option>
 	</select>
-	<input type=checkbox onclick="addRetro('ve');" id="ve_retrocbox" name="ve_retrocbox">
+	<input type=checkbox onclick="retro_flag('Ve');" id="Ve_retrocbox" name="Ve_retrocbox">
 
 	<br>
 	<span class='h3 graha font-weight-bold text-danger d-none' 
 	    style="font-size: 180%;" id='Ma'><br>Ma
-	    <span id='ma_retro' class='h6 text-danger border-danger d-none'>(R)</span>
 	</span>
 	<span class='text-danger h5'>Ma</span>
 	<select onchange = "{ 
 		var ma_h = document.getElementById('h_ma').value; 
+		place_graha_in_house('Ma',ma_h);
 		$('#Ma').detach().prependTo('#'+ma_h); 
 		$('#Ma').removeClass('d-none');}"
 	    name="h_ma" id="h_ma">
@@ -227,7 +241,7 @@
 	    <option value="h11">H11</option>
 	    <option value="h12">H12</option>
 	</select>
-	<input type=checkbox onclick="addRetro('ma');" id="ma_retrocbox" name="ma_retrocbox">
+	<input type=checkbox onclick="retro_flag('Ma');" id="Ma_retrocbox" name="Ma_retrocbox">
 
 	<br>
 	<br>
@@ -238,9 +252,11 @@
 	<span class='text-danger h5'>Ra</span>
 	<select onchange = "{ 
 		var ra_h = 'h' + document.getElementById('h_ra').value; 
+		place_graha_in_house('Ra',ra_h);
 		var ke_val = (parseInt(document.getElementById('h_ra').value)+6)%12
 		if (ke_val==0) { ke_val=12; }
 		var ke_h = 'h' + ke_val.toString(); 
+		place_graha_in_house('Ke',ke_h);
 		$('#Ra').detach().prependTo('#'+ra_h); 
 		$('#Ra').removeClass('d-none');
 		$('#Ke').detach().prependTo('#'+ke_h); 
@@ -264,7 +280,7 @@
 	<br>
 	<hr>
 	<button class='btn btn-primary my-0 py-0' onclick="saveData();">Save</button>
-	<br><span class='text-info font-weight-bold'>Load:</span>
+	<br><span class='text-info font-weight-bold'>Open Saved:</span>
 	<input type="file" name="file-input" id="file-input" multiple>
 	<br><pre id="file-content"></pre>
 	<hr>
@@ -276,10 +292,11 @@
 		<!-- document.getElementById('canvas').style.zIndex = '20'; -->
 	      <!-- }" -->
 	    <!-- >StartDrawing</button> -->
-	<button  id='clearCanvas' class='btn btn-warning my-0 py-0' 
+	<button  id='clearCanvas' class='btn btn-warning my-1 py-0' 
 	    onclick="{
 		ctx.clearRect(0, 0, canvas.width, canvas.height); 
 		document.getElementById('canvas').style.zIndex = '1';
+	        lines = [];
 	      }"
 	    >ClearDrawing</button>
 	    <br>
@@ -296,13 +313,15 @@
 	    <span id='magenta' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'magenta';"
 		style="background-color:magenta;"
-		class='btn my-0 py-0 mx-0 px-0'> Pin </span>
+		class='btn my-0 py-0 mx-0 px-0'> Pin </span> <br>
+	<!-- <button  id='Screenshot' -->
+	<!-- class='btn btn-primary my-0 py-0' onclick="takeShot();">Screenshot</button> -->
+	<button  id='SaveDrawing' 
+	    class='btn btn-primary my-1 py-0' onclick="save_drawing();">SaveDrawing</button> 
+	<!-- <button  id='ClearScreenshot' -->
+	<!-- class='btn btn-warning my-0 py-0 d-none' onclick="clearShot()">Clear-Screenshot</button> -->
 	<hr>
-	<button  id='Screenshot'
-	    class='btn btn-primary my-0 py-0' onclick="takeShot();">Screenshot</button>
-	<button  id='ClearScreenshot'
-	    class='btn btn-warning my-0 py-0 d-none' onclick="clearShot()">Clear-Screenshot</button>
-	<br><span class='text-info font-weight-bold'>Gochar:</span>
+	<span class='text-info font-weight-bold'>Gochar:</span>
 	<img id='gochar_clear' src="minus_c.png" alt="clear Gochar" 
 	                onclick="removeAllGocharGr();" height='18' />
 	<input type="file" name="gochar-input" id="gochar-input">
@@ -445,17 +464,39 @@
 	      <!-- <div class="centered">Centered</div> -->
 	    </div>
 	    <div class="col-4 m-0 p-0 text-primary">
-	    FileName: <input id='j_filename' type="text" class='w-50 text-primary font-weight-bold h6'/>
+	    File: <input id='j_filename' type="text" class='w-40 text-warning bg-secondary font-weight-bold h6'/>
+	    <span class='border border-5 border-danger my-2 mx-1 py-1'> View: 
+	       <!-- <select id='j_view' onchange = "change_view(document.getElementById('j_view').value);" -->
+	       <select id='j_view' onfocus = "this.oldvalue=this.value;" onchange = "change_view(this);"
+	       ></select>
+	       <script>
+		   views['Basic'] ={};
+		   var select = document.getElementById('j_view');
+		   for (v in views) {
+		       select.options[select.options.length] = new Option(v,v);
+		   }
+	       </script>
+	       <!-- <input id='j_view' type="text" class='w-25 text-warning bg-secondary font-weight-bold h6'/> -->
+	      <img id='save_view' src="save.png" alt="SaveView"  class='ml-2'
+	      onclick="save_view();" height='18'/>
+	      <img id='add_view_form' src="plus_c.png" alt="AddView"  class='mx-2'
+	      onclick="add_view_form();" height='18'/>
+	    </span>
 	    <hr class='m-0 p-0 border-info'>
-	    Title: <input id='j_title' type="text" class='w-100 text-primary font-weight-bold h6'/>
-	    Notes: <textarea class='w-100 text-primary h6' rows='21' id='j_notes'></textarea>
-	    Comments: <textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
+	    <span id ='title' class='m-0 p-0'>Basic-Title:</span> 
+	    <input id='j_title' type="text" class='w-100 text-primary font-weight-bold h6'/>
+	    <span id ='notes' class='m-0 p-0'>Basic-Notes:</span> 
+	    <textarea class='w-100 text-primary h6' rows='21' id='j_notes'></textarea>
+	    <span id ='comments' class='m-0 p-0'>Basic-Comments:</span> 
+	    <textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
+	    <span id ='drawings' class='m-0 p-0'>Basic-Drawings:</span> <br>
+	    <span id ='j_drawings' class='m-0 p-0 w-90 text-wrap'></span> 
 	    </div>
 	</div>
 	</div>
 	<div class="row w-100 m-0 p-0 bg-white border border-5 border-info">
 	    <div class="col-12 m-0 p-0 d-none" id="j_screenshots">
-	    <button id='bprintme' onclick="disp_ss('printme');" 
+	    <button id='bprintme' onclick="disp_dp('printme');" 
 		    class="font-weight-bold bg-warning btn-link border border-primary py-0 px-1 mx-0">M</button>
 	    </div>
 	</div>
@@ -500,7 +541,12 @@ let coord = {x:0 , y:0};
 // trigger drawing
 let paint = false;
   // 2D Array. First dimension is the line number. Second dimension stores that line's x,y coordinates.
-let lines = []
+// let lines = [];
+// let lines_by_color = [];
+// let grahas_in_rashi = {};
+// let ascendant_rashi_num = "1";
+// let curr_h1_rashi_num = "";
+for (let i=1; i<=12; i++) { grahas_in_rashi[i.toString()] = []; }
 // Updates the coordianates of the cursor when
 // an event e is triggered to the coordinates where
 // the said event is triggered.
@@ -519,10 +565,11 @@ function startPainting(event){
     paint = true;
     getPosition(event);
     lines.push([]);
+    lines_by_color.push([]);
 }
+
 function stopPainting(){
     paint = false;
-    console.log(lines) // For debugging. 
 }
 
 var count = 0
@@ -545,12 +592,13 @@ function sketch(event){
   getPosition(event);
   // A line is traced from start
   // coordinate to this coordinate
-  if (coord.x>0) { 
-      ctx.lineTo(coord.x , coord.y);
-      // Draws the line.
-      ctx.stroke();
-  }
+      if (coord.x>0) { 
+	  ctx.lineTo(coord.x , coord.y);
+	  // Draws the line.
+	  ctx.stroke();
+      }
     lines[lines.length-1].push([coord.x, coord.y])
+    lines_by_color[lines_by_color.length-1].push({ strokeColor: [coord.x, coord.y]})
 }
 
 
