@@ -186,16 +186,8 @@ function save_drawing() {
     drawings[drawing_id] = {};
     // drawings[drawing_id]['lines'] = lines;
     drawings[drawing_id]['lines'] = structuredClone(lines);
+    drawings[drawing_id]['lines_by_color'] = structuredClone(lines_by_color);
     //
-    // if (document.getElementById('j_notes').value) {
-    //     drawings[drawing_id]["j_notes"] = document.getElementById('j_notes').value;
-    // } else { drawings[drawing_id]["j_notes"] = "NONE"; }
-    // if (document.getElementById('j_title').value) {
-    //     drawings[drawing_id]["j_title"] = document.getElementById('j_title').value;
-    // } else { drawings[drawing_id]["j_title"] = "NONE"; }
-    // if (document.getElementById('j_comments').value) {
-    //     drawings[drawing_id]["j_comments"] = document.getElementById('j_comments').value;
-    // } else { drawings[drawing_id]["j_comments"] = "NONE"; }
     drawings[drawing_id]["grahas_in_rashi"] = grahas_in_rashi;
     drawings[drawing_id]["ascendant_rashi_num"] = ascendant_rashi_num;
     drawings[drawing_id]["curr_h1_rashi_num"] = 
@@ -207,6 +199,7 @@ function undo_stroke(){
     clear_canvas();
     // console.log(lines);
     lines = lines.slice(0,-2)
+    lines_by_color = lines_by_color.slice(0,-2)
     // const index = array.indexOf(lines.length);
     // if (index > -1) {
     //       array.splice(index, 1); // 1 means remove one item only
@@ -217,6 +210,35 @@ function undo_stroke(){
 }
 
 function draw_saved_strokes() {
+    if (lines_by_color.length>0) {
+	let old_xcoord = 0; 
+	let old_ycoord=0; let strokeColor='red';
+	for (c_line in lines_by_color) {
+	    strokeColor=lines_by_color[c_line]['color'];
+	if (lines_by_color[c_line]['coords'].length==0) continue;
+	    old_xcoord = lines_by_color[c_line]['coords'][0][0];
+	    old_ycoord = lines_by_color[c_line]['coords'][0][1];
+	    for (let e=1;e<lines_by_color[c_line]['coords'].length;e++) {
+		// console.log(e);
+		new_xcoord = lines_by_color[c_line]['coords'][e][0];
+		new_ycoord = lines_by_color[c_line]['coords'][e][1];
+		ctx.beginPath();
+		// getPosition(event);
+		ctx.lineWidth = 5;
+		ctx.lineCap = 'round';
+		ctx.strokeStyle = strokeColor;
+		ctx.moveTo(old_xcoord, old_ycoord);
+		ctx.lineTo(new_xcoord, new_ycoord);
+		ctx.stroke();
+		old_xcoord = new_xcoord;
+		old_ycoord = new_ycoord;
+	    }
+	}
+    }
+}
+
+function draw_saved_strokes1() {
+    // version 1 using efficient code - but still no color
     if (lines.length>0) {
 	let old_xcoord = 0; let old_ycoord=0;
 	for (c_line in lines) {
@@ -242,6 +264,7 @@ function draw_saved_strokes() {
 }
 
 function draw_saved_strokes0() {
+    // version 0 using less efficient code
     if (lines.length>0) {
 	let old_xcoord = 0; let old_ycoord=0;
 	for (c_line in lines) {
@@ -295,40 +318,12 @@ function disp_drawing(c_drawing_id){
 	// now populate grahas wher they belong
 	populate_graha_in_rashi();
     }
-    clear_canvas();
-    // redraw the lines from memory
-    var c_lines = [];
-    if (c_drawing_id=='printme') c_lines = lines;
-    else c_lines = l_data['lines'];
-    if (c_lines.length>0) {
-	for (c_line in c_lines) {
-	    // console.log(c_lines[c_line]);
-	    for (e in c_lines[c_line]) {
-		// console.log(e);
-		new_xcoord = c_lines[c_line][e][0];
-		new_ycoord = c_lines[c_line][e][1];
-		// console.log("new_xcoord " + new_xcoord + " new_ycoord " + new_ycoord); 
-		ctx.beginPath();
-		getPosition(event);
-		ctx.lineWidth = 5;
-		ctx.lineCap = 'round';
-		ctx.strokeStyle = strokeColor;
-		ctx.lineTo(new_xcoord, new_ycoord);
-		ctx.stroke();
-	    }
-	}
+    if ("lines_by_color" in l_data) {
+	lines_by_color = l_data['lines_by_color'];
+	clear_canvas();
+	// redraw the lines from memory
+	draw_saved_strokes();
     }
-    // if (c_drawing_id in drawings) {
-    //     if ("j_title" in drawings[c_drawing_id]) {
-    //         document.getElementById('j_title').value = drawings[c_drawing_id]["j_title"];
-    //     }
-    //     if ("j_comments" in drawings[c_drawing_id]) {
-    //         document.getElementById('j_comments').value = drawings[c_drawing_id]["j_comments"];
-    //     }
-    //     if ("j_notes" in drawings[c_drawing_id]) {
-    //         document.getElementById('j_notes').value = drawings[c_drawing_id]["j_notes"];
-    //     }
-    // }
     $('#bprintme').removeClass('bg-warning');
     for (p in drawings) { 
 	// $('#'+p).addClass('d-none');
@@ -398,23 +393,8 @@ function place_graha_in_house(graha,house) {
 function saveData() {
     save_view();
     const saveMe = {};
-    // gets the rashi_in_house data first
-    // saveMe["rashi_in_house"] = {};
-    // for (let i=1; i<=12; i++) {
-    //     c_val = document.getElementById('rashi_in_h'+ i.toString()).innerHTML;
-    //     saveMe["rashi_in_house"][i] = c_val;
-    // }
-    // get rashi in first house
-    // saveMe["ascendant_rashi_num"] = 
-    // document.getElementById('rashi_in_h1').innerHTML;
     saveMe["ascendant_rashi_num"] = ascendant_rashi_num;
     saveMe["curr_h1_rashi_num"] = document.getElementById('rashi_in_h1').innerHTML;
-    // gets the planets in house now
-    // saveMe["planets_in_house"] = {};
-    // for (let i=1; i<=12; i++) {
-    //     c_val = document.getElementById('h'+ i.toString()).innerHTML;
-    //     saveMe["planets_in_house"][i] = c_val;
-    // }
     // 
     saveMe["grahas_in_rashi"] = grahas_in_rashi;
     saveMe["views"] = views;
@@ -425,16 +405,6 @@ function saveData() {
     } else { j_filename = "UnKnown"; }
     saveMe["j_filename"] = j_filename;
     //
-    // if (document.getElementById('j_title').value) {
-    //     saveMe["j_title"] = document.getElementById('j_title').value;
-    // } else { saveMe["j_title"] = "NONE"; }
-    // if (document.getElementById('j_notes').value) {
-    //     saveMe["j_notes"] = document.getElementById('j_notes').value;
-    // } else { saveMe["j_notes"] = "NONE"; }
-    // if (document.getElementById('j_comments').value) {
-    //     saveMe["j_comments"] = document.getElementById('j_comments').value;
-    // } else { saveMe["j_comments"] = "NONE"; }
-    //
     saveMe["j_title"] = views['Basic']['j_title'];
     saveMe["j_comments"] = views['Basic']['j_comments'];
     saveMe["j_notes"] = views['Basic']['j_notes'];
@@ -442,7 +412,6 @@ function saveData() {
     //
     if (typeof drawings == 'undefined') { drawings={}; }
     if (Object.keys(drawings).length>0) saveMe["drawings"] = drawings;
-    // console.log(saveMe);
     //
     saveMeStr = JSON.stringify(saveMe);
     // var fs = require('fs');
@@ -722,16 +691,6 @@ function loadData(l_data,make_tab=1) {
 	   select.options[select.options.length] = new Option(v,v);
 	}
     }
-    // if ("rashi_in_house" in l_data) {
-    //     for (i in l_data["rashi_in_house"]) {
-    //         document.getElementById('rashi_in_h'+ i).innerHTML = l_data["rashi_in_house"][i];
-    //     }
-    // }
-    // if ("planets_in_house" in l_data) {
-    //     for (i in l_data["planets_in_house"]) {
-    //         document.getElementById('h'+ i).innerHTML = l_data["planets_in_house"][i];
-    //     }
-    // }
     // console.log(l_data);
     if ("retro_planet_list" in l_data) {
 	retro_planet_list = l_data["retro_planet_list"];
@@ -742,14 +701,6 @@ function loadData(l_data,make_tab=1) {
 	grahas_in_rashi = l_data["grahas_in_rashi"];
 	// now populate grahas wher they belong
 	populate_graha_in_rashi();
-	// console.log(grahas_in_rashi);
-	// for (let i=1; i<=12; i++) {
-	//     var c_rashi = document.getElementById('rashi_in_h'+ i.toString()).innerHTML;
-	//     document.getElementById('h'+ i).innerHTML = '';
-	//     if (i==1) document.getElementById('h'+ i).innerHTML += '<b>ASC</b>';
-	//     for ( graha of grahas_in_rashi[c_rashi]) 
-	// 	document.getElementById('h'+ i).innerHTML += format_graha(graha);
-	// }
     }
     // console.log(grahas_in_rashi);
     if ("j_filename" in l_data) {
@@ -779,22 +730,6 @@ function loadData(l_data,make_tab=1) {
     if ("j_drawings" in l_data) {
 	document.getElementById('j_drawings').innerHTML = l_data["j_drawings"];
     }
-    // o_data[l_data["j_filename"]] = l_data;
-    // if ("drawings" in l_data) {
-    //     drawings = l_data["drawings"];
-    //     let drawings_arr=['printme'];
-    //     for (drawing_id in drawings) {
-    //         drawings_arr.push(drawing_id);
-    //         var btn_str = '<btn ';
-    //         btn_str += ' id="b'+drawing_id+'" ';
-    //         btn_str += ' onclick=disp_drawing(\''+drawing_id+'\'); ';
-    //         btn_str += ' class="font-weight-bold btn-link border border-primary py-0 px-1 mx-0">';
-    //         btn_str += drawing_id;
-    //         btn_str += '</btn>';
-    //         document.getElementById('j_screenshots').innerHTML += btn_str;
-    //     }
-    //     $('#j_screenshots').removeClass('d-none');
-    // }
 }
 
 function displayContents(contents) {

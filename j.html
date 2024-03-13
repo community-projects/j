@@ -297,6 +297,7 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 		ctx.clearRect(0, 0, canvas.width, canvas.height); 
 		document.getElementById('canvas').style.zIndex = '1';
 	        lines = [];
+		lines_by_color =[];
 	      }"
 	    >ClearDrawing</button>
 	    <br>
@@ -567,7 +568,8 @@ function startPainting(event){
     paint = true;
     getPosition(event);
     lines.push([]);
-    lines_by_color.push([]);
+    var strokeColor = document.getElementById('strokeColor').innerHTML;
+    lines_by_color.push({'color':strokeColor, 'coords':[]});
 }
 
 function stopPainting(){
@@ -600,7 +602,7 @@ function sketch(event){
 	ctx.stroke();
     }
     lines[lines.length-1].push([coord.x, coord.y])
-    lines_by_color[lines_by_color.length-1].push({ strokeColor: [coord.x, coord.y]})
+    lines_by_color[lines_by_color.length-1]['coords'].push([coord.x, coord.y])
 }
 
 
