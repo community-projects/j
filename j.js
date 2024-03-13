@@ -203,6 +203,40 @@ function save_drawing() {
     // console.log(drawings);
 }
 
+function undo_stroke(){
+    clear_canvas();
+    // console.log(lines);
+    lines = lines.slice(0,-2)
+    // const index = array.indexOf(lines.length);
+    // if (index > -1) {
+    //       array.splice(index, 1); // 1 means remove one item only
+    // }
+    // console.log(lines);
+    draw_saved_strokes();
+    // console.log("just popped");
+}
+
+function draw_saved_strokes() {
+    if (lines.length>0) {
+	for (c_line in lines) {
+	    // console.log(lines[c_line]);
+	    for (e in lines[c_line]) {
+		// console.log(e);
+		new_xcoord = lines[c_line][e][0];
+		new_ycoord = lines[c_line][e][1];
+		// console.log("new_xcoord " + new_xcoord + " new_ycoord " + new_ycoord); 
+		ctx.beginPath();
+		getPosition(event);
+		ctx.lineWidth = 5;
+		ctx.lineCap = 'round';
+		ctx.strokeStyle = strokeColor;
+		ctx.lineTo(new_xcoord, new_ycoord);
+		ctx.stroke();
+	    }
+	}
+    }
+}
+
 function disp_drawing(c_drawing_id){
     let l_data = drawings[c_drawing_id];
     if ("ascendant_rashi_num" in l_data) {
@@ -694,7 +728,7 @@ function loadData(l_data,make_tab=1) {
 	btn_str += '</btn>';
 	btn_str += '<img ';
 	btn_str += ' onclick="$(\'#'+j_f+'\').addClass(\'d-none\');" ' 
-	btn_str += ' class="ml-0 mr-1" src="clear.png" height="11"/></span>';
+	btn_str += ' class="ml-0 mr-1" src="images/clear.png" height="11"/></span>';
 	if (make_tab==1) {
 	    document.getElementById('j_opened').innerHTML += btn_str
 	}

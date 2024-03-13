@@ -313,7 +313,9 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	    <span id='magenta' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'magenta';"
 		style="background-color:magenta;"
-		class='btn my-0 py-0 mx-0 px-0'> Pin </span> <br>
+		class='btn my-0 py-0 mx-0 px-0'> Pin </span> 
+	<img id='undo' src="images/back.png" alt="Undo Stroke" onclick="undo_stroke();" height='21' />
+	 <br> 
 	<!-- <button  id='Screenshot' -->
 	<!-- class='btn btn-primary my-0 py-0' onclick="takeShot();">Screenshot</button> -->
 	<button  id='SaveDrawing' 
@@ -322,28 +324,28 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	<!-- class='btn btn-warning my-0 py-0 d-none' onclick="clearShot()">Clear-Screenshot</button> -->
 	<hr>
 	<span class='text-info font-weight-bold'>Gochar:</span>
-	<img id='gochar_clear' src="minus_c.png" alt="clear Gochar" 
+	<img id='gochar_clear' src="images/minus_c.png" alt="clear Gochar" 
 	                onclick="removeAllGocharGr();" height='18' />
 	<input type="file" name="gochar-input" id="gochar-input">
 	<span id="g_loc"></span>
 	<span id="g_date"></span>
 	<span id="g_time"></span>
 	<div class='my-1'>
-	      <img id='plus_font' src="plus_c.png" alt="RashiNumIncrFontSize" 
+	      <img id='plus_font' src="images/plus_c.png" alt="RashiNumIncrFontSize" 
 		onclick="incr_font_size('rashinum',10);" height='18'
-		/>Rashi-Font<img id='minus_font' src="minus_c.png" alt="RashiNumDescrontSize" 
+		/>Rashi-Font<img id='minus_font' src="images/minus_c.png" alt="RashiNumDescrontSize" 
 		onclick="incr_font_size('rashinum',-10);" height='18'
 		/>
 	      <br>
-	      <img id='plus_fontr' src="plus_c.png" alt="GrahaIncrFontSize" 
+	      <img id='plus_fontr' src="images/plus_c.png" alt="GrahaIncrFontSize" 
 		onclick="incr_font_size('graha',10);" height='18'
-		/>Graha-Font<img id='minus_fontr' src="minus_c.png" alt="GrahaDescrontSize" 
+		/>Graha-Font<img id='minus_fontr' src="images/minus_c.png" alt="GrahaDescrontSize" 
 		onclick="incr_font_size('graha',-10);" height='18'
 		/>
 	      <br>
-	      <img id='plus_fontg' src="plus_c.png" alt="GocharGrIncrFontSize" 
+	      <img id='plus_fontg' src="images/plus_c.png" alt="GocharGrIncrFontSize" 
 		onclick="incr_font_size('ggraha',10);" height='18'
-		/>GocharGr-Font<img id='minus_fontg' src="minus_c.png" alt="GocharGrDescrontSize" 
+		/>GocharGr-Font<img id='minus_fontg' src="images/minus_c.png" alt="GocharGrDescrontSize" 
 		onclick="incr_font_size('ggraha',-10);" height='18'
 		/>
 	</div>
@@ -355,7 +357,7 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	<div id ='main_disp' class="row w-100 m-0 p-0">
 	<div id ='printme' class="row w-100 m-0 p-0">
 	    <div id='drawme' class="col-8 m-0 p-0">
-	      <img id='empty_image' src="empty.png" alt="Snow" 
+	      <img id='empty_image' src="images/empty.png" alt="Snow" 
 	      style="width:100%;position:absolute;z-index:1;">
 	      <canvas crossOrigin='anonymous' id="canvas" style='position:relative;z-index:1;'></canvas>  
 		  <div class="rb1 h5 rashinum font-weight-bold text-black" 
@@ -477,9 +479,9 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 		   }
 	       </script>
 	       <!-- <input id='j_view' type="text" class='w-25 text-warning bg-secondary font-weight-bold h6'/> -->
-	      <img id='save_view' src="save.png" alt="SaveView"  class='ml-2'
+	      <img id='save_view' src="images/save.png" alt="SaveView"  class='ml-2'
 	      onclick="save_view();" height='18'/>
-	      <img id='add_view_form' src="plus_c.png" alt="AddView"  class='mx-2'
+	      <img id='add_view_form' src="images/plus_c.png" alt="AddView"  class='mx-2'
 	      onclick="add_view_form();" height='18'/>
 	    </span>
 	    <hr class='m-0 p-0 border-info'>
