@@ -569,7 +569,13 @@ function startPainting(event){
     getPosition(event);
     lines.push([]);
     var strokeColor = document.getElementById('strokeColor').innerHTML;
-    lines_by_color.push({'color':strokeColor, 'coords':[]});
+    lines_by_color.push(
+	{
+	    'color':strokeColor, 
+	    'canvas_dims':[canvas.height, canvas.width],
+	    'coords':[]
+	}
+    );
 }
 
 function stopPainting(){

@@ -213,15 +213,21 @@ function draw_saved_strokes() {
     if (lines_by_color.length>0) {
 	let old_xcoord = 0; 
 	let old_ycoord=0; let strokeColor='red';
+	let c_canvas_height = 0; let c_canvas_width=0;
 	for (c_line in lines_by_color) {
 	    strokeColor=lines_by_color[c_line]['color'];
+	    strokeColor=lines_by_color[c_line]['color'];
+	    c_canvas_height=lines_by_color[c_line]['canvas_dims'][0];
+	    c_canvas_width=lines_by_color[c_line]['canvas_dims'][1];
+	    y_ratio = canvas.width/c_canvas_width;
+	    x_ratio = canvas.height/c_canvas_height;
 	if (lines_by_color[c_line]['coords'].length==0) continue;
-	    old_xcoord = lines_by_color[c_line]['coords'][0][0];
-	    old_ycoord = lines_by_color[c_line]['coords'][0][1];
+	    old_xcoord = Math.floor(lines_by_color[c_line]['coords'][0][0]  * x_ratio);
+	    old_ycoord = Math.floor(lines_by_color[c_line]['coords'][0][1]  * y_ratio);
 	    for (let e=1;e<lines_by_color[c_line]['coords'].length;e++) {
 		// console.log(e);
-		new_xcoord = lines_by_color[c_line]['coords'][e][0];
-		new_ycoord = lines_by_color[c_line]['coords'][e][1];
+		new_xcoord = Math.floor(lines_by_color[c_line]['coords'][e][0] * x_ratio);
+		new_ycoord = Math.floor(lines_by_color[c_line]['coords'][e][1] * y_ratio);
 		ctx.beginPath();
 		// getPosition(event);
 		ctx.lineWidth = 5;
