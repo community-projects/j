@@ -218,21 +218,55 @@ function undo_stroke(){
 
 function draw_saved_strokes() {
     if (lines.length>0) {
+	let old_xcoord = 0; let old_ycoord=0;
+	for (c_line in lines) {
+	    old_xcoord = lines[c_line][0][0];
+	    old_ycoord = lines[c_line][0][1];
+	    for (let e=1;e<lines[c_line].length;e++) {
+		// console.log(e);
+		new_xcoord = lines[c_line][e][0];
+		new_ycoord = lines[c_line][e][1];
+		ctx.beginPath();
+		// getPosition(event);
+		ctx.lineWidth = 5;
+		ctx.lineCap = 'round';
+		ctx.strokeStyle = strokeColor;
+		ctx.moveTo(old_xcoord, old_ycoord);
+		ctx.lineTo(new_xcoord, new_ycoord);
+		ctx.stroke();
+		old_xcoord = new_xcoord;
+		old_ycoord = new_ycoord;
+	    }
+	}
+    }
+}
+
+function draw_saved_strokes0() {
+    if (lines.length>0) {
+	let old_xcoord = 0; let old_ycoord=0;
 	for (c_line in lines) {
 	    // console.log(lines[c_line]);
 	    for (e in lines[c_line]) {
 		// console.log(e);
 		new_xcoord = lines[c_line][e][0];
 		new_ycoord = lines[c_line][e][1];
-		// console.log("new_xcoord " + new_xcoord + " new_ycoord " + new_ycoord); 
+	// console.log("new_xcoord " + new_xcoord + " new_ycoord " + new_ycoord); 
 		ctx.beginPath();
-		getPosition(event);
+		// getPosition(event);
 		ctx.lineWidth = 5;
 		ctx.lineCap = 'round';
 		ctx.strokeStyle = strokeColor;
+		if (old_xcoord==0) {
+		    old_xcoord = new_xcoord;
+		    old_ycoord = new_ycoord;
+		}
+		ctx.moveTo(old_xcoord, old_ycoord);
 		ctx.lineTo(new_xcoord, new_ycoord);
 		ctx.stroke();
+		old_xcoord = new_xcoord;
+		old_ycoord = new_ycoord;
 	    }
+	    old_xcoord = 0; old_ycoord=0;
 	}
     }
 }

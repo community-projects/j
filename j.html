@@ -594,11 +594,11 @@ function sketch(event){
   getPosition(event);
   // A line is traced from start
   // coordinate to this coordinate
-      if (coord.x>0) { 
-	  ctx.lineTo(coord.x , coord.y);
-	  // Draws the line.
-	  ctx.stroke();
-      }
+    if (coord.x>0) { 
+	ctx.lineTo(coord.x , coord.y);
+	// Draws the line.
+	ctx.stroke();
+    }
     lines[lines.length-1].push([coord.x, coord.y])
     lines_by_color[lines_by_color.length-1].push({ strokeColor: [coord.x, coord.y]})
 }
