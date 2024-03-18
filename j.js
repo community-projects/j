@@ -25,10 +25,12 @@ function incr_font_size(c,f){
     for (x = 0 ; x < inputs.length ; x++){
 	var fontSize = inputs[x].style.fontSize;
 	inputs[x].style.fontSize = (parseFloat(fontSize) + f) + '%';
+	font_size[inputs[x].id] = inputs[x].style.fontSize;
 	// alert(parseFloat(fontSize));
 	// inputs[x].style.fontSize = fontSize + "4px";
 	// inputs[x].style.fontSize = fontSize + "10%";
     }
+    // console.log(font_size);
 }
 
 function change_view(viewObj) {
@@ -313,7 +315,7 @@ function disp_drawing(c_drawing_id){
     }
     if ("curr_h1_rashi_num" in l_data) {
 	curr_h1_rashi_num = parseInt(l_data["curr_h1_rashi_num"]);
-	rotate(curr_h1_rashi_num);
+	rotate_by_rashi(curr_h1_rashi_num);
     }
     if ("retro_planet_list" in l_data) {
 	retro_planet_list = l_data["retro_planet_list"];
@@ -367,6 +369,12 @@ function populate_graha_in_rashi() {
 	    if (retro_planet_list.includes(graha)) 
 		document.getElementById('h'+ house.toString()).innerHTML +=
 		    "<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
+	}
+	// restore the graha font size if it was changed
+	var inputs = document.getElementsByClassName('graha');
+	for (x = 0 ; x < inputs.length ; x++){
+	    if (inputs[x].id in font_size) 
+		inputs[x].style.fontSize = font_size[inputs[x].id];
 	}
     }
 }
@@ -560,6 +568,7 @@ function readMultipleFiles(e) {
 	removeAllGr();
 	const l_data = JSON.parse(contents);
 	loadData(l_data);
+	open_files[l_data["j_filename"]]=l_data;
       };
       reader.readAsText(file);
   }
@@ -580,7 +589,7 @@ function readGocharFile(e) {
     const g_data = JSON.parse(contents);
     loadGocharData(g_data);
   };
-  reader.readAsText(file);
+  // reader.readAsText(file);
 }
 
 function readSingleFile(e) {
@@ -597,7 +606,7 @@ function readSingleFile(e) {
     const l_data = JSON.parse(contents);
     loadData(l_data);
   };
-  reader.readAsText(file);
+  // reader.readAsText(file);
 }
 
 
@@ -617,7 +626,8 @@ function removeAllGr(){
 }
 
 function reLoadData(j_filename){
-    const c_data =  o_data[j_filename];
+    const c_data =  open_files[j_filename];
+    clear_canvas();
     loadData(c_data,make_tab=0);
 }
 
@@ -685,10 +695,6 @@ function loadData(l_data,make_tab=1) {
 		house_rashi_num.toString();
 	}
     }
-    if ("curr_h1_rashi_num" in l_data) {
-	curr_h1_rashi_num = parseInt(l_data["curr_h1_rashi_num"]);
-	rotate(curr_h1_rashi_num);
-    }
     if ("views" in l_data) {
 	views = l_data["views"];
 	var select = document.getElementById('j_view');
@@ -707,6 +713,11 @@ function loadData(l_data,make_tab=1) {
 	grahas_in_rashi = l_data["grahas_in_rashi"];
 	// now populate grahas wher they belong
 	populate_graha_in_rashi();
+    }
+    if ("curr_h1_rashi_num" in l_data) {
+        curr_h1_rashi_num = l_data["curr_h1_rashi_num"];
+        // console.log(curr_h1_rashi_num);
+        rotate_by_rashi(parseInt(curr_h1_rashi_num));
     }
     // console.log(grahas_in_rashi);
     if ("j_filename" in l_data) {
@@ -881,19 +892,16 @@ function addRetro(gr) {
     }
 }
 
-function rotate(new_lagna_view) {
-    curr_h1_rashi_num = new_lagna_view.toString();
-    // console.log('new_lagna_view isnow ' + new_lagna_view );
-    // console.log("ascendant_rashi_num:" + ascendant_rashi_num);
+function rotate_by_rashi(new_lagna_view) {
     // set the rashi num for the houses
     for (let house=1; house<=12; house++) {
-	curr_rashi = document.getElementById('rashi_in_h'+ house.toString()).innerHTML;
-	new_rashi = ((parseInt(curr_rashi)+new_lagna_view-1)%12); 
+	new_rashi = ((house+new_lagna_view-1)%12); 
 	if (new_rashi==0) { new_rashi=12;}
 	document.getElementById('rashi_in_h'+ house.toString()).innerHTML = new_rashi.toString();
     }
     // now populate grahas wher they belong
     populate_graha_in_rashi();
+    curr_h1_rashi_num =  document.getElementById('rashi_in_h1').innerHTML;
     //
     // change Grahas  CG in two steps
     // step-1: collect current graha data
@@ -921,3 +929,40 @@ function rotate(new_lagna_view) {
     }
 }
 
+
+function rotate_by_house(rotate_house_count) {
+    // set the rashi num for the houses
+    for (let house=1; house<=12; house++) {
+	curr_rashi = document.getElementById('rashi_in_h'+ house.toString()).innerHTML;
+	new_rashi = ((parseInt(curr_rashi)+rotate_house_count-1)%12); 
+	if (new_rashi==0) { new_rashi=12;}
+	document.getElementById('rashi_in_h'+ house.toString()).innerHTML = new_rashi.toString();
+    }
+    // now populate grahas wher they belong
+    populate_graha_in_rashi();
+    curr_h1_rashi_num =  document.getElementById('rashi_in_h1').innerHTML;
+    // // set the rashi num for the houses
+    // step-1: collect current graha data
+    // const curr_gr = { };
+    // for (let i=1; i<=12; i++) {
+    //     curr_gr[i.toString()] = document.getElementById('h'+ i.toString()).innerHTML;
+    // }
+    // alert(JSON.stringify(curr_gr));
+    // step-2: move new data into the house
+    // for (let i=1; i<=12; i++) {
+    //     n_val = ((i+n-1)%12); if (n_val==0) { n_val=12;}
+    //     document.getElementById('h'+ i.toString()).innerHTML = curr_gr[n_val.toString()];
+    //     // document.getElementById('r'+ i.toString()).setAttribute('onclick','rotate('+i+');');
+    // }
+    // change gochar-Grahas CGG in two steps
+    // step-1: collect current gochar-graha data
+    const curr_ggr = { };
+    for (let i=1; i<=12; i++) {
+	curr_ggr[i.toString()] = document.getElementById('gh'+ i.toString()).innerHTML;
+    }
+    // step-2: move new data into the house
+    for (let i=1; i<=12; i++) {
+	n_val = ((i+rotate_house_count-1)%12); if (n_val==0) { n_val=12;}
+	document.getElementById('gh'+ i.toString()).innerHTML = curr_ggr[n_val.toString()];
+    }
+}
