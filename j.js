@@ -404,7 +404,40 @@ function place_graha_in_house(graha,house) {
     // console.log(grahas_in_rashi);
 }
 
+function save_details() {
+    save_view();
+    const saveMe = {};
+    saveMe["ascendant_rashi_num"] = ascendant_rashi_num;
+    saveMe["curr_h1_rashi_num"] = document.getElementById('rashi_in_h1').innerHTML;
+    // 
+    saveMe["grahas_in_rashi"] = grahas_in_rashi;
+    saveMe["views"] = views;
+    saveMe["retro_planet_list"] = retro_planet_list;
+    // get fileName, title and Notes
+    if (document.getElementById('j_filename').value) {
+	var j_filename = document.getElementById('j_filename').value;
+    } else { j_filename = "UnKnown"; }
+    saveMe["j_filename"] = j_filename;
+    //
+    saveMe["j_title"] = views['Basic']['j_title'];
+    saveMe["j_comments"] = views['Basic']['j_comments'];
+    saveMe["j_notes"] = views['Basic']['j_notes'];
+    saveMe["j_drawings"] = views['Basic']['j_drawings'];
+    //
+    if (typeof drawings == 'undefined') { drawings={}; }
+    if (Object.keys(drawings).length>0) saveMe["drawings"] = drawings;
+    //
+    return saveMe;
+}
+
 function saveData() {
+    var saved_details = save_details();
+    let saveMeStr = JSON.stringify(saved_details);
+    download(saveMeStr, j_filename + '.jgd', 'text/plain');
+}
+
+
+function saveData0() {
     save_view();
     const saveMe = {};
     saveMe["ascendant_rashi_num"] = ascendant_rashi_num;
@@ -565,7 +598,7 @@ function readMultipleFiles(e) {
 	var contents = e.target.result;
 	//displayContents(contents);
 	// loadData(contents);
-	removeAllGr();
+	// removeAllGr();
 	const l_data = JSON.parse(contents);
 	loadData(l_data);
 	open_files[l_data["j_filename"]]=l_data;
@@ -623,9 +656,13 @@ function removeAllGr(){
     for (i in all_gr) {
 	document.getElementById(all_gr[i]).remove();
     }
+    console.log("was here");
 }
 
 function reLoadData(j_filename){
+    var saved_details = save_details();
+    var o_filename = document.getElementById('j_filename').value;
+    open_files[o_filename] = saved_details;
     const c_data =  open_files[j_filename];
     clear_canvas();
     loadData(c_data,make_tab=0);
