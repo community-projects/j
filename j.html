@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="j.css" >
 <script src="j.js" ></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" ></script>
+<!-- <script src="https://code.jquery.com/jquery-3.2.1.min.js" ></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" ></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" ></script>
 <script src= "https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"> </script>
@@ -17,9 +18,13 @@
     views['Basic'] = {};
     let lines_by_color = [];
     let grahas_in_rashi = {};
+    let degree_of_grahas = {};
     let retro_planet_list = [];
     let ascendant_rashi_num = "1";
     let curr_h1_rashi_num = "";
+    // $(function(){ 
+    //  $("#settings_panel").load("settings.html");
+    // });
 </script>
 </head>
 <body>
@@ -37,255 +42,18 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 </div>
 
 <div class="row w-100 text-black" style="background-color:#ffffe9;">
-    <div class="col-2" id="first_col">
+    <div class="col-1" id="first_col">
 	<br>
-	<span class='text-primary h5'>Lagna</span><br>
-	<select onchange = "change_ascendant(document.getElementById('lagna').value);"
-	    name="lagna" id="lagna">
-	    <option value="XX">XX</option>
-	    <option value="1">1:Mesha/Aires</option>
-	    <option value="2">2:Vrishabha/Tauraus</option>
-	    <option value="3">3:Mithuna/Gemini</option>
-	    <option value="4">4:Karka/Cancer</option>
-	    <option value="5">5:Simha/Leo</option>
-	    <option value="6">6:Kanya/Virgo</option>
-	    <option value="7">7:Tula/Libra</option>
-	    <option value="8">8:Vrischika/Scorpio</option>
-	    <option value="9">9:Dhanu/Saggitarius</option>
-	   <option value="10">10:Makara/Capricorn</option>
-	   <option value="11">11:Kumbha/Aquarius</option>
-	   <option value="12">12:Meen/Pisces</option>
-	</select>
-	<br> <br>
-	<span class='h3 graha font-weight-bold text-danger d-none' 
-	    style="font-size: 180%;" id='Su'><br>Su</span>
-	<span class='text-danger h5'>Su</span>
-	<select onchange = "{ 
-		var su_h = document.getElementById('h_su').value; 
-		place_graha_in_house('Su',su_h);
-		$('#Su').detach().prependTo('#'+su_h); 
-		$('#Su').removeClass('d-none');}"
-	    name="h_su" id="h_su">
-	    <option value="XX">XX</option>
-	    <option value="h1">H1</option>
-	    <option value="h2">H2</option>
-	    <option value="h3">H3</option>
-	    <option value="h4">H4</option>
-	    <option value="h5">H5</option>
-	    <option value="h6">H6</option>
-	    <option value="h7">H7</option>
-	    <option value="h8">H8</option>
-	    <option value="h9">H9</option>
-	    <option value="h10">H10</option>
-	    <option value="h11">H11</option>
-	    <option value="h12">H12</option>
-	</select>
-	<br>
-	<span class='h3 graha font-weight-bold text-success d-none' 
-	    style="font-size: 180%;" id='Mo'><br>Mo</span>
-	<span class='text-success h5'>Mo</span>
-	<select onchange = "{ 
-		var mo_h = document.getElementById('h_mo').value; 
-		place_graha_in_house('Mo',mo_h);
-		$('#Mo').detach().prependTo('#'+mo_h); 
-		$('#Mo').removeClass('d-none');}"
-	    name="h_mo" id="h_mo">
-	    <option value="XX">XX</option>
-	    <option value="h1">H1</option>
-	    <option value="h2">H2</option>
-	    <option value="h3">H3</option>
-	    <option value="h4">H4</option>
-	    <option value="h5">H5</option>
-	    <option value="h6">H6</option>
-	    <option value="h7">H7</option>
-	    <option value="h8">H8</option>
-	    <option value="h9">H9</option>
-	    <option value="h10">H10</option>
-	    <option value="h11">H11</option>
-	    <option value="h12">H12</option>
-	</select>
-	<br>
-	<br>
-	<span class='h3 graha graha font-weight-bold text-success d-none' 
-	    style="font-size: 180%;" id='Ju'><br>Ju
-	</span>
-	<span class='text-success h5'>Ju</span>
-	<select onchange = "{ 
-		var j_h = document.getElementById('h_ju').value; 
-		place_graha_in_house('Ju',j_h);
-		$('#Ju').detach().prependTo('#'+j_h); 
-		$('#Ju').removeClass('d-none');}"
-	    name="h_ju" id="h_ju">
-	    <option value="XX">XX</option>
-	    <option value="h1">H1</option>
-	    <option value="h2">H2</option>
-	    <option value="h3">H3</option>
-	    <option value="h4">H4</option>
-	    <option value="h5">H5</option>
-	    <option value="h6">H6</option>
-	    <option value="h7">H7</option>
-	    <option value="h8">H8</option>
-	    <option value="h9">H9</option>
-	    <option value="h10">H10</option>
-	    <option value="h11">H11</option>
-	    <option value="h12">H12</option>
-	</select>
-	<input type=checkbox onclick="retro_flag('Ju');" id="Ju_retrocbox" name="Ju_retrocbox">
-	<br>
-	<span class='h3 graha font-weight-bold text-danger d-none' 
-	    style="font-size: 180%;" id='Sa'><br>Sa
-	</span>
-	    <!-- <span onclick ="{  -->
-	    <!-- const ctx = document.getElementById('myCanvas').getContext('2d');  -->
-	    <!-- ctx.beginPath(); -->
-	    <!-- ctx.moveTo(0, 0); -->
-	    <!-- ctx.lineTo(300, 150); -->
-	    <!-- }" -->
-	    <!-- class='small font-weight-bold'>D</span> -->
-	<span class='text-danger h5'>Sa</span>
-	<select onchange = "{ 
-		var sa_h = document.getElementById('h_sa').value; 
-		place_graha_in_house('Sa',sa_h);
-		$('#Sa').detach().prependTo('#'+sa_h); 
-		$('#Sa').removeClass('d-none');}"
-	    name="h_sa" id="h_sa">
-	    <option value="XX">XX</option>
-	    <option value="h1">H1</option>
-	    <option value="h2">H2</option>
-	    <option value="h3">H3</option>
-	    <option value="h4">H4</option>
-	    <option value="h5">H5</option>
-	    <option value="h6">H6</option>
-	    <option value="h7">H7</option>
-	    <option value="h8">H8</option>
-	    <option value="h9">H9</option>
-	    <option value="h10">H10</option>
-	    <option value="h11">H11</option>
-	    <option value="h12">H12</option>
-	</select>
-	<input type=checkbox onclick="retro_flag('Sa');" id="Sa_retrocbox" name="Sa_retrocbox">
-
-	<br>
-	<span class='h3 graha font-weight-bold text-success d-none' 
-	    style="font-size: 180%;" id='Me'><br>Me
-	</span>
-	<span class='text-success h5'>Me</span>
-	<select onchange = "{ 
-		var me_h = document.getElementById('h_me').value; 
-		place_graha_in_house('Me',me_h);
-		$('#Me').detach().prependTo('#'+me_h); 
-		$('#Me').removeClass('d-none');}"
-	    name="h_me" id="h_me">
-	    <option value="XX">XX</option>
-	    <option value="h1">H1</option>
-	    <option value="h2">H2</option>
-	    <option value="h3">H3</option>
-	    <option value="h4">H4</option>
-	    <option value="h5">H5</option>
-	    <option value="h6">H6</option>
-	    <option value="h7">H7</option>
-	    <option value="h8">H8</option>
-	    <option value="h9">H9</option>
-	    <option value="h10">H10</option>
-	    <option value="h11">H11</option>
-	    <option value="h12">H12</option>
-	</select>
-	<input type=checkbox onclick="retro_flag('Me');" id="Me_retrocbox" name="Me_retrocbox">
-
-	<br>
-	<span class='h3 graha font-weight-bold text-success d-none' 
-	    style="font-size: 180%;" id='Ve'><br>Ve
-	</span>
-	<span class='text-success h5'>Ve</span>
-	<select onchange = "{ 
-		var ve_h = document.getElementById('h_ve').value; 
-		place_graha_in_house('Ve',ve_h);
-		$('#Ve').detach().prependTo('#'+ve_h); 
-		$('#Ve').removeClass('d-none');}"
-	    name="h_ve" id="h_ve">
-	    <option value="XX">XX</option>
-	    <option value="h1">H1</option>
-	    <option value="h2">H2</option>
-	    <option value="h3">H3</option>
-	    <option value="h4">H4</option>
-	    <option value="h5">H5</option>
-	    <option value="h6">H6</option>
-	    <option value="h7">H7</option>
-	    <option value="h8">H8</option>
-	    <option value="h9">H9</option>
-	    <option value="h10">H10</option>
-	    <option value="h11">H11</option>
-	    <option value="h12">H12</option>
-	</select>
-	<input type=checkbox onclick="retro_flag('Ve');" id="Ve_retrocbox" name="Ve_retrocbox">
-
-	<br>
-	<span class='h3 graha font-weight-bold text-danger d-none' 
-	    style="font-size: 180%;" id='Ma'><br>Ma
-	</span>
-	<span class='text-danger h5'>Ma</span>
-	<select onchange = "{ 
-		var ma_h = document.getElementById('h_ma').value; 
-		place_graha_in_house('Ma',ma_h);
-		$('#Ma').detach().prependTo('#'+ma_h); 
-		$('#Ma').removeClass('d-none');}"
-	    name="h_ma" id="h_ma">
-	    <option value="XX">XX</option>
-	    <option value="h1">H1</option>
-	    <option value="h2">H2</option>
-	    <option value="h3">H3</option>
-	    <option value="h4">H4</option>
-	    <option value="h5">H5</option>
-	    <option value="h6">H6</option>
-	    <option value="h7">H7</option>
-	    <option value="h8">H8</option>
-	    <option value="h9">H9</option>
-	    <option value="h10">H10</option>
-	    <option value="h11">H11</option>
-	    <option value="h12">H12</option>
-	</select>
-	<input type=checkbox onclick="retro_flag('Ma');" id="Ma_retrocbox" name="Ma_retrocbox">
-
-	<br>
-	<br>
-	<span class='h3 graha font-weight-bold text-danger d-none' 
-	    style="font-size: 180%;" id='Ra'><br>Ra</span>
-	<span class='h3 graha font-weight-bold text-danger d-none' 
-	    style="font-size: 180%;" id='Ke'><br>Ke</span>
-	<span class='text-danger h5'>Ra</span>
-	<select onchange = "{ 
-		var ra_h = 'h' + document.getElementById('h_ra').value; 
-		place_graha_in_house('Ra',ra_h);
-		var ke_val = (parseInt(document.getElementById('h_ra').value)+6)%12
-		if (ke_val==0) { ke_val=12; }
-		var ke_h = 'h' + ke_val.toString(); 
-		place_graha_in_house('Ke',ke_h);
-		$('#Ra').detach().prependTo('#'+ra_h); 
-		$('#Ra').removeClass('d-none');
-		$('#Ke').detach().prependTo('#'+ke_h); 
-		$('#Ke').removeClass('d-none');
-		}"
-	    name="h_ra" id="h_ra">
-	    <option value="0">XX</option>
-	    <option value="1">H1</option>
-	    <option value="2">H2</option>
-	    <option value="3">H3</option>
-	    <option value="4">H4</option>
-	    <option value="5">H5</option>
-	    <option value="6">H6</option>
-	    <option value="7">H7</option>
-	    <option value="8">H8</option>
-	    <option value="9">H9</option>
-	    <option value="10">H10</option>
-	    <option value="11">H11</option>
-	    <option value="12">H12</option>
-	</select>
-	<br>
+	    <img id='ret2NotesImg'  onclick='disp_notes();' src='images/list.jpg'
+		 title="Display Notes" alt="DisplayNotes" height='31'/>
+	  <br>
+	  <img id='disp_settings' src="images/settings_2.jpg"  
+	      title="Display Settings" alt="dispSettings"  
+	      onclick="disp_settings();" height='27'/>
 	<hr>
-	<button class='btn btn-primary my-0 py-0' onclick="saveData();">Save</button>
-	<br><span class='text-info font-weight-bold'>Open Saved:</span>
-	<input type="file" name="file-input" id="file-input" multiple>
-	<br><pre id="file-content"></pre>
+	<!-- <button class='btn btn-primary my-0 py-0' onclick="saveData();">Save</button> -->
+	<img id='dnld' src="images/download.png" alt="Download" onclick="saveData();" height='27' />
+
 	<hr>
 	<!-- onclick="download('the content of the file', 'filename.txt', 'text/plain');" -->
 	<!-- <button  id='startDraw' class='btn btn-primary my-0 py-0'  -->
@@ -295,66 +63,71 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 		<!-- document.getElementById('canvas').style.zIndex = '20'; -->
 	      <!-- }" -->
 	    <!-- >StartDrawing</button> -->
-	<button  id='clearCanvas' class='btn btn-warning my-1 py-0' 
-	    onclick="{
-		ctx.clearRect(0, 0, canvas.width, canvas.height); 
-		document.getElementById('canvas').style.zIndex = '1';
-	        lines = [];
-		lines_by_color =[];
-	      }"
-	    >ClearDrawing</button>
+	<div class="m-0 p-0 border border-5 border-info">
+	    Draw:<br>
+	    <img id='clearCanvas' src="images/reset_a.jpg" alt="ClearDrawing" 
+		onclick="{
+		    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+		    document.getElementById('canvas').style.zIndex = '1';
+		    lines = [];
+		    lines_by_color =[];
+		  }" title='ClearDrawing' height='27' 
+	      />
 	    <br>
 	    <span id='strokeColor' class='d-none'>green</span>
 	    <span id='blue' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'blue';"
-		class='btn btn-primary my-0 py-0 mx-0 px-0'> Bl </span>
+		class='btn btn-primary my-0 py-0 mx-0 px-0'> BL </span><br>
 	    <span id='green' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'green';"
-		class='btn btn-success my-0 py-0 mx-0 px-0'> Gr </span>
+		class='btn btn-success my-0 py-0 mx-0 px-0'> GR </span><br>
 	    <span id='red' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'red';"
-		class='btn btn-danger my-0 py-0 mx-0 px-0'> Re </span>
+		class='btn btn-danger my-0 py-0 mx-0 px-0'> RE </span><br>
 	    <span id='magenta' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'magenta';"
 		style="background-color:magenta;"
-		class='btn my-0 py-0 mx-0 px-0'> Pin </span> 
-	<img id='undo' src="images/back.png" alt="Undo Stroke" onclick="undo_stroke();" height='21' />
-	 <br> 
+		class='btn my-0 py-0 mx-0 px-0'> PIN </span><br>
+	<img id='undo' src="images/back.png"  class='my-0 py-0 mx-0 px-0' title='Undo Stroke'
+	alt="Undo Stroke" onclick="undo_stroke();" height='21' /> <br> 
 	<!-- <button  id='Screenshot' -->
 	<!-- class='btn btn-primary my-0 py-0' onclick="takeShot();">Screenshot</button> -->
-	<button  id='SaveDrawing' 
-	    class='btn btn-primary my-1 py-0' onclick="save_drawing();">SaveDrawing</button> 
+	<!-- <button  id='SaveDrawing'  -->
+	<!-- class='btn btn-primary my-1 py-0' onclick="save_drawing();">SaveDrawing</button>  -->
+	<img id='SaveDrawing' src="images/save_drawing.png"  title='Take Snapshot of Drawing'
+	alt="saveDrawing" onclick="save_drawing();" height='27' />
+
+	</div>
 	<!-- <button  id='ClearScreenshot' -->
 	<!-- class='btn btn-warning my-0 py-0 d-none' onclick="clearShot()">Clear-Screenshot</button> -->
 	<hr>
-	<span class='text-info font-weight-bold'>Gochar:</span>
+	<span class='text-info font-weight-bold'>Gchr:</span>
 	<img id='gochar_clear' src="images/minus_c.png" alt="clear Gochar" 
 	                onclick="removeAllGocharGr();" height='18' />
-	<input type="file" name="gochar-input" id="gochar-input">
 	<span id="g_loc"></span>
 	<span id="g_date"></span>
 	<span id="g_time"></span>
 	<div class='my-1'>
 	      <img id='plus_font' src="images/plus_c.png" alt="RashiNumIncrFontSize" 
-		onclick="incr_font_size('rashinum',10);" height='18'
-		/>Rashi-Font<img id='minus_font' src="images/minus_c.png" alt="RashiNumDescrontSize" 
-		onclick="incr_font_size('rashinum',-10);" height='18'
+		onclick="incr_font_size('rashinum',10);" height='18' title='Incr Rashi Num FontSize'
+		/>R<img id='minus_font' src="images/minus_c.png" alt="RashiNumDescrontSize" 
+		onclick="incr_font_size('rashinum',-10);" height='18' title='Decr Rashi Num FontSize'
 		/>
 	      <br>
 	      <img id='plus_fontr' src="images/plus_c.png" alt="GrahaIncrFontSize" 
-		onclick="incr_font_size('graha',10);" height='18'
-		/>Graha-Font<img id='minus_fontr' src="images/minus_c.png" alt="GrahaDescrontSize" 
-		onclick="incr_font_size('graha',-10);" height='18'
+		onclick="incr_font_size('graha',10);" height='18' title='Incr Graha FontSize'
+		/>G<img id='minus_fontr' src="images/minus_c.png" alt="GrahaDescrontSize" 
+		onclick="incr_font_size('graha',-10);" height='18' title='Decr Graha FontSize'
 		/>
 	      <br>
 	      <img id='plus_fontg' src="images/plus_c.png" alt="GocharGrIncrFontSize" 
-		onclick="incr_font_size('ggraha',10);" height='18'
-		/>GocharGr-Font<img id='minus_fontg' src="images/minus_c.png" alt="GocharGrDescrontSize" 
-		onclick="incr_font_size('ggraha',-10);" height='18'
+		onclick="incr_font_size('ggraha',10);" height='18' title='Incr GocharGraha FontSize'
+		/>GGr<img id='minus_fontg' src="images/minus_c.png" alt="GocharGrDescrontSize" 
+		onclick="incr_font_size('ggraha',-10);" height='18' title='Decr GocharGraha FontSize'
 		/>
 	</div>
     </div>
-    <div class="col-10 m-0 p-0">
+    <div class="col-11 m-0 p-0">
 	<div class="row w-100 m-0 p-0 bg-white border border-5 border-info">
 	    <div class="col-12 m-0 p-0" id='j_opened'></div>
 	</div>
@@ -469,7 +242,381 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	      <!-- <div class="bottom-right">Bottom Right</div> -->
 	      <!-- <div class="centered">Centered</div> -->
 	    </div>
-	    <div class="col-4 m-0 p-0 text-primary">
+
+
+
+	    <div id="settings_panel" class="col-4 d-none m-0 p-0 text-primary">
+
+	    <span id='ret2Notes'  onclick='disp_notes();'
+		  class='btn btn-primary my-0 py-0 mx-0 px-0 h5'>Return-to--Notes</span> <br>
+
+	<span class='text-primary h5'>Lagna</span>
+	<select onchange = "change_ascendant(document.getElementById('lagna').value);"
+	    name="lagna" id="lagna">
+	    <option value="XX">XX</option>
+	    <option value="1">1:Mesha/Aires</option>
+	    <option value="2">2:Vrishabha/Tauraus</option>
+	    <option value="3">3:Mithuna/Gemini</option>
+	    <option value="4">4:Karka/Cancer</option>
+	    <option value="5">5:Simha/Leo</option>
+	    <option value="6">6:Kanya/Virgo</option>
+	    <option value="7">7:Tula/Libra</option>
+	    <option value="8">8:Vrischika/Scorpio</option>
+	    <option value="9">9:Dhanu/Saggitarius</option>
+	   <option value="10">10:Makara/Capricorn</option>
+	   <option value="11">11:Kumbha/Aquarius</option>
+	   <option value="12">12:Meen/Pisces</option>
+	</select>
+	<br> 
+	<div class="row w-100">
+	    <div class="col-8">
+	    <input id='la_deg' type="text" style="width:54px"  
+	       placeholder='Deg' onchange="save_degree('La');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='la_min' type="text" style="width:54px"  
+	       placeholder='Min' onchange="save_degree('La');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='la_sec' type="text" style="width:54px"  
+	       placeholder='Sec' onchange="save_degree('La');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	</div>
+	<br>
+	<div class="row w-100">
+	    <div class="col-1">
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Su'><br>Su</span>
+	<span class='text-danger h5'>Su</span>
+	    </div>
+	    <div class="col-8">
+	<select onchange = "{ 
+		var su_h = document.getElementById('h_su').value; 
+		place_graha_in_house('Su',su_h);
+		$('#Su').detach().prependTo('#'+su_h); 
+		$('#Su').removeClass('d-none');}"
+	    name="h_su" id="h_su">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	    <input id='su_deg' type="text" style="width:54px"  
+	       placeholder='Deg' onchange="save_degree('Su');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='su_min' type="text" style="width:54px"  
+	       placeholder='Min' onchange="save_degree('Su');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='su_sec' type="text" style="width:54px"  
+	       placeholder='Sec' onchange="save_degree('Su');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	</div>
+	<div class="row w-100">
+	    <div class="col-1">
+	<span class='h3 graha font-weight-bold text-success d-none' 
+	    style="font-size: 180%;" id='Mo'><br>Mo</span>
+	<span class='text-success h5'>Mo</span>
+	    </div>
+	    <div class="col-8">
+	<select onchange = "{ 
+		var mo_h = document.getElementById('h_mo').value; 
+		place_graha_in_house('Mo',mo_h);
+		$('#Mo').detach().prependTo('#'+mo_h); 
+		$('#Mo').removeClass('d-none');}"
+	    name="h_mo" id="h_mo">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	    <input id='mo_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Mo');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='mo_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Mo');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='mo_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Mo');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	</div>
+	<br>
+	<div class="row w-100">
+	    <div class="col-1">
+	<span class='h3 graha graha font-weight-bold text-success d-none' 
+	    style="font-size: 180%;" id='Ju'><br>Ju
+	</span>
+	<span class='text-success h5'>Ju</span>
+	    </div>
+	    <div class="col-8">
+	<select onchange = "{ 
+		var j_h = document.getElementById('h_ju').value; 
+		place_graha_in_house('Ju',j_h);
+		$('#Ju').detach().prependTo('#'+j_h); 
+		$('#Ju').removeClass('d-none');}"
+	    name="h_ju" id="h_ju">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	    <input id='ju_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Ju');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='ju_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Ju');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='ju_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Ju');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	    <div class="col-2">
+	R<input type=checkbox onclick="retro_flag('Ju');" id="Ju_retrocbox" name="Ju_retrocbox">
+	    </div>
+	</div>
+	<div class="row w-100">
+	    <div class="col-1">
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Sa'><br>Sa
+	</span>
+	    <!-- <span onclick ="{  -->
+	    <!-- const ctx = document.getElementById('myCanvas').getContext('2d');  -->
+	    <!-- ctx.beginPath(); -->
+	    <!-- ctx.moveTo(0, 0); -->
+	    <!-- ctx.lineTo(300, 150); -->
+	    <!-- }" -->
+	    <!-- class='small font-weight-bold'>D</span> -->
+	<span class='text-danger h5'>Sa</span>
+	    </div>
+	    <div class="col-8">
+	<select onchange = "{ 
+		var sa_h = document.getElementById('h_sa').value; 
+		place_graha_in_house('Sa',sa_h);
+		$('#Sa').detach().prependTo('#'+sa_h); 
+		$('#Sa').removeClass('d-none');}"
+	    name="h_sa" id="h_sa">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	    <input id='sa_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Sa');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='sa_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Sa');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='sa_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Sa');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	    <div class="col-2">
+	R<input type=checkbox onclick="retro_flag('Sa');" id="Sa_retrocbox" name="Sa_retrocbox">
+	    </div>
+	</div>
+	<div class="row w-100">
+	    <div class="col-1">
+	<span class='h3 graha font-weight-bold text-success d-none' 
+	    style="font-size: 180%;" id='Me'><br>Me
+	</span>
+	<span class='text-success h5'>Me</span>
+	    </div>
+	    <div class="col-8">
+	<select onchange = "{ 
+		var me_h = document.getElementById('h_me').value; 
+		place_graha_in_house('Me',me_h);
+		$('#Me').detach().prependTo('#'+me_h); 
+		$('#Me').removeClass('d-none');}"
+	    name="h_me" id="h_me">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	    <input id='me_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Me');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='me_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Me');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='me_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Me');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	    <div class="col-2">
+	R<input type=checkbox onclick="retro_flag('Me');" id="Me_retrocbox" name="Me_retrocbox">
+	    </div>
+	</div>
+	<div class="row w-100">
+	    <div class="col-1">
+	<span class='h3 graha font-weight-bold text-success d-none' 
+	    style="font-size: 180%;" id='Ve'><br>Ve
+	</span>
+	<span class='text-success h5'>Ve</span>
+	    </div>
+	    <div class="col-8">
+	<select onchange = "{ 
+		var ve_h = document.getElementById('h_ve').value; 
+		place_graha_in_house('Ve',ve_h);
+		$('#Ve').detach().prependTo('#'+ve_h); 
+		$('#Ve').removeClass('d-none');}"
+	    name="h_ve" id="h_ve">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	    <input id='ve_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Ve');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='ve_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Ve');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='ve_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Ve');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	    <div class="col-2">
+	R<input type=checkbox onclick="retro_flag('Ve');" id="Ve_retrocbox" name="Ve_retrocbox">
+	    </div>
+	</div>
+	<div class="row w-100">
+	    <div class="col-1">
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Ma'><br>Ma
+	</span>
+	<span class='text-danger h5'>Ma</span>
+	    </div>
+	    <div class="col-8">
+	<select onchange = "{ 
+		var ma_h = document.getElementById('h_ma').value; 
+		place_graha_in_house('Ma',ma_h);
+		$('#Ma').detach().prependTo('#'+ma_h); 
+		$('#Ma').removeClass('d-none');}"
+	    name="h_ma" id="h_ma">
+	    <option value="XX">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
+	</select>
+	    <input id='ma_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Ma');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='ma_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Ma');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='ma_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Ma');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	    <div class="col-2">
+	R<input type=checkbox onclick="retro_flag('Ma');" id="Ma_retrocbox" name="Ma_retrocbox">
+	    </div>
+	</div>
+	<br>
+	<div class="row w-100">
+	    <div class="col-1">
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Ra'><br>Ra</span>
+	<span class='h3 graha font-weight-bold text-danger d-none' 
+	    style="font-size: 180%;" id='Ke'><br>Ke</span>
+	<span class='text-danger h5'>Ra</span>
+	    </div>
+	    <div class="col-8">
+	<select onchange = "{ 
+		var ra_h = 'h' + document.getElementById('h_ra').value; 
+		place_graha_in_house('Ra',ra_h);
+		var ke_val = (parseInt(document.getElementById('h_ra').value)+6)%12
+		if (ke_val==0) { ke_val=12; }
+		var ke_h = 'h' + ke_val.toString(); 
+		place_graha_in_house('Ke',ke_h);
+		$('#Ra').detach().prependTo('#'+ra_h); 
+		$('#Ra').removeClass('d-none');
+		$('#Ke').detach().prependTo('#'+ke_h); 
+		$('#Ke').removeClass('d-none');
+		}"
+	    name="h_ra" id="h_ra">
+	    <option value="0">XX</option>
+	    <option value="1">H1</option>
+	    <option value="2">H2</option>
+	    <option value="3">H3</option>
+	    <option value="4">H4</option>
+	    <option value="5">H5</option>
+	    <option value="6">H6</option>
+	    <option value="7">H7</option>
+	    <option value="8">H8</option>
+	    <option value="9">H9</option>
+	    <option value="10">H10</option>
+	    <option value="11">H11</option>
+	    <option value="12">H12</option>
+	</select>
+	    <input id='ra_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Ra');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='ra_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Ra');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    <input id='ra_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Ra');"
+	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
+	</div>
+	<hr>
+	<span class='text-info font-weight-bold'>Open Saved:</span>
+	<input type="file" name="file-input" id="file-input" multiple>
+	<br><pre id="file-content"></pre>
+	<span class='text-info font-weight-bold'>Gochar:</span>
+	<input type="file" name="gochar-input" id="gochar-input">
+
+
+	    </div>
+
+
+
+
+	    <div id="notes_panel" class="col-4 m-0 p-0 text-primary">
 	    File: <input id='j_filename' type="text" class='w-40 text-warning bg-secondary font-weight-bold h6'/>
 	    <span class='border border-5 border-danger my-2 mx-1 py-1'> View: 
 	       <!-- <select id='j_view' onchange = "change_view(document.getElementById('j_view').value);" -->
@@ -488,11 +635,13 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	      <img id='add_view_form' src="images/plus_c.png" alt="AddView"  class='mx-2'
 	      onclick="add_view_form();" height='18'/>
 	    </span>
+	    <!-- <img id='disp_settings' src="images/settings_2.jpg" alt="dispSettings"  class='mx-2' -->
+	    <!-- onclick="disp_settings();" height='18'/> -->
 	    <hr class='m-0 p-0 border-info'>
 	    <span id ='title' class='m-0 p-0'>Basic-Title:</span> 
 	    <input id='j_title' type="text" class='w-100 text-primary font-weight-bold h6'/>
 	    <span id ='notes' class='m-0 p-0'>Basic-Notes:</span> 
-	    <textarea class='w-100 text-primary h6' rows='21' id='j_notes'></textarea>
+	    <textarea class='w-100 text-primary h6' rows='11' id='j_notes'></textarea>
 	    <span id ='comments' class='m-0 p-0'>Basic-Comments:</span> 
 	    <textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
 	    <span id ='drawings' class='m-0 p-0'>Basic-Drawings:</span> <br>

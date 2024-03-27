@@ -191,6 +191,7 @@ function save_drawing() {
     drawings[drawing_id]['lines_by_color'] = structuredClone(lines_by_color);
     //
     drawings[drawing_id]["grahas_in_rashi"] = grahas_in_rashi;
+    drawings[drawing_id]["degree_of_grahas"] = degree_of_grahas;
     drawings[drawing_id]["ascendant_rashi_num"] = ascendant_rashi_num;
     drawings[drawing_id]["curr_h1_rashi_num"] = 
 	document.getElementById('rashi_in_h1').innerHTML;
@@ -321,6 +322,9 @@ function disp_drawing(c_drawing_id){
 	retro_planet_list = l_data["retro_planet_list"];
     }
     // let grahas_in_rashi = {}
+    if ("degree_of_grahas" in l_data) {
+	degree_of_grahas = l_data["degree_of_grahas"];
+    }
     if ("grahas_in_rashi" in l_data) {
 	grahas_in_rashi = l_data["grahas_in_rashi"];
 	// now populate grahas wher they belong
@@ -355,6 +359,20 @@ function change_ascendant(new_asc) {
     }
 }
 
+function update_saved_degree() {
+    // console.log(degree_of_grahas);
+    for (const c_gr in degree_of_grahas) { 
+	document.getElementById(c_gr.toLowerCase()+'_deg').value = 
+	    degree_of_grahas[c_gr][0]; 
+	document.getElementById(c_gr.toLowerCase()+'_min').value = 
+	    degree_of_grahas[c_gr][1]; 
+	document.getElementById(c_gr.toLowerCase()+'_sec').value = 
+	    degree_of_grahas[c_gr][2]; 
+    }
+    // now populate grahas where they belong
+    populate_graha_in_rashi();
+}
+
 function populate_graha_in_rashi() {
     for (let house=1; house<=12; house++) {
 	// get rashi in the house
@@ -362,8 +380,10 @@ function populate_graha_in_rashi() {
 	// empty graha from house innerHTML
 	document.getElementById('h'+ house.toString()).innerHTML = '';
 	// if ASC mark it so
+	// if (house_rashi==ascendant_rashi_num.toString()) 
+	//     document.getElementById('h'+ house.toString()).innerHTML += '<br><b>ASC</b>';
 	if (house_rashi==ascendant_rashi_num.toString()) 
-	    document.getElementById('h'+ house.toString()).innerHTML += '<br><b>ASC</b>';
+	    document.getElementById('h'+ house.toString()).innerHTML += format_graha('La');
 	for ( graha of grahas_in_rashi[house_rashi.toString()])  {
 	    document.getElementById('h'+ house.toString()).innerHTML += format_graha(graha);
 	    if (retro_planet_list.includes(graha)) 
@@ -411,6 +431,7 @@ function save_details() {
     saveMe["curr_h1_rashi_num"] = document.getElementById('rashi_in_h1').innerHTML;
     // 
     saveMe["grahas_in_rashi"] = grahas_in_rashi;
+    saveMe["degree_of_grahas"] = degree_of_grahas;
     saveMe["views"] = views;
     saveMe["retro_planet_list"] = retro_planet_list;
     // get fileName, title and Notes
@@ -433,6 +454,7 @@ function save_details() {
 function saveData() {
     var saved_details = save_details();
     let saveMeStr = JSON.stringify(saved_details);
+    var j_filename = document.getElementById('j_filename').value;
     download(saveMeStr, j_filename + '.jgd', 'text/plain');
 }
 
@@ -656,7 +678,7 @@ function removeAllGr(){
     for (i in all_gr) {
 	document.getElementById(all_gr[i]).remove();
     }
-    console.log("was here");
+    // console.log("was here");
 }
 
 function reLoadData(j_filename){
@@ -711,13 +733,23 @@ function loadGocharData(g_data) {
 function format_graha(gr) {
     var red_gr_list = ['Su', 'Ma', 'Ra', 'Ke', 'Sa'];
     var green_gr_list = ['Ju', 'Mo', 'Ve','Me'];
+    // display Degrees
+    let degStr="";
+    if (gr  in degree_of_grahas) {
+	degStr += "<span class='small font-weight-bold'>"+degree_of_grahas[gr][0]+"D</span>";
+    }
     //
     if (red_gr_list.includes(gr)) 
 	var returnStr = "<span class='h3 graha font-weight-bold text-danger' style='font-size: 180%;'";
     if (green_gr_list.includes(gr)) 
 	var returnStr = "<span class='h3 graha font-weight-bold text-success' style='font-size: 180%;'";
+    if (gr==='La') {
+	var returnStr = "<span class='h3 graha font-weight-bold' style='font-size: 150%;'";
+	gr='ASC';
+    }
     //
     returnStr += " id='"+gr+"'><br>"+gr+"</span>";
+    returnStr += degStr;
     return returnStr;
 }
 
@@ -731,6 +763,10 @@ function loadData(l_data,make_tab=1) {
 	    document.getElementById('rashi_in_h'+ i.toString()).innerHTML = 
 		house_rashi_num.toString();
 	}
+    }
+    if ("degree_of_grahas" in l_data) {
+	degree_of_grahas= l_data["degree_of_grahas"];
+	update_saved_degree();
     }
     if ("views" in l_data) {
 	views = l_data["views"];
@@ -1003,3 +1039,33 @@ function rotate_by_house(rotate_house_count) {
 	document.getElementById('gh'+ i.toString()).innerHTML = curr_ggr[n_val.toString()];
     }
 }
+
+
+function disp_notes(){
+    $('#notes_panel').removeClass('d-none'); 
+    $('#settings_panel').addClass('d-none'); 
+}
+
+
+function disp_settings(){
+    $('#settings_panel').removeClass('d-none'); 
+    $('#notes_panel').addClass('d-none'); 
+}
+
+
+function save_degree(gr) {
+    degree_of_grahas[gr] = []
+    let deg = document.getElementById(gr.toLowerCase()+'_deg').value; 
+    let min = document.getElementById(gr.toLowerCase()+'_min').value; 
+    let sec = document.getElementById(gr.toLowerCase()+'_sec').value; 
+    if (deg.length==0) return;
+    degree_of_grahas[gr][0] = deg;
+    if (min.length==0) min='0'; 
+    if (sec.length==0) sec='0';
+    degree_of_grahas[gr][1] = min; 
+    degree_of_grahas[gr][2] = sec;
+    // console.log(degree_of_grahas);
+    // now populate grahas where they belong
+    populate_graha_in_rashi();
+}
+
