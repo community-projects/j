@@ -18,6 +18,7 @@
     views['Basic'] = {};
     let lines_by_color = [];
     let grahas_in_rashi = {};
+    let divisional_data = {};
     let degree_of_grahas = {};
     let retro_planet_list = [];
     let ascendant_rashi_num = "1";
@@ -650,9 +651,11 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	</div>
 	</div>
 	<div class="row w-100 m-0 p-0 bg-white border border-5 border-info">
-	    <div class="col-12 m-0 p-0 d-none" id="j_screenshots">
-	    <button id='bprintme' onclick="disp_dp('printme');" 
-		    class="font-weight-bold bg-warning btn-link border border-primary py-0 px-1 mx-0">M</button>
+	    <div class="col-12 m-0 p-0 " id="j_screenshots">
+	    <button id='chart_d1' onclick="chart_d1();" 
+		    class="font-weight-bold bg-warning btn-link border border-primary py-0 px-2 mx-0">D1</button>
+	    <button id='chart_d9' onclick="chart_d9();" 
+		    class="font-weight-bold text-warning btn-link border border-primary py-0 px-2 mx-0">D9</button>
 	    </div>
 	</div>
     </div>
