@@ -35,9 +35,9 @@ function incr_font_size(c,f){
 
 function change_view(viewObj) {
     let n_view = viewObj.value;
-    let o_view = viewObj.oldvalue;
+    // let o_view = viewObj.oldvalue;
     // console.log("Changing from view:" + viewObj.oldvalue + " to view: " + n_view);
-    save_view(o_view);
+    // save_view(o_view);
     document.getElementById('j_comments').value = views[n_view]['j_comments'];
     document.getElementById('j_notes').value = views[n_view]['j_notes'];
     document.getElementById('j_title').value = views[n_view]['j_title'];
@@ -1192,6 +1192,15 @@ function chart_d9(){
     display_saved_degree(c_degree_of_grahas); 
     let c_grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
     populate_graha_in_rashi(c_ascendant_rashi_num,c_grahas_in_rashi,c_degree_of_grahas);
+}
+
+
+
+function chart_d1d9(){
+	var canvas_w = document.getElementById('drawme').offsetWidth;
+	var canvas_h = document.getElementById('drawme').offsetHeight;
+    document.getElementById('drawme').style.width = '25%';
+    // console.log([canvas_w,canvas_h]);
 }
 
 function place_rashi_num_in_houses(c_asc_rashi_num) {
