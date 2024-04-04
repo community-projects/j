@@ -157,6 +157,14 @@ function save_view(view="") {
     // console.log(views);
 }
 
+function del_drawing(d_id) {
+    let cDiv = document.getElementById('b'+ d_id);
+    if (cDiv) cDiv.parentNode.removeChild(cDiv);
+    cDiv = document.getElementById('del_'+ d_id);
+    if (cDiv) cDiv.parentNode.removeChild(cDiv);
+    delete drawings[d_id];
+    // console.log(drawings);
+}
 
 function save_drawing() {
     if (typeof drawings_arr == 'undefined') { drawings_arr=['printme']; }
@@ -181,6 +189,9 @@ function save_drawing() {
     // btn_str += + (currentdate.getMonth()+1)  + "/" + currentdate.getFullYear() + " @ "
     //       + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
     btn_str += '</btn>';
+    btn_str += '<img id="del_'+drawing_id+'" ';
+    btn_str += ' onclick="del_drawing(\''+drawing_id+'\');"'; 
+    btn_str += ' class="ml-0 mr-1" src="images/clear.png" height="11"/></span>';
     // document.getElementById('j_screenshots').innerHTML += btn_str;
     document.getElementById('j_drawings').innerHTML += btn_str;
     // if (drawings_arr.length==2) { $('#j_screenshots').removeClass('d-none');}
@@ -332,7 +343,9 @@ function disp_drawing(c_drawing_id){
 	populate_graha_in_rashi();
     }
     if ("lines_by_color" in l_data) {
-	lines_by_color = l_data['lines_by_color'];
+	// lines_by_color = l_data['lines_by_color'];
+	// lines_by_color = Object.assign({}, l_data['lines_by_color']);
+	lines_by_color =  JSON.parse(JSON.stringify(l_data['lines_by_color']));
 	clear_canvas();
 	// redraw the lines from memory
 	draw_saved_strokes();
