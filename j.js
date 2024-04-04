@@ -382,7 +382,50 @@ function display_saved_degree(c_dog={}) {
     if (d1_data==1) populate_graha_in_rashi();
 }
 
-function populate_graha_in_rashi(c_arn="",c_gir={},c_dog={}) {
+function populate_graha_in_rashi(c_arn="",c_gir={},c_dog={},loc="") {
+    //
+    if (c_arn.length==0) c_arn = ascendant_rashi_num;
+    if (Object.keys(c_gir).length==0) c_gir = grahas_in_rashi;
+    if (Object.keys(c_dog).length==0)  c_dog=degree_of_grahas;
+    //
+    var rashiIdSuffix = "";
+    for (let house=1; house<=12; house++) {
+	// get rashi in the house
+	if (loc.length==0) {
+	    rashiIdSuffix = house.toString();
+	} else {
+	    rashiIdSuffix = house.toString() + "_" + loc;
+	    c_dog = {};
+	}
+	house_rashi = document.getElementById('rashi_in_h'+ rashiIdSuffix).innerHTML;
+	// empty graha from house innerHTML
+	document.getElementById('h'+ rashiIdSuffix).innerHTML = '';
+	// if ASC mark it so
+	// if (house_rashi==ascendant_rashi_num.toString()) 
+	//     document.getElementById('h'+ rashiIdSuffix).innerHTML += '<br><b>ASC</b>';
+	if (house_rashi==c_arn.toString()) 
+	    document.getElementById('h'+ rashiIdSuffix).innerHTML += format_graha('La',c_dog);
+	for ( graha of c_gir[house_rashi.toString()])  {
+	    document.getElementById('h'+ rashiIdSuffix).innerHTML += format_graha(graha,c_dog);
+	    if (retro_planet_list.includes(graha)) 
+		document.getElementById('h'+ rashiIdSuffix).innerHTML +=
+		    "<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
+	}
+	// restore the graha font size if it was changed
+	var inputs = document.getElementsByClassName('graha');
+	for (x = 0 ; x < inputs.length ; x++){
+	    if (inputs[x].id in font_size) 
+	    if (loc.length>0) {
+		inputs[x].style.fontSize =  (parseFloat(inputs[x].style.fontSize)- 10) + '%'; 
+	    } else {
+		inputs[x].style.fontSize = font_size[inputs[x].id];
+	    }
+	}
+    }
+}
+
+
+function populate_graha_in_rashi1(c_arn="",c_gir={},c_dog={}) {
     //
     if (c_arn.length==0) c_arn = ascendant_rashi_num;
     if (Object.keys(c_gir).length==0) c_gir = grahas_in_rashi;
@@ -1176,7 +1219,14 @@ function make_button_current(curr_btn_id,id_beg_string,id_end_string=""){
 }
 
 function chart_d1(){
+    document.getElementById("empty_image").src="images/empty.png";
     make_button_current('chart_d1','chart_');
+    remove_house_rashinums("11");
+    remove_house_rashinums("12");
+    remove_house_rashinums();
+    create_house_rashinums();
+    remove_house_grahaDivs();
+    create_house_grahaDivs();
     place_rashi_num_in_houses(ascendant_rashi_num);
     display_saved_degree();
     populate_graha_in_rashi();
@@ -1185,7 +1235,16 @@ function chart_d1(){
 
 function chart_d9(){
     if (divisional_data["d9"]==undefined) return;
+    document.getElementById("empty_image").src="images/empty.png";
     make_button_current('chart_d9','chart_');
+    remove_house_rashinums("11");
+    remove_house_rashinums("12");
+    remove_house_rashinums();
+    create_house_rashinums();
+    remove_house_grahaDivs('11');
+    remove_house_grahaDivs('12');
+    remove_house_grahaDivs();
+    create_house_grahaDivs();
     let c_ascendant_rashi_num = divisional_data["d9"]["ascendant_rashi_num"];
     place_rashi_num_in_houses(c_ascendant_rashi_num);
     let c_degree_of_grahas = divisional_data["d9"]["degree_of_grahas"];
@@ -1197,19 +1256,184 @@ function chart_d9(){
 
 
 function chart_d1d9(){
-	var canvas_w = document.getElementById('drawme').offsetWidth;
-	var canvas_h = document.getElementById('drawme').offsetHeight;
-    document.getElementById('drawme').style.width = '25%';
+    if (divisional_data["d9"]==undefined) return;
+    // var canvas_w = document.getElementById('drawme').offsetWidth;
+    // var canvas_h = document.getElementById('drawme').offsetHeight;
+    // document.getElementById('drawme').style.width = '25%';
     // console.log([canvas_w,canvas_h]);
+    // drawImageAtQuadrants([[1,1], [1,2]], "images/empty.png", "drawme");
+    make_button_current('chart_d1d9','chart_');
+    // Change the background diagram
+    document.getElementById("empty_image").src="images/empty_1_2.png";
+    document.getElementById("empty_image").height=ctx.canvas.height;
+    // clear all d1Only/d9Only rashi numbers
+    remove_house_rashinums();
+    remove_house_grahaDivs();
+    // hide the m in each house of D1Only/D9Only
+    var all_inputs = document.querySelectorAll('.rot,.house');
+    for (x = 0 ; x < all_inputs.length ; x++){
+	myid = all_inputs[x].getAttribute("id");
+	document.getElementById(myid).style.display = 'none';
+    }
+    // Draw D1 of D1D9 chart
+    var topPos = 0;
+    var leftPos = 0;
+    var width = ctx.canvas.width/2;
+    var height = ctx.canvas.height;
+    var divStyle = 'style="position: absolute; ';
+    divStyle += 'top: ' + topPos.toString() + 'px;';
+    divStyle += 'left: ' + leftPos.toString() + 'px;';
+    divStyle += 'width: '+ width.toString() + 'px; ';
+    divStyle += 'height: ' + height.toString() + 'px;"';
+    var divId=' id="chart_11" ';
+    var divElem = '<div '+ divStyle + divId + '><\/div>';
+    $("#drawme").append(divElem);
+    create_house_rashinums('11');
+    place_rashi_num_in_houses(ascendant_rashi_num,"11");
+    create_house_grahaDivs('11');
+    populate_graha_in_rashi("",{},{},"11");
+    //
+    // Draw D9 of D1D9 chart
+    topPos = 0;
+    leftPos = ctx.canvas.width/2;
+    width = ctx.canvas.width/2;
+    height = ctx.canvas.height;
+    divStyle = 'style="position: absolute; ';
+    divStyle += 'top: ' + topPos.toString() + 'px;';
+    divStyle += 'left: ' + leftPos.toString() + 'px;';
+    divStyle += 'width: '+ width.toString() + 'px; ';
+    divStyle += 'height: ' + height.toString() + 'px;"';
+    divId=' id="chart_12" ';
+    var divElem = '<div '+ divStyle + divId + '><\/div>';
+    $("#drawme").append(divElem);
+    create_house_rashinums('12');
+    let c_ascendant_rashi_num = divisional_data["d9"]["ascendant_rashi_num"];
+    place_rashi_num_in_houses(c_ascendant_rashi_num,"12");
+    create_house_grahaDivs('12');
+    let c_degree_of_grahas = divisional_data["d9"]["degree_of_grahas"];
+    let c_grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
+    populate_graha_in_rashi(c_ascendant_rashi_num,c_grahas_in_rashi,c_degree_of_grahas,'12');
 }
 
-function place_rashi_num_in_houses(c_asc_rashi_num) {
+function remove_house_rashinums(loc="") {
+    var cDiv =""; 
+    for (let i=1; i<=12; i++) {
+	if (loc.length==0) {
+	    idStrSuffix = i.toString();
+	} else {
+	    idStrSuffix = i.toString() + "_" + loc;
+	}
+	cDiv = document.getElementById('rashi_in_h'+ idStrSuffix);
+	if (cDiv) cDiv.parentNode.removeChild(cDiv);
+    }
+}
+
+function remove_house_grahaDivs(loc="") {
+    var cDiv =""; 
+    for (let i=1; i<=12; i++) {
+	if (loc.length==0) {
+	    idStrSuffix = i.toString();
+	} else {
+	    idStrSuffix = i.toString() + "_" + loc;
+	}
+	cDiv = document.getElementById('h'+ idStrSuffix);
+	if (cDiv) cDiv.parentNode.removeChild(cDiv);
+    }
+}
+
+function  create_house_grahaDivs(loc="") {
+    var c_divStr = ""; var chartStr="";
+    for (let i=1; i<=12; i++) {
+	if (loc.length==0) {
+	    idStrSuffix = i.toString();
+	    chartStr = "#drawme";
+	} else {
+	    idStrSuffix = i.toString() + "_" + loc;
+	    chartStr = "#chart_"+loc;
+	}
+	c_divStr = '<div ';
+	c_divStr +=' class="b'+i.toString()+' house "';
+	c_divStr += ' style="z-index:2;font-size: 120%; "';
+	c_divStr += ' id="h'+idStrSuffix+'" ';
+	c_divStr += ' ><br></div>';
+	$(chartStr).append(c_divStr);
+    }
+}
+
+function  create_house_rashinums(loc="") {
+    var c_divStr = ""; var chartStr="";
+    for (let i=1; i<=12; i++) {
+	if (loc.length==0) {
+	    idStrSuffix = i.toString();
+	    chartStr = "#drawme";
+	} else {
+	    idStrSuffix = i.toString() + "_" + loc;
+	    chartStr = "#chart_"+loc;
+	}
+	c_divStr = '<div ';
+	c_divStr +=' class="rb'+i.toString()+' h5 rashinum font-weight-bold text-black"';
+	c_divStr += ' style="z-index:2;font-size: 120%; "';
+	c_divStr += ' id="rashi_in_h'+idStrSuffix+'" ';
+	c_divStr += ' >'+i.toString()+'</div>';
+	// $("#chart_"+loc).append(c_divStr);
+	$(chartStr).append(c_divStr);
+    }
+}
+
+function place_rashi_num_in_houses(c_asc_rashi_num,loc="") {
     for (let i=1; i<=12; i++) {
 	house_rashi_num = ((parseInt(c_asc_rashi_num)+i-1)%12); 
 	if (house_rashi_num==0) { house_rashi_num=12;}
-	document.getElementById('rashi_in_h'+ i.toString()).innerHTML = 
+	if (loc.length==0) idStrSuffix = i.toString();
+	else idStrSuffix = i.toString() + "_" + loc;
+	document.getElementById('rashi_in_h'+ idStrSuffix).innerHTML = 
 	    house_rashi_num.toString();
     }
 }
+
+
+function drawImageAtQuadrants(positions, imgUrl, parentId) { 
+    positions.forEach(function(position) { 
+	drawImageAtQuadrant(position[0], position[1], imgUrl, parentId); 
+    })
+}
+
+function drawImageAtQuadrant(rowIndex, colIndex, imgUrl, parentId) { 
+    if (rowIndex < 1 || colIndex < 1) { 
+	console.log("drawImageAtQuadrant: Invalid row or column index (must be > 1)"); 
+    } else { 
+	var img = new Image(); 
+	img.onload = function() { 
+	    //loadedImagesCount++; 
+	    // imageY = (rowIndex - 1)*img.height;
+	    imageY = (rowIndex - 1)*ctx.canvas.height;
+	    // imageX = (colIndex - 1)*img.width; 
+	    imageX = (colIndex - 1)*ctx.canvas.width/2; 
+	    // ctx.drawImage(img, imageX, imageY); 
+	    ctx.drawImage(img, imageX, imageY, ctx.canvas.width/2, img.height); 
+	    // createDiv(parentId, imageY, imageX, img.width, img.height); 
+	    createDiv(parentId, imageY/2, imageX/2, ctx.canvas.width/2, ctx.canvas.height/2); 
+	}; 
+	img.src = imgUrl; 
+    }
+}
+function createDiv(parentId, topPos, leftPos, width, height) {
+    var divStyle = 'style="position: absolute; ';
+    divStyle += 'top: ' + topPos.toString() + 'px;';
+    divStyle += 'left: ' + leftPos.toString() + 'px;';
+    divStyle += 'width: '+ width.toString() + 'px; ';
+    divStyle += 'height: ' + height.toString() + 'px;"';
+    console.log(divStyle);
+    //
+    var divElem = '<div '+ divStyle + '><\/div>';
+    $("#" + parentId).append(divElem);
+}
+
+
+
+
+
+
+
 
 
