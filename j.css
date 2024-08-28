@@ -1,5 +1,7 @@
 .container { position: relative; text-align: center; color: white; }
 
+.chart_title { position: absolute; bottom: 95%; left: 96%; }
+
 /* for each rotate-house */
 .rotb1 { position: absolute; bottom: 65%; left: 47%; }
     .rotb2 { position: absolute; bottom: 75%; left: 27%; }
@@ -82,5 +84,19 @@ text-decoration: none;
 cursor: pointer;
 }
 
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
 
 
