@@ -1,4 +1,108 @@
 
+
+function process_jh_freeForm_settings() {
+    var tarea0 = document.getElementById('free_form_settings').value.split('\n');
+    // let deg = document.getElementById(gr.toLowerCase()+'_deg').value; 
+    let i = 0;
+    let grList = ["Lagna","Sun","Moon","Mercury","Mars",
+	"Saturn","Venus","Jupiter","Rahu"];
+    const rasiNumByName = { "Mesh":"1", "Vrish":"2", "Mith":"3", "Kark":"4", "Simh":"5", "Kanya":"6", 
+	"Tula":"7", "Vrisch":"8", "Dhanu":"9", "Makar":"10", "Kumbh":"11", "Meen":"12"
+    };
+    while (i < tarea0.length) {
+	var lineArray = tarea0[i].split(/(\s+)/);
+	// console.log(tarea0[i]);
+	// console.log(lineArray);
+	// Saturn (R) - MK          8 Mith 57' 51.78"   Ardr      1    Mith   Dhanu
+	// Lagna                   12 Dhanu 13' 01.23"  Mool      4    Dhanu  Kark
+	//[ "Lagna", "  ", "12", " ", "Dhanu", " ", "13' 01.23\"  Mool", "      ", "4", "    ", "Dhanu", "  ", "Kark" ]
+	let c_gr = lineArray[0];
+	if (grList.includes(c_gr)) {
+	    // console.log(lineArray);
+	    // console.log(c_gr + " is graha");
+	    var c_rashinum = ''; var c_gr_x ='';
+	    var c_deg =''; var c_min =''; var c_sec ='';
+	    var k = 0;
+	    while (k < lineArray.length) {
+		// console.log(k + " is now k");
+		if (lineArray[k] in  rasiNumByName) {
+		    c_rashinum = rasiNumByName[lineArray[k]];
+		    c_deg = lineArray[k-2];
+		    c_min = lineArray[k+2].replace(/\D/g,''); // strip non digits 
+		    c_sec = lineArray[k+4].replace(/["]+/g,''); // remove double quotes
+		    c_gr_x = c_gr.slice(0,2);
+		    if (c_gr_x == "La") {
+			ascendant_rashi_num = c_rashinum;
+		    }
+		    // console.log( "Gr:"+ c_gr_x + " - "+c_rashinum + "Rashi @ "+ c_deg + ":" + c_min + ":" + c_sec);
+		    document.getElementById(c_gr_x.toLowerCase()+'_deg').value = c_deg;
+		    document.getElementById(c_gr_x.toLowerCase()+'_min').value = c_min;
+		    document.getElementById(c_gr_x.toLowerCase()+'_sec').value = c_sec;
+		    degree_of_grahas[c_gr_x] = [];
+		    degree_of_grahas[c_gr_x][0]=c_deg;
+		    degree_of_grahas[c_gr_x][1]=c_min;
+		    degree_of_grahas[c_gr_x][2]=c_sec;
+		    if (c_gr_x != "La") { grahas_in_rashi[c_rashinum].push(c_gr_x); }
+		    // if Retro mark as required and update arrays as needed
+		    if (tarea0[i].includes("(R)")) {
+			retro_planet_list.push(c_gr_x);
+			document.getElementById(c_gr_x+'_retrocbox').checked=true;
+		    }
+		    //
+		    if (c_gr_x == "Ra") {
+			// find the 7th house from Ra house - for Ke house
+			var ke_rashinum = (parseInt(c_rashinum)+6)%12;
+			if (ke_rashinum==0) { ke_rashinum=12; }
+			grahas_in_rashi[ke_rashinum.toString()].push('Ke');
+			// degree_of_grahas['Ke'] = [];
+			// degree_of_grahas['Ke'][0]=c_deg;
+			// degree_of_grahas['Ke'][1]=c_min;
+			// degree_of_grahas['Ke'][2]=c_sec;
+		    }
+		    break;
+		}
+		k++;
+		if (tarea0[i].includes("-")) { if (k>11) break;
+		} else { if (k>9) break; }
+	    }
+		    
+	} 
+	i++;
+    }
+    // console.log(ascendant_rashi_num);
+    // console.log(grahas_in_rashi);
+    // console.log(degree_of_grahas);
+    display_saved_degree();
+    place_rashi_num_in_houses(ascendant_rashi_num);
+    populate_graha_in_rashi();
+    // change settings of Gr drop down menu values
+    var arn = ascendant_rashi_num;
+    var gir = grahas_in_rashi;
+    var dog = degree_of_grahas;
+    //
+    for (let house=1; house<=12; house++) {
+	// get rashi in the house
+	house_rashinum = document.getElementById('rashi_in_h'+ house.toString()).innerHTML;
+	// console.log(house_rashinum + " is now house_rashinum");
+	if (house_rashinum==ascendant_rashi_num) 
+	    document.getElementById('lagna').value = house_rashinum;
+	for ( graha of gir[house_rashinum])  {
+	    if (graha=='La' || graha=='Ke') continue;
+	    // console.log("graha is now " + graha);
+	    // console.log("settting h_" + graha.toLowerCase().value + " to h" + house_rashinum);
+	    document.getElementById('h_'+ graha.toLowerCase()).value = "h" + house_rashinum;
+	}
+    }
+    calc_d9();
+}
+
+
+function openFile() {
+      var input = document.getElementById("file-input");
+      input.click();
+}
+
+
 function read_url(url) {
    var xmlhttp;
    if (window.XMLHttpRequest) {
@@ -37,15 +141,21 @@ function change_view(viewObj) {
     let n_view = viewObj.value;
     // let o_view = viewObj.oldvalue;
     // console.log("Changing from view:" + viewObj.oldvalue + " to view: " + n_view);
+    // console.log(views[n_view]);
     // save_view(o_view);
     document.getElementById('j_comments').value = views[n_view]['j_comments'];
     document.getElementById('j_notes').value = views[n_view]['j_notes'];
     document.getElementById('j_title').value = views[n_view]['j_title'];
-    document.getElementById('j_drawings').innerHTML = views[n_view]['j_drawings'];
+    curr_drawing_idList = views[n_view]['drawing_idList'];
+    document.getElementById('j_drawings').innerHTML = "";
     document.getElementById('title').innerHTML = n_view + '-Title';
     document.getElementById('comments').innerHTML = n_view + '-Comments';
     document.getElementById('notes').innerHTML = n_view + '-Notes';
     document.getElementById('drawings').innerHTML = n_view + '-Drawings';
+    if (curr_drawing_idList.length>0) {
+	for (d_id of curr_drawing_idList) 
+	    document.getElementById('j_drawings').innerHTML += return_drawing_btnStr(d_id);
+    }
 }
 
 function add_view() {
@@ -72,6 +182,7 @@ function add_view() {
     document.getElementById('comments').innerHTML = view + '-Comments';
     document.getElementById('notes').innerHTML = view + '-Notes';
     document.getElementById('drawings').innerHTML = view + '-Drawings';
+    curr_drawing_idList = [];
 }
 
 
@@ -85,26 +196,21 @@ function add_view_form() {
     document.getElementById('j_new_view').value  ='';
 }
 
-function save_view() {
-    var currentdate = new Date();
-    let view = 'v'+currentdate.getHours()+currentdate.getMinutes()+currentdate.getSeconds();
-    if (document.getElementById('j_view').value) {
-	view = document.getElementById('j_view').value;
-    } 
-    views[view] = {};
-    if (document.getElementById('j_notes').value) {
-	views[view]["j_notes"] = document.getElementById('j_notes').value;
-    } else { views[view]["j_notes"] = "NONE"; }
-    if (document.getElementById('j_title').value) {
-	views[view]["j_title"] = document.getElementById('j_title').value;
-    } else { views[view]["j_title"] = "NONE"; }
-    if (document.getElementById('j_comments').value) {
-	views[view]["j_comments"] = document.getElementById('j_comments').value;
-    } else { views[view]["j_comments"] = "NONE"; }
-    views[view]["j_drawings"] = document.getElementById('j_drawings').innerHTML;
-    // console.log(views);
-}
 
+
+function return_drawing_btnStr(d_id) {
+    let c_btn_str = "";
+    c_btn_str += '<btn ';
+    c_btn_str += ' id="b'+d_id+'" ';
+    c_btn_str += ' onclick=disp_drawing(\''+d_id+'\'); ';
+    c_btn_str += ' class="small font-weight-bold btn-link border border-primary py-0 px-1 mx-0">';
+    c_btn_str += d_id;
+    c_btn_str += '</btn>';
+    c_btn_str += '<img id="del_'+d_id+'" ';
+    c_btn_str += ' onclick="del_drawing(\''+d_id+'\');"'; 
+    c_btn_str += ' class="ml-0 mr-1" src="images/clear.png" height="11"/></span>';
+    return c_btn_str;
+}
 
 // function save_drawing() {
 //     if (typeof drawings_arr == 'undefined') { drawings_arr=['printme']; }
@@ -151,11 +257,33 @@ function save_view(view="") {
     if (document.getElementById('j_comments').value) {
 	views[view]["j_comments"] = document.getElementById('j_comments').value;
     } else { views[view]["j_comments"] = "NONE"; }
-    if (document.getElementById('j_drawings').innerHTML) {
-	views[view]["j_drawings"] = document.getElementById('j_drawings').innerHTML;
-    } else { views[view]["j_drawings"] = ""; }
+    // if (document.getElementById('j_drawings').innerHTML) {
+	// views[view]["j_drawings"] = document.getElementById('j_drawings').innerHTML;
+    // } else { views[view]["j_drawings"] = ""; }
     // console.log(views);
+    views[view]['drawing_idList'] = curr_drawing_idList;
 }
+
+// function save_view() {
+//     var currentdate = new Date();
+//     let view = 'v'+currentdate.getHours()+currentdate.getMinutes()+currentdate.getSeconds();
+//     if (document.getElementById('j_view').value) {
+// 	view = document.getElementById('j_view').value;
+//     } 
+//     views[view] = {};
+//     if (document.getElementById('j_notes').value) {
+// 	views[view]["j_notes"] = document.getElementById('j_notes').value;
+//     } else { views[view]["j_notes"] = "NONE"; }
+//     if (document.getElementById('j_title').value) {
+// 	views[view]["j_title"] = document.getElementById('j_title').value;
+//     } else { views[view]["j_title"] = "NONE"; }
+//     if (document.getElementById('j_comments').value) {
+// 	views[view]["j_comments"] = document.getElementById('j_comments').value;
+//     } else { views[view]["j_comments"] = "NONE"; }
+//     views[view]["j_drawings"] = document.getElementById('j_drawings').innerHTML;
+//     views[view]['drawing_idList'] = curr_drawing_idList;
+//     // console.log(views);
+// }
 
 function del_drawing(d_id) {
     let cDiv = document.getElementById('b'+ d_id);
@@ -179,34 +307,39 @@ function save_drawing() {
  	btn_str += '<br>';
  	// console.log(btn_str);
     }
-    btn_str += '<btn ';
-    btn_str += ' id="b'+drawing_id+'" ';
-    btn_str += ' onclick=disp_drawing(\''+drawing_id+'\'); ';
-    btn_str += ' class="small font-weight-bold btn-link border border-primary py-0 px-1 mx-0">';
-    btn_str += drawing_id;
-    // 17/1/2024 @ 10:39:55
-    // var currentdate = new Date();
-    // btn_str += + (currentdate.getMonth()+1)  + "/" + currentdate.getFullYear() + " @ "
-    //       + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
-    btn_str += '</btn>';
-    btn_str += '<img id="del_'+drawing_id+'" ';
-    btn_str += ' onclick="del_drawing(\''+drawing_id+'\');"'; 
-    btn_str += ' class="ml-0 mr-1" src="images/clear.png" height="11"/></span>';
+    // btn_str += '<btn ';
+    // btn_str += ' id="b'+drawing_id+'" ';
+    // btn_str += ' onclick=disp_drawing(\''+drawing_id+'\'); ';
+    // btn_str += ' class="small font-weight-bold btn-link border border-primary py-0 px-1 mx-0">';
+    // btn_str += drawing_id;
+    // // 17/1/2024 @ 10:39:55
+    // // var currentdate = new Date();
+    // // btn_str += + (currentdate.getMonth()+1)  + "/" + currentdate.getFullYear() + " @ "
+    // //       + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
+    // btn_str += '</btn>';
+    // btn_str += '<img id="del_'+drawing_id+'" ';
+    // btn_str += ' onclick="del_drawing(\''+drawing_id+'\');"'; 
+    // btn_str += ' class="ml-0 mr-1" src="images/clear.png" height="11"/></span>';
+    curr_drawing_idList.push(drawing_id);
     // document.getElementById('j_screenshots').innerHTML += btn_str;
-    document.getElementById('j_drawings').innerHTML += btn_str;
+    // document.getElementById('j_drawings').innerHTML += btn_str;
+    document.getElementById('j_drawings').innerHTML += return_drawing_btnStr(drawing_id);
     // if (drawings_arr.length==2) { $('#j_screenshots').removeClass('d-none');}
     // save lines from current drawing
     drawings[drawing_id] = {};
     // drawings[drawing_id]['lines'] = lines;
+    drawings[drawing_id]['title'] = drawing_id;
     drawings[drawing_id]['lines'] = structuredClone(lines);
     drawings[drawing_id]['lines_by_color'] = structuredClone(lines_by_color);
     //
     drawings[drawing_id]["grahas_in_rashi"] = grahas_in_rashi;
     drawings[drawing_id]["degree_of_grahas"] = degree_of_grahas;
     drawings[drawing_id]["ascendant_rashi_num"] = ascendant_rashi_num;
+    drawings[drawing_id]["comments"] = document.getElementById('j_comments').value;
     drawings[drawing_id]["curr_h1_rashi_num"] = 
 	document.getElementById('rashi_in_h1').innerHTML;
     // console.log(drawings);
+    // console.log(curr_drawing_idList);
 }
 
 function undo_stroke(){
@@ -314,6 +447,23 @@ function draw_saved_strokes0() {
     }
 }
 
+function update_obs_title(d_id) {
+    document.getElementById('modal2B').style.display = 'none';
+    drawings[d_id]['title'] = document.getElementById('new_obs_title').value;
+    document.getElementById('j_comm_title').innerHTML = document.getElementById('new_obs_title').value;
+}
+
+function obs_update_title_form(d_id) {
+    document.getElementById('modal2B').style.display = 'block';
+    // document.getElementById('modal2M').innerHTML  = '<div class="h5 font-weight-bold text-black"> Rename Observation Title:</div>';
+    // document.getElementById('modal2M').innerHTML  += '<input id="new_obs_title" type="text" value="'+ d_id +'" ';
+    // document.getElementById('modal2M').innerHTML  += ' class="text-primary font-weight-bold h6"/>';
+    document.getElementById('modal2M').innerHTML  = '<div class="h5 font-weight-bold text-black"> Rename Observation Title:</div>';
+    document.getElementById('modal2M').innerHTML  += '<input id="new_obs_title" type="text" value="'+ drawings[d_id]['title'] +'" class="text-primary font-weight-bold h6"/>';
+    document.getElementById('modal2M').innerHTML  += '<span class="btn btn-primary" onclick="update_obs_title(\''+d_id +'\');">Update</span>';
+}
+
+
 function disp_drawing(c_drawing_id){
     let l_data = drawings[c_drawing_id];
     if ("ascendant_rashi_num" in l_data) {
@@ -325,6 +475,22 @@ function disp_drawing(c_drawing_id){
 	//     document.getElementById('rashi_in_h'+ i.toString()).innerHTML = 
 	// 	house_rashi_num.toString();
 	// }
+    }
+    if ("title" in l_data) {
+	document.getElementById('j_comm_title').innerHTML =  l_data["title"];
+	btn_str = '<img ';
+	btn_str += ' onclick="obs_update_title_form(\''+c_drawing_id+'\');" ';
+	btn_str += ' class="ml-0 mr-1" src="images/edit.png" height="11"/>';
+	document.getElementById('j_comm_title').innerHTML += btn_str;
+    } else {
+	drawings[c_drawing_id]["title"] = c_drawing_id;
+	btn_str = '<img ';
+	btn_str += ' onclick="obs_update_title_form(\''+c_drawing_id+'\');" ';
+	btn_str += ' class="ml-0 mr-1" src="images/edit.png" height="11"/>';
+	document.getElementById('j_comm_title').innerHTML += btn_str;
+    }
+    if ("comments" in l_data) {
+	document.getElementById('j_comments').value =  l_data["comments"];
     }
     if ("curr_h1_rashi_num" in l_data) {
 	curr_h1_rashi_num = parseInt(l_data["curr_h1_rashi_num"]);
@@ -438,36 +604,6 @@ function populate_graha_in_rashi(c_arn="",c_gir={},c_dog={},loc="") {
 }
 
 
-function populate_graha_in_rashi1(c_arn="",c_gir={},c_dog={}) {
-    //
-    if (c_arn.length==0) c_arn = ascendant_rashi_num;
-    if (Object.keys(c_gir).length==0) c_gir = grahas_in_rashi;
-    if (Object.keys(c_dog).length==0)  c_dog=degree_of_grahas;
-    //
-    for (let house=1; house<=12; house++) {
-	// get rashi in the house
-	house_rashi = document.getElementById('rashi_in_h'+ house.toString()).innerHTML;
-	// empty graha from house innerHTML
-	document.getElementById('h'+ house.toString()).innerHTML = '';
-	// if ASC mark it so
-	// if (house_rashi==ascendant_rashi_num.toString()) 
-	//     document.getElementById('h'+ house.toString()).innerHTML += '<br><b>ASC</b>';
-	if (house_rashi==c_arn.toString()) 
-	    document.getElementById('h'+ house.toString()).innerHTML += format_graha('La',c_dog);
-	for ( graha of c_gir[house_rashi.toString()])  {
-	    document.getElementById('h'+ house.toString()).innerHTML += format_graha(graha,c_dog);
-	    if (retro_planet_list.includes(graha)) 
-		document.getElementById('h'+ house.toString()).innerHTML +=
-		    "<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
-	}
-	// restore the graha font size if it was changed
-	var inputs = document.getElementsByClassName('graha');
-	for (x = 0 ; x < inputs.length ; x++){
-	    if (inputs[x].id in font_size) 
-		inputs[x].style.fontSize = font_size[inputs[x].id];
-	}
-    }
-}
 
 function populate_graha_in_rashi0() {
     for (let house=1; house<=12; house++) {
@@ -503,9 +639,11 @@ function place_graha_in_house(graha,house) {
 	grahas_in_rashi={}; 
 	for (let i=1; i<=12; i++) { grahas_in_rashi[i.toString()] = []; }
     }
+    // console.log(grahas_in_rashi);
     // find rashi of the house
     rashi_in_h1= document.getElementById('rashi_in_h1').innerHTML;
     c_rashi=((parseInt(rashi_in_h1)+parseInt(house.substring(1))-1)%12); if (c_rashi==0) { c_rashi=12;}
+    // console.log(c_rashi.toString());
     // make sure graha is pesent in just one place
     for (let i=1; i<=12; i++) { 
 	if (grahas_in_rashi[i.toString()].includes(graha)) {
@@ -539,7 +677,8 @@ function save_details() {
     saveMe["j_title"] = views['Basic']['j_title'];
     saveMe["j_comments"] = views['Basic']['j_comments'];
     saveMe["j_notes"] = views['Basic']['j_notes'];
-    saveMe["j_drawings"] = views['Basic']['j_drawings'];
+    // saveMe["j_drawings"] = views['Basic']['j_drawings'];
+    saveMe["drawing_idList"] = curr_drawing_idList;
     //
     if (typeof drawings == 'undefined') { drawings={}; }
     if (Object.keys(drawings).length>0) saveMe["drawings"] = drawings;
@@ -884,6 +1023,7 @@ function loadData(l_data,make_tab=1) {
 	grahas_in_rashi = l_data["grahas_in_rashi"];
 	// now populate grahas wher they belong
 	populate_graha_in_rashi();
+	calc_d9();
     }
     if ("curr_h1_rashi_num" in l_data) {
         curr_h1_rashi_num = l_data["curr_h1_rashi_num"];
@@ -915,8 +1055,14 @@ function loadData(l_data,make_tab=1) {
     if ("j_comments" in l_data) {
 	document.getElementById('j_comments').value = l_data["j_comments"];
     }
-    if ("j_drawings" in l_data) {
-	document.getElementById('j_drawings').innerHTML = l_data["j_drawings"];
+    // if ("j_drawings" in l_data) {
+	// document.getElementById('j_drawings').innerHTML = l_data["j_drawings"];
+    //}
+    document.getElementById('j_drawings').innerHTML = "";
+    if (views['Basic']['drawing_idList'].length>0) {
+	curr_drawing_idList = views['Basic']['drawing_idList'];
+	for (d_id of views['Basic']['drawing_idList']) 
+	    document.getElementById('j_drawings').innerHTML += return_drawing_btnStr(d_id);
     }
 }
 
@@ -1140,12 +1286,14 @@ function rotate_by_house(rotate_house_count) {
 
 
 function disp_notes(){
+    $('#drawme').removeClass('d-none'); 
     $('#notes_panel').removeClass('d-none'); 
     $('#settings_panel').addClass('d-none'); 
 }
 
 
 function disp_settings(){
+    $('#drawme').addClass('d-none'); 
     $('#settings_panel').removeClass('d-none'); 
     $('#notes_panel').addClass('d-none'); 
 }
@@ -1194,20 +1342,23 @@ function calc_d9() {
 	const [d9_c_deg,d9_c_min,d9_c_sec] = conv_sec_to_degMinSec(c_d9_rasi_totsecs)
 	// console.log(c_gr + ' D9 is ' + c_d9_rashi_num);
 	// console.log([d9_c_deg,d9_c_min,d9_c_sec]);
-	if (divisional_data["d9"]["grahas_in_rashi"]==undefined)
+	if (divisional_data["d9"]["grahas_in_rashi"]==undefined) {
 	    divisional_data["d9"]["grahas_in_rashi"]={};
-	for (let i=1; i<=12; i++)  
-	    divisional_data["d9"]["grahas_in_rashi"][i.toString()] = []; 
+	    for (let i=1; i<=12; i++)  
+		divisional_data["d9"]["grahas_in_rashi"][i.toString()] = []; 
+	}
+	// if (divisional_data["d9"]["grahas_in_rashi"][c_d9_rashi_num.toString()] == undefined)
+	    // divisional_data["d9"]["grahas_in_rashi"][c_d9_rashi_num.toString()] = [];
+	divisional_data["d9"]["grahas_in_rashi"][c_d9_rashi_num.toString()].push(c_gr);
+	//
 	if (divisional_data["d9"]["degree_of_grahas"]==undefined)
 	    divisional_data["d9"]["degree_of_grahas"]={};
-	if (divisional_data["d9"]["grahas_in_rashi"][c_d9_rashi_num] == undefined)
-	    divisional_data["d9"]["grahas_in_rashi"][c_d9_rashi_num] = [];
-	divisional_data["d9"]["grahas_in_rashi"][c_d9_rashi_num].push(c_gr);
 	divisional_data["d9"]["degree_of_grahas"][c_gr] = [d9_c_deg,d9_c_min,d9_c_sec];
+	//
 	if (c_gr=='La') 
 	    divisional_data["d9"]["ascendant_rashi_num"] = c_d9_rashi_num;
     }
-    // console.log(divisional_data);
+    console.log(divisional_data);
 }
 
 function conv_sec_to_degMinSec(c_totsec) {
@@ -1243,6 +1394,7 @@ function chart_d1(){
     place_rashi_num_in_houses(ascendant_rashi_num);
     display_saved_degree();
     populate_graha_in_rashi();
+    document.getElementById('chart_title').innerHTML = "D1";
 }
 
 
@@ -1264,6 +1416,7 @@ function chart_d9(){
     display_saved_degree(c_degree_of_grahas); 
     let c_grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
     populate_graha_in_rashi(c_ascendant_rashi_num,c_grahas_in_rashi,c_degree_of_grahas);
+    document.getElementById('chart_title').innerHTML = "D9";
 }
 
 

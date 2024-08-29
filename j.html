@@ -21,6 +21,7 @@
     let divisional_data = {};
     let degree_of_grahas = {};
     let retro_planet_list = [];
+    let curr_drawing_idList = [];
     let ascendant_rashi_num = "1";
     let curr_h1_rashi_num = "";
     // $(function(){ 
@@ -29,33 +30,63 @@
 </script>
 </head>
 <body>
-<div id='header' class="my-0 py-0">
-<h2>JGD Kundli</h2>
-<p>Jai gurudev v2.8<small><i> 04Apr2024</i></small></p>
+
+<div id='header' class="row w-100 ml-1">
+    <div class="col-4 m-0 p-0">
+    <h2>JGD Kundli</h2>
+    <p>Jai gurudev v2.9<small><i> 11Apr2024</i></small></p>
+    </div>
+    <div class="col-8 m-0 p-0">
+    <img id='h_dnld' src="images/download_b.png" alt="Download"  title="Download Current"
+	onclick="saveData();" height='54' class='mx-1' />
+    <img id='h_open' src="images/open.png" alt="Open Saved File"  title="Open Saved File"
+	onclick="openFile();" height='54' class='mx-1'/>
+    <img id='h_ret2NotesImg'  onclick='disp_notes();' src='images/list.jpg'
+	 title="Display Notes" alt="DisplayNotes" height='54' class='mx-1'/>
+    <img id='h_disp_settings' src="images/settings_2.jpg"  title="Display Settings" 
+	alt="dispSettings"  onclick="disp_settings();" height='54' class='mx-1'/>
+    </div>
 </div>
+
 <div id="modal2B" style="display:none; " class="modal" >
-<div class="col-3 modal-content float-top float-right">
-<span class="close"
-onclick = "{document.getElementById('modal2B').style.display = 'none';}"
->&times;</span>
-<p id="modal2M">Panduranga Naamamu Parama Punya Dhaaamamu..</p>
+    <div class="col-3 modal-content float-top float-right">
+	<span class="close"
+	    onclick = "{document.getElementById('modal2B').style.display = 'none';}"
+	    >&times;
+	</span>
+	<p id="modal2M">Panduranga Naamamu Parama Punya Dhaaamamu..</p>
+    </div>
 </div>
+
+<div id="modalB" style="display:none;" class="modal" >
+    <div class="col-6 float-top float-right modal-content">
+	<span class="close"
+	    onclick = "{document.getElementById('modalB').style.display = 'none';}"
+	    >&times;
+	</span>
+	<p id="modalM">Panduranga Naamamu Parama Punya Dhaaamamu..</p>
+    </div>
 </div>
+
+
+
+
 
 <div class="row w-100 text-black ml-1" style="background-color:#ffffe9;">
     <div class="mx-1 text-center" id="first_col">
-	<br>
-	    <img id='ret2NotesImg'  onclick='disp_notes();' src='images/list.jpg'
-		 title="Display Notes" alt="DisplayNotes" height='31'/>
-	  <br>
-	  <img id='disp_settings' src="images/settings_2.jpg"  
-	      title="Display Settings" alt="dispSettings"  
-	      onclick="disp_settings();" height='27'/>
+	<!-- <br> -->
+	<!-- <img id='ret2NotesImg'  onclick='disp_notes();' src='images/list.jpg' -->
+	<!-- title="Display Notes" alt="DisplayNotes" height='31'/> -->
+	<!-- <br> -->
+	<!-- <img id='disp_settings' src="images/settings_2.jpg"   -->
+	<!-- title="Display Settings" alt="dispSettings"   -->
+	<!-- onclick="disp_settings();" height='27'/> -->
 	<hr>
 	<!-- <button class='btn btn-primary my-0 py-0' onclick="saveData();">Save</button> -->
-	<img id='dnld' src="images/download.png" alt="Download" onclick="saveData();" height='27' />
+	<!-- <img id='dnld' src="images/download.png" alt="Download"  title="Download" -->
+	<!-- onclick="saveData();" height='27' /> -->
 
-	<hr>
+	<!-- <hr> -->
 	<!-- onclick="download('the content of the file', 'filename.txt', 'text/plain');" -->
 	<!-- <button  id='startDraw' class='btn btn-primary my-0 py-0'  -->
 	    <!-- onclick="{ -->
@@ -140,6 +171,9 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	      <img id='empty_image' src="images/empty.png" alt="Snow" 
 	      style="width:100%;position:absolute;z-index:1;">
 	      <canvas crossOrigin='anonymous' id="canvas" style='position:relative;z-index:1;'></canvas>  
+		  <div class=" p-1 m-1 chart_title h4 bg-warning text-danger font-weight-bold text-black" 
+		       style="z-index:2;font-size: 120%; " 
+		      id='chart_title'>D1</div>
 		  <div class="rb1 h5 rashinum font-weight-bold text-black" 
 		       style="z-index:2;font-size: 120%; " 
 		      id='rashi_in_h1'>1</div>
@@ -248,13 +282,26 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 
 
 
-	    <div id="settings_panel" class="col-4 d-none m-0 p-0 text-primary">
+	    <div id="settings_panel" class="col-6 d-none m-0 p-0 text-primary">
 
-	    <span id='ret2Notes'  onclick='disp_notes();'
-	      class='btn btn-primary my-0 py-0 mx-0 px-0 h5'>Return-to--Notes
+	<!-- 
+	    <span id='ret2Notes'  onclick='disp_notes();' 
+	      class='btn btn-primary my-0 py-0 mx-0 px-0 h5'>Return  -to- Notes
 	    <img id='ret2NotesImg2'  onclick='disp_notes();' src='images/list.jpg'
 		 title="Display Notes" alt="DisplayNotes" height='31'/></span> <br>
-
+	-->
+	<span 
+	    onclick="{ document.getElementById('modalB').style.display = 'block';
+		document.getElementById('modalM').innerHTML  =  
+	    '<span class=\'h5 text-danger font-weight-bold\'>Input ClipBoard from Jagannath Hora</span><br>';
+		document.getElementById('modalM').innerHTML  +=  
+		    '<textarea class=\'small mx-2 text-primary col-12\' id=\'free_form_settings\' +\
+		       name=\'free_form_settings\' rows=\'18\'>rama</textarea>';
+		document.getElementById('modalM').innerHTML  +=  
+		   '<span onclick=\'process_jh_freeForm_settings();\' +\
+			class=\'btn btn-primary m-0 p-0\'>Import</span>';
+	    }"
+			  class='m-0 p-0 btn btn-info float-right'>JH-Import-FreeFromText</span><br>
 	<span class='text-primary h5'>Lagna</span>
 	    <select onchange = "change_ascendant(document.getElementById('lagna').value);"
 		name="lagna" id="lagna">
@@ -574,9 +621,9 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	    </div>
 	    <div class="col-8">
 	<select onchange = "{ 
-		var ra_h = 'h' + document.getElementById('h_ra').value; 
+		var ra_h = document.getElementById('h_ra').value; 
 		place_graha_in_house('Ra',ra_h);
-		var ke_val = (parseInt(document.getElementById('h_ra').value)+6)%12
+		var ke_val = (parseInt(ra_h.substring(1))+6)%12
 		if (ke_val==0) { ke_val=12; }
 		var ke_h = 'h' + ke_val.toString(); 
 		place_graha_in_house('Ke',ke_h);
@@ -586,19 +633,19 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 		$('#Ke').removeClass('d-none');
 		}"
 	    name="h_ra" id="h_ra">
-	    <option value="0">XX</option>
-	    <option value="1">H1</option>
-	    <option value="2">H2</option>
-	    <option value="3">H3</option>
-	    <option value="4">H4</option>
-	    <option value="5">H5</option>
-	    <option value="6">H6</option>
-	    <option value="7">H7</option>
-	    <option value="8">H8</option>
-	    <option value="9">H9</option>
-	    <option value="10">H10</option>
-	    <option value="11">H11</option>
-	    <option value="12">H12</option>
+	    <option value="h0">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
 	</select>
 	    <input id='ra_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Ra');"
 	    class='py-0 my-0 text-primary font-weight-bold h6'/>
@@ -622,9 +669,11 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 
 
 	    <div id="notes_panel" class="col-4 m-0 p-0 text-primary">
-	  <img id='disp_settings2' src="images/settings_2.jpg"  
+	    <!-- 
+		<img id='disp_settings2' src="images/settings_2.jpg"   
 	      title="Display Settings" alt="dispSettings"   class='mr-1'
 	      onclick="disp_settings();" height='18'/>
+	    -->
 	    File: <input id='j_filename' type="text" class='w-30 text-warning bg-secondary font-weight-bold h6'/>
 	    <br><span class='border border-5 border-danger my-2 mx-1 py-1'> View: 
 	       <!-- <select id='j_view' onchange = "change_view(document.getElementById('j_view').value);" -->
@@ -650,10 +699,16 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	    <input id='j_title' type="text" class='w-100 text-primary font-weight-bold h6'/>
 	    <span id ='notes' class='m-0 p-0'>Basic-Notes:</span> 
 	    <textarea class='w-100 text-primary h6' rows='11' id='j_notes'></textarea>
+
+	    <!--  
 	    <span id ='comments' class='m-0 p-0'>Basic-Comments:</span> 
 	    <textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
-	    <span id ='drawings' class='m-0 p-0'>Basic-Drawings:</span> <br>
+	    -->
+	    <span id ='drawings' class='m-0 p-0'>Basic-Observations:</span> <br>
 	    <span id ='j_drawings' class='m-0 p-0 w-90 text-wrap'></span> 
+	    <br><span id ='comments' class='m-0 p-0'>Comments:</span> 
+	    <span id ='j_comm_title' class='text-success font-weight-bold m-0 p-0'></span> <br>
+	    <textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
 	    </div>
 	</div>
 	</div>
