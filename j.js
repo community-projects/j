@@ -1,14 +1,105 @@
 
+function update_settings(){
+    let grList = ["Lagna","Sun","Moon","Mercury","Mars",
+	"Saturn","Venus","Jupiter","Rahu"];
+    for (gr of grList) {
+	c_gr = gr.slice(0,2);
+	c_deg = divisional_data['d1']['degree_of_grahas'][c_gr][0];
+	c_min = divisional_data['d1']['degree_of_grahas'][c_gr][1];
+	c_sec = divisional_data['d1']['degree_of_grahas'][c_gr][2];
+	document.getElementById(c_gr.toLowerCase()+'_deg').value = c_deg;
+	document.getElementById(c_gr.toLowerCase()+'_min').value = c_min;
+	document.getElementById(c_gr.toLowerCase()+'_sec').value = c_sec;
+    }
+    //
+    for (gr of retro_planet_list) {
+	document.getElementById(gr+'_retrocbox').checked=true;
+    }
+    d1_rashiNum_asc = divisional_data['d1']['rashiNum_asc'];
+    // console.log(divisional_data);
+    for (let house=1; house<=12; house++) {
+	// get rashi in the house
+	var house_rashiNum = (parseInt(d1_rashiNum_asc)+house-1)%12;
+	if (house_rashiNum==0) {house_rashiNum=12};
+	if (house_rashiNum==d1_rashiNum_asc) 
+	    document.getElementById('lagna').value = house_rashiNum;
+	// console.log("house_rashiNum is now : " + house_rashiNum);
+	for (graha of divisional_data['d1']['grahas_in_rashi'][parseInt(house_rashiNum)])  {
+	    if (graha=='La' || graha=='Ke') continue;
+	    document.getElementById('h_'+ graha.toLowerCase()).value = "h" + house_rashiNum;
+	}
+    }
+}
+
+function disp_degree(action) {
+    if (typeof l_out['settings'] === 'undefined') { initialize_l_out(); }
+    if (action==='show') { 
+	$('#hide_degree').removeClass('d-none');
+	$('#show_degree').addClass('d-none');
+	l_out['settings']['disp_degree']=1;
+    } else {
+	$('#hide_degree').addClass('d-none');
+	$('#show_degree').removeClass('d-none');
+	l_out['settings']['disp_degree']=0;
+    }
+    var all_inputs = document.querySelectorAll('.deg');
+    for (x = 0 ; x < all_inputs.length ; x++){
+	myid = all_inputs[x].getAttribute("id");
+	if (action==='show') { $('#'+myid).removeClass('d-none');}
+	else { $('#'+myid).addClass('d-none');}
+    }
+    // console.log("disp_degree");
+    // console.log(l_out);
+}
+
+function disp_rotate_links(action) {
+    if (action==='show') { 
+	$('#hide_rotate_links').removeClass('d-none');
+	$('#show_rotate_links').addClass('d-none');
+    } else {
+	$('#hide_rotate_links').addClass('d-none');
+	$('#show_rotate_links').removeClass('d-none');
+    }
+    var all_inputs = document.querySelectorAll('.rot');
+    for (x = 0 ; x < all_inputs.length ; x++){
+	myid = all_inputs[x].getAttribute("id");
+	if (action==='show') { $('#'+myid).removeClass('d-none');}
+	else { $('#'+myid).addClass('d-none');}
+    }
+}
+
+function choose_view_generate_form(loc) {
+    if (loc.length==0) { loc='00';}
+    return '<span class=\'h5 text-danger font-weight-bold\'>'
+    + 'Choose View</span><br>'
+    + '<span onclick="clear_all_view_divs(\''+loc+'\');" class="m-1 btn btn-link border border-danger">Clear-test</span>'
+    + '<span onclick="view_d1(\''+loc+'\');" class="m-1 btn btn-link border border-danger">D1-View</span>'
+    + '<span onclick="view_d9(\''+loc+'\');" class="m-1 btn btn-link border border-danger">D9-View</span>';
+}
 
 function process_jh_freeForm_settings() {
+    document.getElementById('modalB').style.display = 'none';
     var tarea0 = document.getElementById('free_form_settings').value.split('\n');
     // let deg = document.getElementById(gr.toLowerCase()+'_deg').value; 
     let i = 0;
+    var x_loc='00';
     let grList = ["Lagna","Sun","Moon","Mercury","Mars",
 	"Saturn","Venus","Jupiter","Rahu"];
     const rasiNumByName = { "Mesh":"1", "Vrish":"2", "Mith":"3", "Kark":"4", "Simh":"5", "Kanya":"6", 
 	"Tula":"7", "Vrisch":"8", "Dhanu":"9", "Makar":"10", "Kumbh":"11", "Meen":"12"
     };
+    if (typeof divisional_data['d1'] === 'undefined') { initialize_div_d1(); }
+    if (typeof l_out[x_loc] === 'undefined') { initialize_l_out(x_loc); }
+    // if (typeof divisional_data['d1'] === 'undefined') { divisional_data['d1'] = {}; }
+    // if (typeof divisional_data['d1']['grahas_in_rashi'] === 'undefined') { 
+	// divisional_data['d1']['grahas_in_rashi']={};
+    // }
+    // if (typeof divisional_data['d1']['degree_of_grahas'] === 'undefined') { 
+	// divisional_data['d1']['degree_of_grahas']={};
+    // }
+    //
+    for (let raNum=1; raNum<=12; raNum++) { grahas_in_rashi[raNum.toString()]=[]; }
+    //
     while (i < tarea0.length) {
 	var lineArray = tarea0[i].split(/(\s+)/);
 	// console.log(tarea0[i]);
@@ -32,7 +123,9 @@ function process_jh_freeForm_settings() {
 		    c_sec = lineArray[k+4].replace(/["]+/g,''); // remove double quotes
 		    c_gr_x = c_gr.slice(0,2);
 		    if (c_gr_x == "La") {
-			ascendant_rashi_num = c_rashinum;
+			rashiNum_asc = c_rashinum.toString();
+			divisional_data['d1']['rashiNum_asc'] = c_rashinum;
+			l_out[x_loc]['rashiNum_asc'] = c_rashinum;
 		    }
 		    // console.log( "Gr:"+ c_gr_x + " - "+c_rashinum + "Rashi @ "+ c_deg + ":" + c_min + ":" + c_sec);
 		    document.getElementById(c_gr_x.toLowerCase()+'_deg').value = c_deg;
@@ -42,7 +135,13 @@ function process_jh_freeForm_settings() {
 		    degree_of_grahas[c_gr_x][0]=c_deg;
 		    degree_of_grahas[c_gr_x][1]=c_min;
 		    degree_of_grahas[c_gr_x][2]=c_sec;
-		    if (c_gr_x != "La") { grahas_in_rashi[c_rashinum].push(c_gr_x); }
+		    divisional_data['d1']['degree_of_grahas']=degree_of_grahas;
+		    l_out[x_loc]['degree_of_grahas']=degree_of_grahas;
+		    if (c_gr_x != "La") { 
+			grahas_in_rashi[c_rashinum].push(c_gr_x); 
+			divisional_data['d1']['grahas_in_rashi']=grahas_in_rashi;
+			l_out[x_loc]['grahas_in_rashi']=grahas_in_rashi;
+		    }
 		    // if Retro mark as required and update arrays as needed
 		    if (tarea0[i].includes("(R)")) {
 			retro_planet_list.push(c_gr_x);
@@ -54,10 +153,8 @@ function process_jh_freeForm_settings() {
 			var ke_rashinum = (parseInt(c_rashinum)+6)%12;
 			if (ke_rashinum==0) { ke_rashinum=12; }
 			grahas_in_rashi[ke_rashinum.toString()].push('Ke');
-			// degree_of_grahas['Ke'] = [];
-			// degree_of_grahas['Ke'][0]=c_deg;
-			// degree_of_grahas['Ke'][1]=c_min;
-			// degree_of_grahas['Ke'][2]=c_sec;
+			divisional_data['d1']['grahas_in_rashi']=grahas_in_rashi;
+			l_out[x_loc]['grahas_in_rashi']=grahas_in_rashi;
 		    }
 		    break;
 		}
@@ -69,22 +166,26 @@ function process_jh_freeForm_settings() {
 	} 
 	i++;
     }
-    // console.log(ascendant_rashi_num);
+    l_out[x_loc]['rashiNum_h1'] = rashiNum_asc
+    l_out[x_loc]['chart_title'] = 'D1';
+    // console.log(rashiNum_asc);
     // console.log(grahas_in_rashi);
     // console.log(degree_of_grahas);
-    display_saved_degree();
-    place_rashi_num_in_houses(ascendant_rashi_num);
-    populate_graha_in_rashi();
+    // display_saved_degree();
+    // place_rashi_num_in_houses(rashiNum_asc);
+    // populate_graha_in_rashi();
+    // chart_d1();
+    view_1x1(x_loc);
     // change settings of Gr drop down menu values
-    var arn = ascendant_rashi_num;
+    var arn = rashiNum_asc;
     var gir = grahas_in_rashi;
     var dog = degree_of_grahas;
     //
     for (let house=1; house<=12; house++) {
 	// get rashi in the house
-	house_rashinum = document.getElementById('rashi_in_h'+ house.toString()).innerHTML;
+	house_rashinum = document.getElementById('rashi_in_h'+ house.toString()+'_'+x_loc).innerHTML;
 	// console.log(house_rashinum + " is now house_rashinum");
-	if (house_rashinum==ascendant_rashi_num) 
+	if (house_rashinum==rashiNum_asc) 
 	    document.getElementById('lagna').value = house_rashinum;
 	for ( graha of gir[house_rashinum])  {
 	    if (graha=='La' || graha=='Ke') continue;
@@ -94,6 +195,10 @@ function process_jh_freeForm_settings() {
 	}
     }
     calc_d9();
+    // console.log("l_out here");
+    // console.log(l_out);
+    // console.log("divisional here");
+    // console.log(divisional_data);
 }
 
 
@@ -134,7 +239,25 @@ function incr_font_size(c,f){
 	// inputs[x].style.fontSize = fontSize + "4px";
 	// inputs[x].style.fontSize = fontSize + "10%";
     }
+    l_out_save_fontSize();
     // console.log(font_size);
+}
+
+function l_out_save_fontSize() {
+    var s_loc="";
+    if (curr_layout_name==='1x1') s_loc='00';
+    if (curr_layout_name==='1x2') s_loc='11';
+    if (curr_layout_name==='2x2') s_loc='211';
+    // save rashinum fontsize
+    // <div class="rb3 h5 rashinum font-weight-bold text-black" 
+    // style="z-index:2;font-size: 120%; " id="rashi_in_h3_00">1</div>
+    if (typeof l_out['fontSize'] === 'undefined') { l_out['fontSize']={}; }
+    if (typeof l_out['fontSize'][curr_layout_name] === 'undefined') { l_out['fontSize'][curr_layout_name]=[]; }
+    l_out['fontSize'][curr_layout_name][0] = document.getElementById("rashi_in_h1_"+s_loc).style.fontSize;
+    // save graha fontsize
+    // <span class="lh-sm my-0 py-0 h3 graha font-weight-bold text-success" 
+    // style="line-height:90%;font-size: 180%;" id="Ve"><br class="p-0 m-0">Ve</span>
+    l_out['fontSize'][curr_layout_name][1] = document.getElementById("h1_"+s_loc).style.fontSize;
 }
 
 function change_view(viewObj) {
@@ -229,7 +352,7 @@ function return_drawing_btnStr(d_id) {
 //     // btn_str += + (currentdate.getMonth()+1)  + "/" + currentdate.getFullYear() + " @ "
 //     //       + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
 //     btn_str += '</btn>';
-//     // document.getElementById('j_screenshots').innerHTML += btn_str;
+//     // document.getElementById('j_view_formats').innerHTML += btn_str;
 //     document.getElementById('j_drawings').innerHTML += btn_str;
 //     save_view();
 //     //empty all fields
@@ -294,7 +417,52 @@ function del_drawing(d_id) {
     // console.log(drawings);
 }
 
+
 function save_drawing() {
+    if (typeof drawings_arr == 'undefined') { drawings_arr=['printme']; }
+    var currentdate = new Date();
+    var drawing_id = 'd'+currentdate.getHours()+currentdate.getMinutes()+currentdate.getSeconds();
+    // console.log(drawing_id); // For debugging. 
+    drawings_arr.push(drawing_id);
+    var btn_str = '';
+    // console.log("length of drawings is " + Object.keys(drawings).length);
+    if (Object.keys(drawings).length>0 && Object.keys(drawings).length % 5 === 0) {
+ 	btn_str += '<br>';
+ 	// console.log(btn_str);
+    }
+    curr_drawing_idList.push(drawing_id);
+    document.getElementById('j_drawings').innerHTML += return_drawing_btnStr(drawing_id);
+    // save lines from current drawing
+    drawings[drawing_id] = {};
+    // drawings[drawing_id]['lines'] = lines;
+    drawings[drawing_id]['curr_layout_name'] = curr_layout_name;
+    drawings[drawing_id]['title'] = drawing_id;
+    drawings[drawing_id]['lines'] = structuredClone(lines);
+    drawings[drawing_id]['lines_by_color'] = structuredClone(lines_by_color);
+    //
+    drawings[drawing_id]["degree_of_grahas"] = degree_of_grahas;
+    // drawings[drawing_id]["rashiNum_asc"] = rashiNum_asc;
+    drawings[drawing_id]["comments"] = document.getElementById('j_comments').value;
+    drawings[drawing_id]["rashiNum_h1"] = {};
+    drawings[drawing_id]["rashiNum_asc"] = {};
+    drawings[drawing_id]["grahas_in_rashi"] = {};
+    drawings[drawing_id]["degree_of_grahas"] = {};
+    drawings[drawing_id]['chart_title'] = {};
+    // console.log(l_out);
+    for (xloc of l_out['locList'][curr_layout_name]) {
+	drawings[drawing_id]["rashiNum_h1"][xloc] = 
+	    document.getElementById('rashi_in_h1_'+xloc).innerHTML;
+	drawings[drawing_id]["rashiNum_asc"][xloc] = l_out[xloc]['rashiNum_asc'];
+	drawings[drawing_id]["grahas_in_rashi"][xloc] = l_out[xloc]["grahas_in_rashi"];
+	drawings[drawing_id]["degree_of_grahas"][xloc] = l_out[xloc]["degree_of_grahas"];
+	drawings[drawing_id]["chart_title"][xloc] = l_out[xloc]["chart_title"];
+    }
+    // console.log(curr_drawing_idList);
+    // console.log(drawings);
+}
+
+
+function save_drawing0() {
     if (typeof drawings_arr == 'undefined') { drawings_arr=['printme']; }
     var currentdate = new Date();
     var drawing_id = 'd'+currentdate.getHours()+currentdate.getMinutes()+currentdate.getSeconds();
@@ -321,23 +489,29 @@ function save_drawing() {
     // btn_str += ' onclick="del_drawing(\''+drawing_id+'\');"'; 
     // btn_str += ' class="ml-0 mr-1" src="images/clear.png" height="11"/></span>';
     curr_drawing_idList.push(drawing_id);
-    // document.getElementById('j_screenshots').innerHTML += btn_str;
+    // document.getElementById('j_view_formats').innerHTML += btn_str;
     // document.getElementById('j_drawings').innerHTML += btn_str;
     document.getElementById('j_drawings').innerHTML += return_drawing_btnStr(drawing_id);
-    // if (drawings_arr.length==2) { $('#j_screenshots').removeClass('d-none');}
+    // if (drawings_arr.length==2) { $('#j_view_formats').removeClass('d-none');}
     // save lines from current drawing
     drawings[drawing_id] = {};
     // drawings[drawing_id]['lines'] = lines;
+    drawings[drawing_id]['curr_layout_name'] = curr_layout_name;
     drawings[drawing_id]['title'] = drawing_id;
     drawings[drawing_id]['lines'] = structuredClone(lines);
     drawings[drawing_id]['lines_by_color'] = structuredClone(lines_by_color);
     //
     drawings[drawing_id]["grahas_in_rashi"] = grahas_in_rashi;
     drawings[drawing_id]["degree_of_grahas"] = degree_of_grahas;
-    drawings[drawing_id]["ascendant_rashi_num"] = ascendant_rashi_num;
+    // drawings[drawing_id]["rashiNum_asc"] = rashiNum_asc;
     drawings[drawing_id]["comments"] = document.getElementById('j_comments').value;
-    drawings[drawing_id]["curr_h1_rashi_num"] = 
-	document.getElementById('rashi_in_h1').innerHTML;
+    drawings[drawing_id]["rashiNum_h1"] = {};
+    drawings[drawing_id]["rashiNum_asc"] = {};
+    for (xloc of l_out['locList'][curr_layout_name]) {
+	drawings[drawing_id]["rashiNum_h1"][xloc] = 
+	    document.getElementById('rashi_in_h1_'+xloc).innerHTML;
+	drawings[drawing_id]["rashiNum_asc"][xloc] = l_out[xloc]['rashiNum_asc'];
+    }
     // console.log(drawings);
     // console.log(curr_drawing_idList);
 }
@@ -463,18 +637,21 @@ function obs_update_title_form(d_id) {
     document.getElementById('modal2M').innerHTML  += '<span class="btn btn-primary" onclick="update_obs_title(\''+d_id +'\');">Update</span>';
 }
 
+function disp_layout(l_view) {
+    if (l_view==='1x1') { view_1x1(); }
+    if (l_view==='1x2') { view_1x2(); }
+    if (l_view==='2x2') { view_2x2(); }
+}
 
 function disp_drawing(c_drawing_id){
     let l_data = drawings[c_drawing_id];
-    if ("ascendant_rashi_num" in l_data) {
-	ascendant_rashi_num = parseInt(l_data["ascendant_rashi_num"]);
-	place_rashi_num_in_houses(ascendant_rashi_num);
-	// for (let i=1; i<=12; i++) {
-	//     house_rashi_num = ((parseInt(ascendant_rashi_num)+i-1)%12); 
-	//     if (house_rashi_num==0) { house_rashi_num=12;}
-	//     document.getElementById('rashi_in_h'+ i.toString()).innerHTML = 
-	// 	house_rashi_num.toString();
-	// }
+    if ("curr_layout_name" in l_data) {
+	curr_layout_name = l_data["curr_layout_name"];
+    }
+    if ("rashiNum_asc" in l_data) {
+	for (xloc of l_out['locList'][curr_layout_name]) {
+	    l_out[xloc]['rashiNum_asc'] = drawings[c_drawing_id]["rashiNum_asc"][xloc];
+	}
     }
     if ("title" in l_data) {
 	document.getElementById('j_comm_title').innerHTML =  l_data["title"];
@@ -492,21 +669,32 @@ function disp_drawing(c_drawing_id){
     if ("comments" in l_data) {
 	document.getElementById('j_comments').value =  l_data["comments"];
     }
-    if ("curr_h1_rashi_num" in l_data) {
-	curr_h1_rashi_num = parseInt(l_data["curr_h1_rashi_num"]);
-	rotate_by_rashi(curr_h1_rashi_num);
+    if ("rashiNum_h1" in l_data) {
+	for (xloc of l_out['locList'][curr_layout_name]) {
+	    l_out[xloc]['rashiNum_h1'] = drawings[c_drawing_id]["rashiNum_h1"][xloc];
+	}
     }
     if ("retro_planet_list" in l_data) {
 	retro_planet_list = l_data["retro_planet_list"];
     }
     // let grahas_in_rashi = {}
     if ("degree_of_grahas" in l_data) {
-	degree_of_grahas = l_data["degree_of_grahas"];
+	// degree_of_grahas = l_data["degree_of_grahas"];
+	for (xloc of l_out['locList'][curr_layout_name]) {
+	    l_out[xloc]['degree_of_grahas'] = drawings[c_drawing_id]["degree_of_grahas"][xloc];
+	}
+    }
+    if ("chart_title" in l_data) {
+	// console.log("chart_title is " + chart_title);
+	for (xloc of l_out['locList'][curr_layout_name]) {
+	    l_out[xloc]['chart_title'] = drawings[c_drawing_id]["chart_title"][xloc];
+	    create_chart_title_div(xloc);
+	}
     }
     if ("grahas_in_rashi" in l_data) {
-	grahas_in_rashi = l_data["grahas_in_rashi"];
-	// now populate grahas wher they belong
-	populate_graha_in_rashi();
+	for (xloc of l_out['locList'][curr_layout_name]) {
+	    l_out[xloc]['grahas_in_rashi'] = drawings[c_drawing_id]["grahas_in_rashi"][xloc];
+	}
     }
     if ("lines_by_color" in l_data) {
 	// lines_by_color = l_data['lines_by_color'];
@@ -523,15 +711,16 @@ function disp_drawing(c_drawing_id){
     } 
     // $('#'+c_drawing_id).removeClass('d-none');
     $('#b'+c_drawing_id).addClass('bg-warning');
+    disp_layout(curr_layout_name);
 }
 
 function change_ascendant(new_asc) {
     // console.log(new_asc);
-    ascendant_rashi_num = new_asc;
-    curr_h1_rashi_num = new_asc;
-    place_rashi_num_in_houses(ascendant_rashi_num);
+    rashiNum_asc = new_asc.toString();
+    rashiNum_h1 = new_asc.toString();
+    place_rashi_num_in_houses(rashiNum_asc);
     // for(let i=1; i<=12; i++) { 
-    //     var rnum = (parseInt(ascendant_rashi_num)+i-1)%12;
+    //     var rnum = (parseInt(rashiNum_asc)+i-1)%12;
     //     if (rnum==0) {rnum=12};
     //     // change rashinum in this house
     //     document.getElementById('rashi_in_h'+i.toString()).innerHTML = rnum.toString(); 
@@ -540,6 +729,26 @@ function change_ascendant(new_asc) {
     // now populate grahas wher they belong
     populate_graha_in_rashi();
 }
+
+
+
+function display_all_graha_degree(loc) {
+    if (loc.length==0) { loc='00';}
+    var c_dog = l_out[loc]['degree_of_grahas'];
+    // "degree_of_grahas": { "La": [ "15", "58", "37.09" ]} deg,min,sec 
+    // 
+    for (const c_gr in c_dog) { 
+	document.getElementById(c_gr.toLowerCase()+'_deg_'+loc).value = 
+	    c_dog[c_gr][0]; 
+	document.getElementById(c_gr.toLowerCase()+'_min_'+loc).value = 
+	    c_dog[c_gr][1]; 
+	document.getElementById(c_gr.toLowerCase()+'_sec_'+loc).value = 
+	    c_dog[c_gr][2]; 
+    }
+}
+
+
+
 
 function display_saved_degree(c_dog={}) {
     // console.log(c_dog);
@@ -561,11 +770,15 @@ function display_saved_degree(c_dog={}) {
     if (d1_data==1) populate_graha_in_rashi();
 }
 
-function populate_graha_in_rashi(c_arn="",c_gir={},c_dog={},loc="") {
+function populate_all_graha_in_rashi(loc="") {
     //
-    if (c_arn.length==0) c_arn = ascendant_rashi_num;
-    if (Object.keys(c_gir).length==0) c_gir = grahas_in_rashi;
-    if (Object.keys(c_dog).length==0)  c_dog=degree_of_grahas;
+    // console.log("populate_all_graha_in_rashi - l_out");
+    // console.log(l_out);
+    if (loc.length==0) { loc='00';}
+    var c_arn = l_out[loc]['rashiNum_asc'];
+    var c_gir = l_out[loc]['grahas_in_rashi'];
+    var c_dog = l_out[loc]['degree_of_grahas'];
+    // console.log(c_gir);
     //
     var rashiIdSuffix = "";
     for (let house=1; house<=12; house++) {
@@ -580,15 +793,66 @@ function populate_graha_in_rashi(c_arn="",c_gir={},c_dog={},loc="") {
 	// empty graha from house innerHTML
 	document.getElementById('h'+ rashiIdSuffix).innerHTML = '';
 	// if ASC mark it so
-	// if (house_rashi==ascendant_rashi_num.toString()) 
+	// if (house_rashi==rashiNum_asc.toString()) 
+	//     document.getElementById('h'+ rashiIdSuffix).innerHTML += '<br><b>ASC</b>';
+	if (house_rashi==c_arn.toString()) 
+	    document.getElementById('h'+ rashiIdSuffix).innerHTML += generate_string_gr_deg('La',loc);
+	if (typeof c_gir[house_rashi.toString()]!== 'undefined') {
+	    for ( graha of c_gir[house_rashi.toString()])  {
+		if (graha=='La') { continue; }
+		document.getElementById('h'+ rashiIdSuffix).innerHTML += generate_string_gr_deg(graha,loc);
+		if (retro_planet_list.includes(graha)) 
+		    document.getElementById('h'+ rashiIdSuffix).innerHTML +=
+			"<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
+	    }
+	}
+	// // restore the graha font size if it was changed
+	// var inputs = document.getElementsByClassName('graha');
+	// for (x = 0 ; x < inputs.length ; x++){
+	    // if (inputs[x].id in font_size) 
+	    // if (loc.length>0) {
+		// inputs[x].style.fontSize =  (parseFloat(inputs[x].style.fontSize)- 10) + '%'; 
+	    // } else {
+		// inputs[x].style.fontSize = font_size[inputs[x].id];
+	    // }
+	// }
+    }
+}
+
+
+
+function populate_graha_in_rashi(c_arn="",c_gir={},c_dog={},loc="") {
+    //
+    if (c_arn.length==0) c_arn = rashiNum_asc.toString();
+    if (Object.keys(c_gir).length==0) c_gir = grahas_in_rashi;
+    if (Object.keys(c_dog).length==0)  c_dog=degree_of_grahas;
+    // console.log(c_gir);
+    //
+    var rashiIdSuffix = "";
+    for (let house=1; house<=12; house++) {
+	// get rashi in the house
+	if (loc.length==0) {
+	    rashiIdSuffix = house.toString();
+	} else {
+	    rashiIdSuffix = house.toString() + "_" + loc;
+	    c_dog = {};
+	}
+	house_rashi = document.getElementById('rashi_in_h'+ rashiIdSuffix).innerHTML;
+	// empty graha from house innerHTML
+	document.getElementById('h'+ rashiIdSuffix).innerHTML = '';
+	// if ASC mark it so
+	// if (house_rashi==rashiNum_asc.toString()) 
 	//     document.getElementById('h'+ rashiIdSuffix).innerHTML += '<br><b>ASC</b>';
 	if (house_rashi==c_arn.toString()) 
 	    document.getElementById('h'+ rashiIdSuffix).innerHTML += format_graha('La',c_dog);
-	for ( graha of c_gir[house_rashi.toString()])  {
-	    document.getElementById('h'+ rashiIdSuffix).innerHTML += format_graha(graha,c_dog);
-	    if (retro_planet_list.includes(graha)) 
-		document.getElementById('h'+ rashiIdSuffix).innerHTML +=
-		    "<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
+	if (typeof c_gir[house_rashi.toString()]!== 'undefined') {
+	    for ( graha of c_gir[house_rashi.toString()])  {
+		if (graha=='La') { continue; }
+		document.getElementById('h'+ rashiIdSuffix).innerHTML += format_graha(graha,c_dog);
+		if (retro_planet_list.includes(graha)) 
+		    document.getElementById('h'+ rashiIdSuffix).innerHTML +=
+			"<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
+	    }
 	}
 	// restore the graha font size if it was changed
 	var inputs = document.getElementsByClassName('graha');
@@ -604,40 +868,16 @@ function populate_graha_in_rashi(c_arn="",c_gir={},c_dog={},loc="") {
 }
 
 
-
-function populate_graha_in_rashi0() {
-    for (let house=1; house<=12; house++) {
-	// get rashi in the house
-	house_rashi = document.getElementById('rashi_in_h'+ house.toString()).innerHTML;
-	// empty graha from house innerHTML
-	document.getElementById('h'+ house.toString()).innerHTML = '';
-	// if ASC mark it so
-	// if (house_rashi==ascendant_rashi_num.toString()) 
-	//     document.getElementById('h'+ house.toString()).innerHTML += '<br><b>ASC</b>';
-	if (house_rashi==ascendant_rashi_num.toString()) 
-	    document.getElementById('h'+ house.toString()).innerHTML += format_graha('La');
-	for ( graha of grahas_in_rashi[house_rashi.toString()])  {
-	    document.getElementById('h'+ house.toString()).innerHTML += format_graha(graha);
-	    if (retro_planet_list.includes(graha)) 
-		document.getElementById('h'+ house.toString()).innerHTML +=
-		    "<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
-	}
-	// restore the graha font size if it was changed
-	var inputs = document.getElementsByClassName('graha');
-	for (x = 0 ; x < inputs.length ; x++){
-	    if (inputs[x].id in font_size) 
-		inputs[x].style.fontSize = font_size[inputs[x].id];
-	}
-    }
-}
-
-
 function place_graha_in_house(graha,house) {
     // graha:Su house;h3 <-- need to strip the "h" from the house
     // console.log("graha: " + graha + " House: " + house.substring(1));
     if (typeof grahas_in_rashi == 'undefined') { 
 	grahas_in_rashi={}; 
 	for (let i=1; i<=12; i++) { grahas_in_rashi[i.toString()] = []; }
+    }
+    if (typeof divisional_data['d1'] === 'undefined') { divisional_data['d1'] = {}; }
+    if (typeof divisional_data['d1']['grahas_in_rashi'] === 'undefined') { 
+	divisional_data['d1']['grahas_in_rashi']={};
     }
     // console.log(grahas_in_rashi);
     // find rashi of the house
@@ -655,14 +895,17 @@ function place_graha_in_house(graha,house) {
     }
     // console.log(c_rashi.toString());
     grahas_in_rashi[c_rashi.toString()].push(graha);
+    divisional_data['d1']['grahas_in_rashi'][c_rashi.toString()].push(graha);
     // console.log(grahas_in_rashi);
 }
 
 function save_details() {
     save_view();
     const saveMe = {};
-    saveMe["ascendant_rashi_num"] = ascendant_rashi_num;
-    saveMe["curr_h1_rashi_num"] = document.getElementById('rashi_in_h1').innerHTML;
+    saveMe["rashiNum_asc"] = rashiNum_asc.toString();
+    saveMe["divisional_data"] = divisional_data;
+    saveMe["l_out"] = l_out;
+    // saveMe["rashiNum_h1"] = document.getElementById('rashi_in_h1').innerHTML;
     // 
     saveMe["grahas_in_rashi"] = grahas_in_rashi;
     saveMe["degree_of_grahas"] = degree_of_grahas;
@@ -693,166 +936,18 @@ function saveData() {
     download(saveMeStr, j_filename + '.jgd', 'text/plain');
 }
 
-
-function saveData0() {
-    save_view();
-    const saveMe = {};
-    saveMe["ascendant_rashi_num"] = ascendant_rashi_num;
-    saveMe["curr_h1_rashi_num"] = document.getElementById('rashi_in_h1').innerHTML;
-    // 
-    saveMe["grahas_in_rashi"] = grahas_in_rashi;
-    saveMe["views"] = views;
-    saveMe["retro_planet_list"] = retro_planet_list;
-    // get fileName, title and Notes
-    if (document.getElementById('j_filename').value) {
-	var j_filename = document.getElementById('j_filename').value;
-    } else { j_filename = "UnKnown"; }
-    saveMe["j_filename"] = j_filename;
-    //
-    saveMe["j_title"] = views['Basic']['j_title'];
-    saveMe["j_comments"] = views['Basic']['j_comments'];
-    saveMe["j_notes"] = views['Basic']['j_notes'];
-    saveMe["j_drawings"] = views['Basic']['j_drawings'];
-    //
-    if (typeof drawings == 'undefined') { drawings={}; }
-    if (Object.keys(drawings).length>0) saveMe["drawings"] = drawings;
-    //
-    saveMeStr = JSON.stringify(saveMe);
-    // var fs = require('fs');
-    // var dir = './raju_1';
-    // if (!fs.exists(dir)){ fs.mkdir(dir); }
-    // alert("rama");
-    download(saveMeStr, j_filename + '.jgd', 'text/plain');
-}
-
-// function saveData_works() {
-//     const saveMe = {};
-//     // get rashi in first house
-//     saveMe["ascendant_rashi_num"] = 
-// 	document.getElementById('rashi_in_h1').innerHTML;
-//     // gets the rashi_in_house data first
-//     saveMe["rashi_in_house"] = {};
-//     for (let i=1; i<=12; i++) {
-// 	c_val = document.getElementById('rashi_in_h'+ i.toString()).innerHTML;
-// 	saveMe["rashi_in_house"][i] = c_val;
-//     }
-//     // gets the planets in house now
-//     saveMe["planets_in_house"] = {};
-//     for (let i=1; i<=12; i++) {
-// 	c_val = document.getElementById('h'+ i.toString()).innerHTML;
-// 	saveMe["planets_in_house"][i] = c_val;
-//     }
-//     // get fileName, title and Notes
-//     if (document.getElementById('j_filename').value) {
-// 	var j_filename = document.getElementById('j_filename').value;
-//     } else { j_filename = "UnKnown"; }
-//     saveMe["j_filename"] = j_filename;
-//     if (document.getElementById('j_title').value) {
-// 	saveMe["j_title"] = document.getElementById('j_title').value;
-//     } else { saveMe["j_title"] = "NONE"; }
-//     if (document.getElementById('j_notes').value) {
-// 	saveMe["j_notes"] = document.getElementById('j_notes').value;
-//     } else { saveMe["j_notes"] = "NONE"; }
-//     saveMeStr = JSON.stringify(saveMe);
-//     // var fs = require('fs');
-//     // var dir = './raju_1';
-//     // if (!fs.exists(dir)){ fs.mkdir(dir); }
-//     // alert("rama");
-//     download(saveMeStr, j_filename + '.jgd', 'text/plain');
-// }
-
-
-// async function saveData_exp() {
-//     const saveMe = {};
-//     // get rashi in first house
-//     saveMe["ascendant_rashi_num"] = 
-// 	document.getElementById('rashi_in_h1').innerHTML;
-//     // gets the rashi_in_house data first
-//     saveMe["rashi_in_house"] = {};
-//     for (let i=1; i<=12; i++) {
-// 	c_val = document.getElementById('rashi_in_h'+ i.toString()).innerHTML;
-// 	saveMe["rashi_in_house"][i] = c_val;
-//     }
-//     // gets the planets in house now
-//     saveMe["planets_in_house"] = {};
-//     for (let i=1; i<=12; i++) {
-// 	c_val = document.getElementById('h'+ i.toString()).innerHTML;
-// 	saveMe["planets_in_house"][i] = c_val;
-//     }
-//     // get fileName, title and Notes
-//     if (document.getElementById('j_filename').value) {
-// 	var j_filename = document.getElementById('j_filename').value;
-//     } else { j_filename = "UnKnown"; }
-//     saveMe["j_filename"] = j_filename;
-//     if (document.getElementById('j_title').value) {
-// 	saveMe["j_title"] = document.getElementById('j_title').value;
-//     } else { saveMe["j_title"] = "NONE"; }
-//     if (document.getElementById('j_notes').value) {
-// 	saveMe["j_notes"] = document.getElementById('j_notes').value;
-//     } else { saveMe["j_notes"] = "NONE"; }
-//     saveMeStr = JSON.stringify(saveMe);
-//     // var fs = require('fs');
-//     // var dir = './raju_1';
-//     // if (!fs.exists(dir)){ fs.mkdir(dir); }
-//     // alert("rama");
-//     // download(saveMeStr, j_filename + '.jgd', 'text/plain');
-//     // alert("rama");
-// 
-//     // await createZip().then( async (res) => { await res.generateAsync({ type: "blob" }).then(function(content) { 
-// // 	    download(content, 'test2.zip', 'application/zip'); });
-//   //   })
-// 
-//     // // zip0 = createZip();
-//     // const zip = new JSZip(); 
-//     // var savable = new Image();
-//     for (ss of screenshots_arr) { 
-// 	if (ss=="printme") {continue;}
-// 	var canvas = document.getElementById(ss);
-// 	// savable.src = canvas.toDataURL("image/png");
-// 	var c_image  = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-// 	// var c_image  = canvas.toDataURL("image/png");
-// 	// zip.file("rama.png", savable.src.substr(savable.src.indexOf(',')+1), {base64: true});
-// 	// download(savable.src.substr(savable.src.indexOf(',')+1), 'image.png', 'image/png');
-// 	download(c_image, 'image.png', 'image/png');
-//     }
-//     // content = zip.generate();
-//     // download(content, 'test2.zip', 'application/zip');
-// 
-// 
-// }
-
-// async function createZip() {
-//     if (typeof screenshots_arr == 'undefined') { screenshots_arr=[]; }
-//     const zip = new JSZip(); 
-//     var savable = new Image();
-//     if (screenshots_arr.length>0) { 
-// 	for (ss of screenshots_arr) { 
-// 	    if (ss=="printme") {continue;} 
-// 	    // alert(ss);
-// 	    var canvas = document.getElementById(ss); 
-// 	    // var image = new Image();
-// 	    // image.id = "p"+ss;
-// 	    // image.crossOrigin = 'anonymous';
-// 	    // image.src = canvas.toDataURL();
-// 	    // zip.file(ss,image);
-// 
-// 	    // canvas.toBlob(function(data) { zip.file(ss,data); }); 
-// 
-// 	    savable.src = canvas.toDataURL();
-// 	    zip.file("rama.png", savable.src.substr(savable.src.indexOf(',')+1), {base64: true});
-// 
-// 	} 
-//     }
-//     return zip;
-// }
-
 function readMultipleFiles(e) {
   if (e.length==0) { return;};
+  // console.log(e);
   for (i in e.target.files) {
+      // console.log(e.target.files);
+      // console.log("i is now " + i);
+      if (isNaN(i)) continue;
       var file = e.target.files[i];
       var reader = new FileReader();
       reader.onload = function(e) {
 	var contents = e.target.result;
+	// console.log("contents:" + contents);
 	//displayContents(contents);
 	// loadData(contents);
 	// removeAllGr();
@@ -965,6 +1060,36 @@ function loadGocharData(g_data) {
 
 
 
+function generate_string_gr_deg(gr,loc) {
+    var red_gr_list = ['Su', 'Ma', 'Ra', 'Ke', 'Sa'];
+    var green_gr_list = ['Ju', 'Mo', 'Ve','Me'];
+    //
+    if (loc.length==0) { loc='00';}
+    var c_dog = l_out[loc]['degree_of_grahas'];
+    // display Degrees
+    let degStr="";
+    if (gr  in c_dog) {
+	degStr += "<span id='deg_"+gr+"_"+loc+"' class='deg my-0 py-0 small font-weight-bold'>"+c_dog[gr][0]+"D</span>";
+    }
+    //
+    if (red_gr_list.includes(gr)) 
+	var returnStr = "<span class='lh-sm my-0 py-0 h3 graha font-weight-bold text-danger' "
+	+ "style='line-height:90%;font-size: 180%;'";
+    if (green_gr_list.includes(gr)) 
+	var returnStr = "<span class='lh-sm my-0 py-0 h3 graha font-weight-bold text-success' "
+	+ "style='line-height:90%;font-size: 180%;'";
+    if (gr==='La') {
+	var returnStr = "<span class='lh-sm my-0 py-0 h3 graha font-weight-bold' " 
+	+ "style='line-height:90%;font-size: 150%;'";
+	gr='ASC';
+    }
+    //
+    returnStr += " id='"+gr+"_"+loc+"'><br class='p-0 m-0'>"+gr+"</span>";
+    returnStr += degStr;
+    return returnStr;
+}
+
+
 function format_graha(gr,c_dog={}) {
     var red_gr_list = ['Su', 'Ma', 'Ra', 'Ke', 'Sa'];
     var green_gr_list = ['Ju', 'Mo', 'Ve','Me'];
@@ -990,20 +1115,14 @@ function format_graha(gr,c_dog={}) {
 }
 
 function loadData(l_data,make_tab=1) {
+    initialize_l_out();
     // const l_data = JSON.parse(contents);
-    if ("ascendant_rashi_num" in l_data) {
-	ascendant_rashi_num = parseInt(l_data["ascendant_rashi_num"]);
-	place_rashi_num_in_houses(ascendant_rashi_num);
-	// for (let i=1; i<=12; i++) {
-	//     house_rashi_num = ((parseInt(ascendant_rashi_num)+i-1)%12); 
-	//     if (house_rashi_num==0) { house_rashi_num=12;}
-	//     document.getElementById('rashi_in_h'+ i.toString()).innerHTML = 
-	// 	house_rashi_num.toString();
-	// }
+    if ("rashiNum_asc" in l_data) {
+	rashiNum_asc = parseInt(l_data["rashiNum_asc"]);
     }
     if ("degree_of_grahas" in l_data) {
 	degree_of_grahas= l_data["degree_of_grahas"];
-	display_saved_degree();
+	// display_saved_degree();
     }
     if ("views" in l_data) {
 	views = l_data["views"];
@@ -1018,17 +1137,23 @@ function loadData(l_data,make_tab=1) {
 	retro_planet_list = l_data["retro_planet_list"];
     }
     if ("drawings" in l_data) { drawings = l_data["drawings"]; }
-    // let grahas_in_rashi = {}
+    if ("divisional_data" in l_data) { divisional_data = l_data["divisional_data"];}
+    if ("l_out" in l_data) { 
+	l_out = l_data["l_out"];
+	initialize_l_out();
+	update_settings();
+    }
+    // 
     if ("grahas_in_rashi" in l_data) {
 	grahas_in_rashi = l_data["grahas_in_rashi"];
 	// now populate grahas wher they belong
-	populate_graha_in_rashi();
-	calc_d9();
+	// populate_graha_in_rashi();
+	// calc_d9();
     }
-    if ("curr_h1_rashi_num" in l_data) {
-        curr_h1_rashi_num = l_data["curr_h1_rashi_num"];
-        // console.log(curr_h1_rashi_num);
-        rotate_by_rashi(parseInt(curr_h1_rashi_num));
+    if ("rashiNum_h1" in l_data) {
+        rashiNum_h1 = l_data["rashiNum_h1"];
+        // console.log(rashiNum_h1);
+        // rotate_by_rashi(parseInt(rashiNum_h1));
     }
     // console.log(grahas_in_rashi);
     if ("j_filename" in l_data) {
@@ -1064,6 +1189,28 @@ function loadData(l_data,make_tab=1) {
 	for (d_id of views['Basic']['drawing_idList']) 
 	    document.getElementById('j_drawings').innerHTML += return_drawing_btnStr(d_id);
     }
+    view_1x1('00');
+    l_out_restore_fontSize();
+    l_out['locList'] = {};
+    l_out['locList']['1x1']=['00'];
+    l_out['locList']['1x2']=['11','12'];
+    l_out['locList']['2x2']=['211','212','221','222'];
+    // console.log(l_out);
+    set_layout_chart_positions();
+}
+
+function set_layout_chart_positions() {
+    l_out['locPos'] = {};
+    var width = ctx.canvas.width;
+    var height = ctx.canvas.height;
+    // l_out['locPos'][loc] = [topPos,leftPos,width,height]
+    l_out['locPos']['00'] = [0,0,width,height];
+    l_out['locPos']['11'] = [0,0,width/2,height];
+    l_out['locPos']['12'] = [0,width/2,width/2,height];
+    l_out['locPos']['211'] = [10,0,width/2,height/2];
+    l_out['locPos']['212'] = [10,width/2,width/2,height/2];
+    l_out['locPos']['221'] = [height/2+10,0,width/2,height/2];
+    l_out['locPos']['222'] = [height/2+10,width/2,width/2,height/2];
 }
 
 function displayContents(contents) {
@@ -1148,12 +1295,12 @@ function clearShot() {
 // 	         document.getElementById('first_col').offsetWidth, 
 // 		 document.getElementById('header').offsetHeight+
 // 		     document.getElementById('j_opened').offsetHeight+
-// 		     document.getElementById('j_screenshots').offsetHeight
+// 		     document.getElementById('j_view_formats').offsetHeight
 // 	     );
 // 	    canvas.id=canvas_id; 
 // 	    canvas.crossOrigin = 'anonymous';
 // 	    // document.getElementById('output').appendChild(canvas);
-// 	    if (screenshots_arr.length==2) { $('#j_screenshots').removeClass('d-none');}
+// 	    if (screenshots_arr.length==2) { $('#j_view_formats').removeClass('d-none');}
 // 	    document.getElementById('main_disp').appendChild(canvas);
 // 	    $('#'+canvas_id).addClass('d-none');  
 // 	})
@@ -1168,7 +1315,7 @@ function clearShot() {
 // 	// btn_str += + (currentdate.getMonth()+1)  + "/" + currentdate.getFullYear() + " @ "
 //         //       + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
 // 	btn_str += '</btn>';
-// 	document.getElementById('j_screenshots').innerHTML += btn_str;
+// 	document.getElementById('j_view_formats').innerHTML += btn_str;
 // }
 
 function clear_canvas() {
@@ -1209,45 +1356,56 @@ function addRetro(gr) {
     }
 }
 
-function rotate_by_rashi(new_lagna_view) {
+
+
+
+function rotate_by_rashi(new_lagna_view,loc='00') {
+    // console.log("rotate_by_rashi -- " + new_lagna_view  + " - " + loc);
     // set the rashi num for the houses
     for (let house=1; house<=12; house++) {
-	new_rashi = ((house+new_lagna_view-1)%12); 
+	new_rashi = ((house+parseInt(new_lagna_view)-1)%12); 
 	if (new_rashi==0) { new_rashi=12;}
-	document.getElementById('rashi_in_h'+ house.toString()).innerHTML = new_rashi.toString();
+	// console.log("new_rashi of h" + house + "is" + new_rashi.toString());
+	document.getElementById('rashi_in_h'+ house.toString()+'_'+loc).innerHTML = new_rashi.toString();
     }
+    // console.log(l_out)
     // now populate grahas wher they belong
-    populate_graha_in_rashi();
-    curr_h1_rashi_num =  document.getElementById('rashi_in_h1').innerHTML;
-    //
-    // change Grahas  CG in two steps
-    // step-1: collect current graha data
-    // const curr_gr = { };
-    // for (let i=1; i<=12; i++) {
-    //     curr_gr[i.toString()] = document.getElementById('h'+ i.toString()).innerHTML;
-    // }
-    // alert(JSON.stringify(curr_gr));
-    // step-2: move new data into the house
-    // for (let i=1; i<=12; i++) {
-    //     n_val = ((i+n-1)%12); if (n_val==0) { n_val=12;}
-    //     document.getElementById('h'+ i.toString()).innerHTML = curr_gr[n_val.toString()];
-    //     // document.getElementById('r'+ i.toString()).setAttribute('onclick','rotate('+i+');');
-    // }
-    // change gochar-Grahas CGG in two steps
-    // step-1: collect current gochar-graha data
-    const curr_ggr = { };
-    for (let i=1; i<=12; i++) {
-	curr_ggr[i.toString()] = document.getElementById('gh'+ i.toString()).innerHTML;
-    }
-    // step-2: move new data into the house
-    for (let i=1; i<=12; i++) {
-	n_val = ((i+new_lagna_view-1)%12); if (n_val==0) { n_val=12;}
-	document.getElementById('gh'+ i.toString()).innerHTML = curr_ggr[n_val.toString()];
-    }
+    l_out[loc]['rashiNum_h1'] = document.getElementById('rashi_in_h1_'+loc).innerHTML;
+    populate_all_graha_in_rashi(loc);
+    l_out_restore_fontSize();
+    // console.log(l_out)
 }
 
 
+
 function rotate_by_house(rotate_house_count) {
+    // rotate_house_count 3_11
+    const rhc_split = rotate_house_count.split("_");
+    var rhc= rhc_split[0];
+    var loc = rhc_split[1];
+    curr_rashiNum_h1 = document.getElementById('rashi_in_h1_'+loc).innerHTML;
+    new_rashi = ((parseInt(curr_rashiNum_h1)+parseInt(rhc)-1)%12);
+    if (curr_rashiNum_h1==0) { new_rashi=12;}
+    l_out[loc]['rashiNum_h1'] = new_rashi.toString();
+    // console.log("rotate_by_house: Setting rashiNum_h1 of " + loc + " to " + new_rashi.toString());
+    // console.log(l_out);
+    //
+    // // set the rashi num for the houses
+    // for (let house=1; house<=12; house++) {
+	// curr_rashi = document.getElementById('rashi_in_h'+ house.toString()+'_'+loc).innerHTML;
+	// new_rashi = ((parseInt(curr_rashi)+parseInt(rhc)-1)%12); 
+	// if (new_rashi==0) { new_rashi=12;}
+	// document.getElementById('rashi_in_h'+ house.toString()+'_'+loc).innerHTML = new_rashi.toString();
+    // }
+    // // now populate grahas wher they belong
+    // l_out[loc]['rashiNum_h1'] = document.getElementById('rashi_in_h1_'+loc).innerHTML;
+    place_rashi_num_in_houses(new_rashi.toString(),loc);
+    populate_all_graha_in_rashi(loc);
+    l_out_restore_fontSize();
+}
+
+
+function rotate_by_house0(rotate_house_count) {
     // set the rashi num for the houses
     for (let house=1; house<=12; house++) {
 	curr_rashi = document.getElementById('rashi_in_h'+ house.toString()).innerHTML;
@@ -1257,7 +1415,7 @@ function rotate_by_house(rotate_house_count) {
     }
     // now populate grahas wher they belong
     populate_graha_in_rashi();
-    curr_h1_rashi_num =  document.getElementById('rashi_in_h1').innerHTML;
+    rashiNum_h1 =  document.getElementById('rashi_in_h1').innerHTML;
     // // set the rashi num for the houses
     // step-1: collect current graha data
     // const curr_gr = { };
@@ -1273,15 +1431,15 @@ function rotate_by_house(rotate_house_count) {
     // }
     // change gochar-Grahas CGG in two steps
     // step-1: collect current gochar-graha data
-    const curr_ggr = { };
-    for (let i=1; i<=12; i++) {
-	curr_ggr[i.toString()] = document.getElementById('gh'+ i.toString()).innerHTML;
-    }
+    // const curr_ggr = { };
+    // for (let i=1; i<=12; i++) {
+	// curr_ggr[i.toString()] = document.getElementById('gh'+ i.toString()).innerHTML;
+    // }
     // step-2: move new data into the house
-    for (let i=1; i<=12; i++) {
-	n_val = ((i+rotate_house_count-1)%12); if (n_val==0) { n_val=12;}
-	document.getElementById('gh'+ i.toString()).innerHTML = curr_ggr[n_val.toString()];
-    }
+    // for (let i=1; i<=12; i++) {
+	// n_val = ((i+rotate_house_count-1)%12); if (n_val==0) { n_val=12;}
+	// document.getElementById('gh'+ i.toString()).innerHTML = curr_ggr[n_val.toString()];
+    // }
 }
 
 
@@ -1289,6 +1447,7 @@ function disp_notes(){
     $('#drawme').removeClass('d-none'); 
     $('#notes_panel').removeClass('d-none'); 
     $('#settings_panel').addClass('d-none'); 
+    $('#j_view_formats').removeClass('d-none'); 
 }
 
 
@@ -1296,6 +1455,7 @@ function disp_settings(){
     $('#drawme').addClass('d-none'); 
     $('#settings_panel').removeClass('d-none'); 
     $('#notes_panel').addClass('d-none'); 
+    $('#j_view_formats').addClass('d-none'); 
 }
 
 
@@ -1312,6 +1472,7 @@ function save_degree(gr) {
     degree_of_grahas[gr][2] = sec;
     // console.log(degree_of_grahas);
     // now populate grahas where they belong
+    divisional_data['d1']['degree_of_grahas']=degree_of_grahas;
     populate_graha_in_rashi();
     calc_d9();
 }
@@ -1331,7 +1492,7 @@ function calc_d9() {
 		tot_sec += (i-1)*30*60*60;
 	}
 	if (c_gr=='La') {
-	    tot_sec += (parseInt(ascendant_rashi_num)-1)*30*60*60;
+	    tot_sec += (parseInt(rashiNum_asc)-1)*30*60*60;
 	}
 	//
 	// console.log(c_gr + ' tot_sec is ' + tot_sec);
@@ -1356,9 +1517,9 @@ function calc_d9() {
 	divisional_data["d9"]["degree_of_grahas"][c_gr] = [d9_c_deg,d9_c_min,d9_c_sec];
 	//
 	if (c_gr=='La') 
-	    divisional_data["d9"]["ascendant_rashi_num"] = c_d9_rashi_num;
+	    divisional_data["d9"]["rashiNum_asc"] = c_d9_rashi_num.toString();
     }
-    console.log(divisional_data);
+    // console.log(divisional_data);
 }
 
 function conv_sec_to_degMinSec(c_totsec) {
@@ -1382,16 +1543,386 @@ function make_button_current(curr_btn_id,id_beg_string,id_end_string=""){
     $('#'+curr_btn_id).removeClass('text-warning');
 }
 
-function chart_d1(){
+
+
+
+
+function view_1x2() {
+    if (typeof divisional_data['d1'] === 'undefined') { initialize_div_d1(); }
+    if (typeof l_out['11'] === 'undefined') { initialize_l_out('11'); }
+    if (typeof l_out['12'] === 'undefined') { initialize_l_out('12'); }
+    make_button_current('view_1x2','view_');
+    curr_layout_name='1x2';
+    document.getElementById("empty_image").src="images/empty_1_2.png";
+    document.getElementById("empty_image").height=ctx.canvas.height;
+    clear_all_view_divs();
+    // l_out['locPos']['12'] = [0,width/2,width/2,height];
+    var divId='';
+    var divElem = '';
+    var c_rashiNum_h1 ='';
+    for (xloc of l_out['locList']['1x2']) {
+	var divStyle = 'style="position: absolute; ';
+	var topPos = l_out['locPos'][xloc][0];
+	var leftPos = l_out['locPos'][xloc][1];
+	var width = l_out['locPos'][xloc][2];
+	var height = l_out['locPos'][xloc][3];
+	var divStyle = 'style="position: absolute; ';
+	divStyle += 'top: ' + topPos.toString() + 'px;';
+	divStyle += 'left: ' + leftPos.toString() + 'px;';
+	divStyle += 'width: '+ width.toString() + 'px; ';
+	divStyle += 'height: ' + height.toString() + 'px;"';
+	divId=' id="chart_'+ xloc+ '" ';
+	divElem = '<div '+ divStyle + divId + '><\/div>';
+	$("#drawme").append(divElem);
+	if (Object.keys(l_out[xloc]['grahas_in_rashi']).length ==0) { 
+	    // console.log("l_out - grahas_in_rashi for loc " + xloc + " is zero length");
+	    window[l_out['defaultView'][xloc]](xloc); 
+	} else {
+	    create_house_rashinums(xloc);
+	    c_rashiNum_h1 = l_out[xloc]["rashiNum_h1"];
+	    place_rashi_num_in_houses(c_rashiNum_h1,xloc);
+	    //
+	    create_house_grahaDivs(xloc);
+	    populate_all_graha_in_rashi(xloc); // this also brings the degree info
+	    //
+	    create_house_rotate_links(xloc);
+	    create_chart_title_div(xloc);
+	    l_out_restore_fontSize();
+	}
+	// create_house_rashinums(xloc);
+	// place_rashi_num_in_houses(rashiNum_asc,xloc);
+	// //
+	// create_house_grahaDivs(xloc);
+	// populate_all_graha_in_rashi(xloc); // this also brings the degree info
+	// //
+	// create_house_rotate_links(xloc);
+	// // show the title 
+	// create_chart_title_div(xloc);
+	// l_out_restore_fontSize();
+    }
+    if (l_out['settings']['disp_degree']==1) {disp_degree('show');} 
+    else {disp_degree('hide');}
+    // console.log(l_out);
+}
+
+function view_2x2() {
+    if (typeof divisional_data['d1'] === 'undefined') { initialize_div_d1(); }
+    if (typeof l_out['211'] === 'undefined') { initialize_l_out('211'); }
+    if (typeof l_out['212'] === 'undefined') { initialize_l_out('212'); }
+    if (typeof l_out['221'] === 'undefined') { initialize_l_out('221'); }
+    if (typeof l_out['222'] === 'undefined') { initialize_l_out('222'); }
+    make_button_current('view_2x2','view_');
+    curr_layout_name='2x2';
+    document.getElementById("empty_image").src="images/empty_2_2.png";
+    document.getElementById("empty_image").height=ctx.canvas.height;
+    clear_all_view_divs();
+    // l_out['locPos']['12'] = [0,width/2,width/2,height];
+    var divId='';
+    var divElem = '';
+    for (xloc of l_out['locList']['2x2']) {
+	var divStyle = 'style="position: absolute; ';
+	var topPos = l_out['locPos'][xloc][0];
+	var leftPos = l_out['locPos'][xloc][1];
+	var width = l_out['locPos'][xloc][2];
+	var height = l_out['locPos'][xloc][3];
+	var divStyle = 'style="position: absolute; ';
+	divStyle += 'top: ' + topPos.toString() + 'px;';
+	divStyle += 'left: ' + leftPos.toString() + 'px;';
+	divStyle += 'width: '+ width.toString() + 'px; ';
+	divStyle += 'height: ' + height.toString() + 'px;"';
+	divId=' id="chart_'+ xloc+ '" ';
+	divElem = '<div '+ divStyle + divId + '><\/div>';
+	$("#drawme").append(divElem);
+	if (Object.keys(l_out[xloc]['grahas_in_rashi']).length ==0) { 
+	    // console.log("l_out - grahas_in_rashi for loc " + xloc + " is zero length");
+	    window[l_out['defaultView'][xloc]](xloc); 
+	} else {
+	    create_house_rashinums(xloc);
+	    c_rashiNum_h1 = l_out[xloc]["rashiNum_h1"];
+	    place_rashi_num_in_houses(c_rashiNum_h1,xloc);
+	    //
+	    create_house_grahaDivs(xloc);
+	    populate_all_graha_in_rashi(xloc); // this also brings the degree info
+	    //
+	    create_house_rotate_links(xloc);
+	    create_chart_title_div(xloc);
+	    l_out_restore_fontSize();
+	}
+    }
+    // console.log(l_out);
+    // if (l_out['settings']['disp_degree']) {disp_degree('show');} 
+    // else {disp_degree('hide');}
+    if (l_out['settings']['disp_degree']==1) {disp_degree('show');} 
+    else {disp_degree('hide');}
+}
+
+function clear_all_view_divs(loc="") {
+    // console.log("clear_all_view_divs");
+    // if (c_locList.length==0) return;
+    if (loc.length>0) {
+	if (typeof l_out[loc] === 'undefined') { initialize_l_out(loc); }
+    }
+    // console.log(loc);
+    for (xview in l_out['locList']) {
+	// console.log("view_1x2: view =" + xview);
+	for (xloc of l_out['locList'][xview]) {
+	    if (xloc !== loc) {
+		if (l_out['locList'][xview].includes(loc)) {
+		    // console.log("Skipping .." + xloc);
+		    continue; 
+		}
+	    }
+	    // console.log("removing .." + xloc);
+	    // console.log("view_1x2: view =" + xview + " loc: " + xloc);
+	    remove_house_rashinums(xloc);
+	    remove_house_grahaDivs(xloc);
+	    remove_house_rotate_links(xloc);
+	    remove_chart_title(xloc);
+	}
+    }
+}
+
+
+function view_d1(loc){
+    // console.log("view_d1 - divisional_data");
+    // console.log(divisional_data);
+    if (loc.length==0) { loc='00'; }
+    // clean up any older divs if present
+    // l_out['locList']['1x1']=['00'];
+    // var c_locList = [];
+    // for (xview in l_out['locList']) {
+	// if (l_out['locList'][xview].includes(loc)) {
+	    // c_locList = l_out['locList'][xview];
+	// }
+    // }
+    clear_all_view_divs(loc);
+    //
+    rashiNum_asc = divisional_data["d1"]["rashiNum_asc"];
+    grahas_in_rashi = divisional_data["d1"]["grahas_in_rashi"];
+    degree_of_grahas = divisional_data["d1"]["degree_of_grahas"];
+    l_out[loc] = divisional_data['d1'];
+    l_out[loc]["chart_title"] = 'D1';
+    l_out[loc]['rashiNum_h1'] = rashiNum_asc.toString();
+    //
+    create_house_rashinums(loc);
+    place_rashi_num_in_houses(rashiNum_asc,loc);
+    //
+    create_house_grahaDivs(loc);
+    populate_all_graha_in_rashi(loc); // this also brings the degree info
+    //
+    create_house_rotate_links(loc);
+    create_chart_title_div(loc);
+    // chart_d1();
+    l_out_restore_fontSize(); // restore rashiNum and graha fontSize
+}
+
+
+function view_d9(loc){
+    if (loc.length==0) { loc='00'; }
+    if (typeof divisional_data['d9'] === 'undefined') { return; }
+    // clean up any older divs if present
+    clear_all_view_divs(loc);
+    //
+    rashiNum_asc = divisional_data["d9"]["rashiNum_asc"];
+    grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
+    degree_of_grahas = divisional_data["d9"]["degree_of_grahas"];
+    l_out[loc] = divisional_data['d9'];
+    l_out[loc]["chart_title"] = 'D9';
+    l_out[loc]['rashiNum_h1'] = rashiNum_asc
+    //
+    create_house_rashinums(loc);
+    place_rashi_num_in_houses(rashiNum_asc,loc);
+    //
+    create_house_grahaDivs(loc);
+    populate_all_graha_in_rashi(loc); // this also brings the degree info
+    //
+    create_house_rotate_links(loc);
+    create_chart_title_div(loc);
+    l_out_restore_fontSize(); // restore rashiNum and graha fontSize
+}
+
+
+function l_out_restore_fontSize() {
+    // console.log('l_out_restore_fontSize: curr_layout_name is ' + curr_layout_name);
+    // console.log(l_out['fontSize']);
+    // l_out['locList']['1x1']=['00'];
+    if (typeof l_out['locList'][curr_layout_name]!== 'undefined') {
+	if (typeof l_out['fontSize'][curr_layout_name]!== 'undefined') {
+	    for (xloc of l_out['locList'][curr_layout_name]) {
+		// restore the graha font size 
+		var g_inputs = document.getElementsByClassName('house'); 
+		for (x = 0 ; x < g_inputs.length ; x++){ 
+		    if (g_inputs[x].id.endsWith("_"+xloc)) {
+			// console.log("Changing fontsize of :" + g_inputs[x].id + " from " + g_inputs[x].style.fontSize);
+			g_inputs[x].style.fontSize = l_out['fontSize'][curr_layout_name][1];
+		    }
+		}
+		// restore the rashiNum font size 
+		var r_inputs = document.getElementsByClassName('rashinum'); 
+		for (x = 0 ; x < r_inputs.length ; x++){ 
+		    if (r_inputs[x].id.endsWith("_"+xloc)) {
+			r_inputs[x].style.fontSize = l_out['fontSize'][curr_layout_name][0];
+		    }
+		}
+	    }
+	}
+    }
+}
+
+
+
+
+function view_1x1(loc='00'){
+    // console.log("view_1x1: l_out");
+    // console.log(l_out);
+    if (typeof divisional_data['d1'] === 'undefined') { initialize_div_d1(); }
+    if (typeof l_out['00'] === 'undefined') { initialize_l_out('00'); }
+    if (loc.length==0) { loc='00'; }
+    // get the proper background image
     document.getElementById("empty_image").src="images/empty.png";
-    make_button_current('chart_d1','chart_');
-    remove_house_rashinums("11");
+    // display the bottom tab 1x1 as selected
+    make_button_current('view_1x1','view_');
+    // clean up any older divs if present
+    clear_all_view_divs('00');
+    // Draw position 1,1 row-1 col-1 11
+    var topPos = 0;
+    var leftPos = 0;
+    var width = ctx.canvas.width; 
+    var height = ctx.canvas.height; 
+    var divStyle = 'style="position: absolute; ';
+    divStyle += 'top: ' + topPos.toString() + 'px;';
+    divStyle += 'left: ' + leftPos.toString() + 'px;';
+    divStyle += 'width: '+ width.toString() + 'px; ';
+    divStyle += 'height: ' + height.toString() + 'px;"';
+    var divId=' id="chart_00" ';
+    var divElem = '<div '+ divStyle + divId + '><\/div>';
+    $("#drawme").append(divElem);
+    curr_layout_name='1x1';
+    rashiNum_asc = l_out['00']['rashiNum_asc'];
+    rashiNum_h1 = l_out['00']['rashiNum_h1'];
+    create_house_rashinums('00');
+    place_rashi_num_in_houses(rashiNum_h1,'00');
+    //
+    create_house_grahaDivs('00');
+    populate_all_graha_in_rashi('00'); // this also brings the degree info
+    //
+    create_house_rotate_links('00');
+    // populate_graha_in_rashi("",{},{},'00');
+    // show the title 
+    create_chart_title_div('00');
+    l_out_restore_fontSize();
+    // if (l_out['settings']['disp_degree']) {disp_degree('show');} 
+    // else {disp_degree('hide');}
+    // console.log("view_1x1: l_out- AA");
+    // console.log(l_out);
+    if (l_out['settings']['disp_degree']==1) {
+	disp_degree('show');
+    } else {
+	disp_degree('hide');
+    }
+}
+
+
+function initialize_l_out(loc='00') {
+    // console.log("initialize_l_out - for loc " + loc);
+    if (loc.length==0) { loc='00'; }
+    if (typeof l_out[loc] === 'undefined') { l_out[loc] = {}; }
+    if (typeof l_out[loc]['grahas_in_rashi'] === 'undefined') { 
+	l_out[loc]['grahas_in_rashi']={};
+    }
+    if (typeof l_out[loc]['degree_of_grahas'] === 'undefined') { 
+	l_out[loc]['degree_of_grahas']={};
+    }
+    if (typeof l_out[loc]['rashiNum_asc'] === 'undefined') {
+	l_out[loc]['rashiNum_asc']=1;
+    }
+    if (typeof l_out['chart_title'] === 'undefined') {
+	l_out[loc]['chart_title']='D1';
+    }
+    if (typeof l_out['rashiNum_h1'] === 'undefined') {
+	l_out[loc]['rashiNum_h1']='1';
+    }
+    if (typeof l_out['fontSize'] === 'undefined') {
+	l_out['fontSize'] = {};
+    }
+    if (typeof l_out['fontSize']['1x1'] === 'undefined') {
+	l_out['fontSize']['1x1'] = []; // [0]; rashinumFontsize, [1];GrahaFontsize
+    }
+    if (typeof l_out['fontSize']['1x2'] === 'undefined') {
+	l_out['fontSize']['1x2'] = []; // [0]; rashinumFontsize, [1];GrahaFontsize
+    }
+    if (typeof l_out['fontSize']['2x2'] === 'undefined') {
+	l_out['fontSize']['2x2'] = ['90%','90%']; // [0]; rashinumFontsize, [1];GrahaFontsize
+    }
+    //
+    if (typeof l_out['settings'] === 'undefined') {
+	l_out['settings']  = {};
+	l_out['settings']['disp_degree']=1;
+	// console.log(l_out['settings']);
+    }
+    if (typeof l_out['locList'] === 'undefined') {
+	l_out['locList'] = {};
+	l_out['locList']['1x1']=['00'];
+	l_out['locList']['1x2']=['11','12'];
+	l_out['locList']['2x2']=['211','212','221','222'];
+	set_layout_chart_positions();
+    }
+    l_out['defaultView'] = {};
+    l_out['defaultView']['00']="view_d1";
+    l_out['defaultView']['11']="view_d1";
+    l_out['defaultView']['12']="view_d9";
+    l_out['defaultView']['211']="view_d1";
+    l_out['defaultView']['212']="view_d1";
+    l_out['defaultView']['221']="view_d1";
+    l_out['defaultView']['222']="view_d9";
+    // console.log("initialize_l_out : l_out: ");
+    // console.log(l_out);
+}
+
+function initialize_div_d1() {
+    if (typeof divisional_data['d1'] === 'undefined') { divisional_data['d1'] = {}; }
+    if (typeof divisional_data['d1']['grahas_in_rashi'] === 'undefined') { 
+	divisional_data['d1']['grahas_in_rashi']={};
+    }
+    if (typeof divisional_data['d1']['degree_of_grahas'] === 'undefined') { 
+	divisional_data['d1']['degree_of_grahas']={};
+    }
+    if (typeof divisional_data['d1']['rashiNum_asc'] === 'undefined') {
+	divisional_data['d1']['rashiNum_asc']=1;
+    }
+}
+
+function chart_d1_0(){
+    if (typeof divisional_data['d1'] === 'undefined') { divisional_data['d1'] = {}; }
+    if (typeof divisional_data['d1']['grahas_in_rashi'] === 'undefined') { 
+	divisional_data['d1']['grahas_in_rashi']={};
+    }
+    if (typeof divisional_data['d1']['degree_of_grahas'] === 'undefined') { 
+	divisional_data['d1']['degree_of_grahas']={};
+    }
+    if (typeof divisional_data['d1']['rashiNum_asc'] === 'undefined') {
+	divisional_data['d1']['rashiNum_asc']=1;
+    }
+    //
+    degree_of_grahas = divisional_data["d1"]["degree_of_grahas"];
+    grahas_in_rashi = divisional_data["d1"]["grahas_in_rashi"];
+    rashiNum_asc = divisional_data["d1"]["rashiNum_asc"];
+    // console.log(rashiNum_asc);
+    // console.log(grahas_in_rashi);
+    // console.log(degree_of_grahas);
+    //
+    document.getElementById("empty_image").src="images/empty.png";
+    if (typeof grList_by_dNum_raNum['d1'] === 'undefined') { grList_by_dNum_raNum['d1'] = {}; }
+    // make_button_current('chart_d1','chart_');
+    // make_button_current('view_1x1','view_');
+    remove_house_rashinums('00');
     remove_house_rashinums("12");
     remove_house_rashinums();
     create_house_rashinums();
+    create_house_rotate_links();
     remove_house_grahaDivs();
     create_house_grahaDivs();
-    place_rashi_num_in_houses(ascendant_rashi_num);
+    place_rashi_num_in_houses(rashiNum_asc);
     display_saved_degree();
     populate_graha_in_rashi();
     document.getElementById('chart_title').innerHTML = "D1";
@@ -1401,21 +1932,26 @@ function chart_d1(){
 function chart_d9(){
     if (divisional_data["d9"]==undefined) return;
     document.getElementById("empty_image").src="images/empty.png";
-    make_button_current('chart_d9','chart_');
-    remove_house_rashinums("11");
+    // make_button_current('chart_d9','chart_');
+    remove_house_rashinums('00');
     remove_house_rashinums("12");
     remove_house_rashinums();
     create_house_rashinums();
-    remove_house_grahaDivs('11');
+    remove_house_grahaDivs('00');
     remove_house_grahaDivs('12');
     remove_house_grahaDivs();
     create_house_grahaDivs();
-    let c_ascendant_rashi_num = divisional_data["d9"]["ascendant_rashi_num"];
-    place_rashi_num_in_houses(c_ascendant_rashi_num);
+    //
+    degree_of_grahas = divisional_data["d9"]["degree_of_grahas"];
+    grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
+    rashiNum_asc = divisional_data["d9"]["rashiNum_asc"];
+    //
+    let c_rashiNum_asc = divisional_data["d9"]["rashiNum_asc"];
+    place_rashi_num_in_houses(c_rashiNum_asc);
     let c_degree_of_grahas = divisional_data["d9"]["degree_of_grahas"];
     display_saved_degree(c_degree_of_grahas); 
     let c_grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
-    populate_graha_in_rashi(c_ascendant_rashi_num,c_grahas_in_rashi,c_degree_of_grahas);
+    populate_graha_in_rashi(c_rashiNum_asc,c_grahas_in_rashi,c_degree_of_grahas);
     document.getElementById('chart_title').innerHTML = "D9";
 }
 
@@ -1428,7 +1964,8 @@ function chart_d1d9(){
     // document.getElementById('drawme').style.width = '25%';
     // console.log([canvas_w,canvas_h]);
     // drawImageAtQuadrants([[1,1], [1,2]], "images/empty.png", "drawme");
-    make_button_current('chart_d1d9','chart_');
+    // make_button_current('chart_d1d9','chart_');
+    // make_button_current('view_1x2','view_');
     // Change the background diagram
     document.getElementById("empty_image").src="images/empty_1_2.png";
     document.getElementById("empty_image").height=ctx.canvas.height;
@@ -1454,10 +1991,10 @@ function chart_d1d9(){
     var divId=' id="chart_11" ';
     var divElem = '<div '+ divStyle + divId + '><\/div>';
     $("#drawme").append(divElem);
-    create_house_rashinums('11');
-    place_rashi_num_in_houses(ascendant_rashi_num,"11");
-    create_house_grahaDivs('11');
-    populate_graha_in_rashi("",{},{},"11");
+    create_house_rashinums('00');
+    place_rashi_num_in_houses(rashiNum_asc,'00');
+    create_house_grahaDivs('00');
+    populate_graha_in_rashi("",{},{},'00');
     //
     // Draw D9 of D1D9 chart
     topPos = 0;
@@ -1473,12 +2010,12 @@ function chart_d1d9(){
     var divElem = '<div '+ divStyle + divId + '><\/div>';
     $("#drawme").append(divElem);
     create_house_rashinums('12');
-    let c_ascendant_rashi_num = divisional_data["d9"]["ascendant_rashi_num"];
-    place_rashi_num_in_houses(c_ascendant_rashi_num,"12");
+    let c_rashiNum_asc = divisional_data["d9"]["rashiNum_asc"];
+    place_rashi_num_in_houses(c_rashiNum_asc,"12");
     create_house_grahaDivs('12');
     let c_degree_of_grahas = divisional_data["d9"]["degree_of_grahas"];
     let c_grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
-    populate_graha_in_rashi(c_ascendant_rashi_num,c_grahas_in_rashi,c_degree_of_grahas,'12');
+    populate_graha_in_rashi(c_rashiNum_asc,c_grahas_in_rashi,c_degree_of_grahas,'12');
 }
 
 function remove_house_rashinums(loc="") {
@@ -1490,7 +2027,8 @@ function remove_house_rashinums(loc="") {
 	    idStrSuffix = i.toString() + "_" + loc;
 	}
 	cDiv = document.getElementById('rashi_in_h'+ idStrSuffix);
-	if (cDiv) cDiv.parentNode.removeChild(cDiv);
+	// if (cDiv) cDiv.parentNode.removeChild(cDiv);
+	if (cDiv) cDiv.remove();
     }
 }
 
@@ -1503,7 +2041,14 @@ function remove_house_grahaDivs(loc="") {
 	    idStrSuffix = i.toString() + "_" + loc;
 	}
 	cDiv = document.getElementById('h'+ idStrSuffix);
-	if (cDiv) cDiv.parentNode.removeChild(cDiv);
+	// // console.log("remove_house_grahaDivs: About to delete div h"+idStrSuffix);
+	// if (cDiv) {
+	    // console.log("here");
+	    // console.log(cDiv);
+	    // cDiv.parentNode.removeChild(cDiv);
+	// }
+	if (cDiv) { cDiv.remove(); }
+	// if (cDiv) { cDiv.style.display = 'none'; }
     }
 }
 
@@ -1526,7 +2071,63 @@ function  create_house_grahaDivs(loc="") {
     }
 }
 
-function  create_house_rashinums(loc="") {
+
+function remove_chart_title(loc=""){
+    // console.log("Removing chart title of loc: " + loc);
+    var all_inputs = document.querySelectorAll('.chart_title');
+    for (x = 0 ; x < all_inputs.length ; x++){
+	var myid = all_inputs[x].getAttribute("id");
+	// console.log("checking now: " + myid);
+	if (all_inputs[x].id.endsWith("_"+loc)) {
+	    cDiv = document.getElementById(myid);
+	    // if (cDiv) cDiv.parentNode.removeChild(cDiv);
+	    if (cDiv) { cDiv.remove(); }
+	    // if (cDiv) { cDiv.style.display = 'none'; }
+	}
+    }
+}
+
+
+
+function create_chart_title_div(loc="") {
+    // <div class=" p-1 m-1 chart_title h4 bg-warning text-danger font-weight-bold"  
+	// onclick="{ 
+	    // document.getElementById('modal2B').style.display = 'block';
+	    // document.getElementById('modal2M').innerHTML  = choose_view_generate_form(); 
+	// }"
+    // style="z-index:3;font-size: 150%; "  
+    // id='chart_title'>D1</div> 
+    //
+    var title= l_out[loc]['chart_title'];
+    var c_divStr = ""; var chartStr="";
+    // console.log("create_chart_title_div for loc: " + loc + " / title is " + title);
+    //
+    if (loc.length==0) {
+	idStrSuffix = "";
+	chartStr = "#drawme";
+    } else {
+	idStrSuffix = loc;
+	chartStr = "#chart_"+loc;
+    }
+    c_divStr = '<div ';
+    // c_divStr +=' class="p-1 m-1 chart_title h4 bg-warning text-danger font-weight-bold"';
+    c_divStr +=' class="p-1 m-1 chart_title h4 bg-warning text-danger font-weight-bold" ' 
+	+ 'onclick="{ '
+	+   ' document.getElementById(\'modal2B\').style.display = \'block\'; '
+	+   ' document.getElementById(\'modal2M\').innerHTML  = choose_view_generate_form(\''+loc+'\'); '
+	+ '}" '
+    c_divStr += ' style="z-index:3;font-size: 150%; "';
+    c_divStr += ' id="chart_title_'+idStrSuffix+'" ';
+    c_divStr += ' >'+title+'</div>';
+    $(chartStr).append(c_divStr);
+}
+
+
+
+function create_house_rashinums(loc="") {
+    // <div class="rb1 h5 rashinum font-weight-bold text-black"  
+    // style="z-index:2;font-size: 120%; "  
+    // id='rashi_in_h1'>1</div> 
     var c_divStr = ""; var chartStr="";
     for (let i=1; i<=12; i++) {
 	if (loc.length==0) {
@@ -1546,7 +2147,60 @@ function  create_house_rashinums(loc="") {
     }
 }
 
-function place_rashi_num_in_houses(c_asc_rashi_num,loc="") {
+
+
+function remove_house_rotate_links(loc=""){
+    //
+    var all_inputs = document.querySelectorAll('.rot');
+    for (x = 0 ; x < all_inputs.length ; x++){
+	var myid = all_inputs[x].getAttribute("id");
+	if (all_inputs[x].id.endsWith("_"+loc)) {
+	    cDiv = document.getElementById(myid);
+	    // if (cDiv) cDiv.parentNode.removeChild(cDiv);
+	    if (cDiv) { cDiv.remove(); }
+	    // if (cDiv) { cDiv.style.display = 'none'; }
+	}
+    }
+}
+
+
+function  create_house_rotate_links(loc="") {
+    // <span onclick=rotate_by_house(2); style="z-index:2;" id='make_ascndnt_h2' 
+    //   title='rotate_make_this_H1' class='rot small rotb2'>m</span> 
+    //
+    // console.log("create_house_rotate_links: loc: " + loc);
+    var c_divStr = ""; var chartStr="";
+    for (let i=1; i<=12; i++) {
+	if (loc.length==0) {
+	    idStrSuffix = i.toString();
+	    chartStr = "#drawme";
+	} else {
+	    idStrSuffix = i.toString() + "_" + loc;
+	    chartStr = "#chart_"+loc;
+	}
+	c_divStr = '<span onclick=rotate_by_house(\''+idStrSuffix+'\'); ';
+	c_divStr +=' class="d-none rot rotb'+i.toString()+' small"';
+	c_divStr += ' style="z-index:2;"';
+	c_divStr += ' title="rotate_make_this_H1"';
+	c_divStr += ' id="make_ascndnt_h'+idStrSuffix+'" ';
+	c_divStr += ' >m</span>';
+	$(chartStr).append(c_divStr);
+    }
+}
+
+
+function place_rashi_num_in_houses(c_rashiNum_h1,loc="") {
+    for (let i=1; i<=12; i++) {
+	house_rashi_num = ((parseInt(c_rashiNum_h1)+i-1)%12); 
+	if (house_rashi_num==0) { house_rashi_num=12;}
+	if (loc.length==0) idStrSuffix = i.toString();
+	else idStrSuffix = i.toString() + "_" + loc;
+	document.getElementById('rashi_in_h'+ idStrSuffix).innerHTML = 
+	    house_rashi_num.toString();
+    }
+}
+
+function place_rashi_num_in_houses0(c_asc_rashi_num,loc="") {
     for (let i=1; i<=12; i++) {
 	house_rashi_num = ((parseInt(c_asc_rashi_num)+i-1)%12); 
 	if (house_rashi_num==0) { house_rashi_num=12;}

@@ -1,48 +1,48 @@
 .container { position: relative; text-align: center; color: white; }
 
-.chart_title { position: absolute; bottom: 95%; left: 96%; }
+.chart_title { position: absolute; bottom: 95%; left: 47%; }
 
 /* for each rotate-house */
 .rotb1 { position: absolute; bottom: 65%; left: 47%; }
-    .rotb2 { position: absolute; bottom: 75%; left: 27%; }
-    .rotb3 { position: absolute; bottom: 68%; left: 21%; }
-    .rotb4 { position: absolute; bottom: 48%; left: 42%; }
-    .rotb5 { position: absolute; bottom: 27%; left: 20%; }
-    .rotb6 { position: absolute; bottom: 18%; left: 35%; }
-    .rotb7 { position: absolute; bottom: 43%; left: 51%; }
-    .rotb8 { position: absolute; bottom: 23%; left: 70%; }
-    .rotb9 { position: absolute; bottom: 31%; left: 75%; }
-    .rotb10 { position: absolute; bottom: 47%; left: 56%; }
-    .rotb11 { position: absolute; bottom: 66%; left: 75%; }
-    .rotb12 { position: absolute; bottom: 75%; left: 72%; }
+.rotb2 { position: absolute; bottom: 75%; left: 27%; }
+.rotb3 { position: absolute; bottom: 68%; left: 21%; }
+.rotb4 { position: absolute; bottom: 48%; left: 42%; }
+.rotb5 { position: absolute; bottom: 27%; left: 20%; }
+.rotb6 { position: absolute; bottom: 18%; left: 35%; }
+.rotb7 { position: absolute; bottom: 43%; left: 51%; }
+.rotb8 { position: absolute; bottom: 23%; left: 70%; }
+.rotb9 { position: absolute; bottom: 31%; left: 75%; }
+.rotb10 { position: absolute; bottom: 47%; left: 56%; }
+.rotb11 { position: absolute; bottom: 66%; left: 75%; }
+.rotb12 { position: absolute; bottom: 75%; left: 72%; }
 
 /* for each Gr in each bhava/house */
 .b1 { position: absolute; bottom: 67%; left: 47%; }
-    .b2 { position: absolute; bottom: 80%; left: 25%; }
-    .b3 { position: absolute; bottom: 67%; left: 5%; }
-    .b4 { position: absolute; bottom: 45%; left: 27%; }
-    .b5 { position: absolute; bottom: 20%; left: 5%; }
-    .b6 { position: absolute; bottom: 7%; left: 25%; }
-    .b7 { position: absolute; bottom: 20%; left: 47%; }
-    .b8 { position: absolute; bottom: 7%; left: 65%; }
-    .b9 { position: absolute; bottom: 20%; left: 85%; }
-    .b10 { position: absolute; bottom: 45%; left: 68%; }
-    .b11 { position: absolute; bottom: 63%; left: 85%; }
-    .b12 { position: absolute; bottom: 80%; left: 68%; }
+.b2 { position: absolute; bottom: 80%; left: 25%; }
+.b3 { position: absolute; bottom: 67%; left: 5%; }
+.b4 { position: absolute; bottom: 45%; left: 27%; }
+.b5 { position: absolute; bottom: 20%; left: 5%; }
+.b6 { position: absolute; bottom: 7%; left: 25%; }
+.b7 { position: absolute; bottom: 20%; left: 47%; }
+.b8 { position: absolute; bottom: 7%; left: 65%; }
+.b9 { position: absolute; bottom: 20%; left: 85%; }
+.b10 { position: absolute; bottom: 45%; left: 68%; }
+.b11 { position: absolute; bottom: 63%; left: 85%; }
+.b12 { position: absolute; bottom: 80%; left: 68%; }
 
 /* for each bhava/house */
-.rb1 { position: absolute; bottom: 52%; left: 49%; }
-    .rb2 { position: absolute; bottom: 72%; left: 30%; }
-    .rb3 { position: absolute; bottom: 67%; left: 26%; }
-    .rb4 { position: absolute; bottom: 47%; left: 46%; }
-    .rb5 { position: absolute; bottom: 29%; left: 26%; }
-    .rb6 { position: absolute; bottom: 25%; left: 31%; }
-    .rb7 { position: absolute; bottom: 44%; left: 49%; }
-    .rb8 { position: absolute; bottom: 26%; left: 67%; }
-    .rb9 { position: absolute; bottom: 29%; left: 71%; }
-    .rb10 { position: absolute; bottom: 48%; left: 52%; }
-    .rb11 { position: absolute; bottom: 67%; left: 72%; }
-    .rb12 { position: absolute; bottom: 72%; left: 68%; }
+.rb1 { position: absolute; bottom: 50%; left: 49%; }
+.rb2 { position: absolute; bottom: 72%; left: 30%; }
+.rb3 { position: absolute; bottom: 67%; left: 26%; }
+.rb4 { position: absolute; bottom: 47%; left: 46%; }
+.rb5 { position: absolute; bottom: 29%; left: 26%; }
+.rb6 { position: absolute; bottom: 25%; left: 31%; }
+.rb7 { position: absolute; bottom: 44%; left: 49%; }
+.rb8 { position: absolute; bottom: 26%; left: 67%; }
+.rb9 { position: absolute; bottom: 29%; left: 71%; }
+.rb10 { position: absolute; bottom: 48%; left: 52%; }
+.rb11 { position: absolute; bottom: 67%; left: 72%; }
+.rb12 { position: absolute; bottom: 72%; left: 68%; }
 
 .bottom-left { position: absolute; bottom: 8px; left: 16px; }
     .top-left { position: absolute; top: 8px; left: 16px; }
