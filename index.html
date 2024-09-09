@@ -14,56 +14,82 @@
     let font_size = {};
     let lines = [];
     let views = {};
+    let l_out = {}
+    let curr_layout_name = '1x1';
     let drawings = {};
     views['Basic'] = {};
     let lines_by_color = [];
     let grahas_in_rashi = {};
+    let grList_by_dNum_raNum = {};
     let divisional_data = {};
     let degree_of_grahas = {};
     let retro_planet_list = [];
-    let ascendant_rashi_num = "1";
-    let curr_h1_rashi_num = "";
+    let curr_drawing_idList = [];
+    let rashiNum_asc = "1";
+    let rashiNum_h1 = "";
     // $(function(){ 
     //  $("#settings_panel").load("settings.html");
     // });
 </script>
 </head>
 <body>
-<div id='header' class="my-0 py-0">
-<h2>JGD Kundli</h2>
-<p>Jai gurudev v2.8<small><i> 04Apr2024</i></small></p>
+
+<div id='header' class="row w-100 ml-1">
+    <div class="col-4 m-0 p-0">
+    <h2>JGD Kundli</h2>
+    <p>Jai gurudev v2.9<small><i> 11Apr2024</i></small></p>
+    </div>
+    <div class="col-8 m-0 p-0">
+    <!-- TOP MENU ICONs on the top -->
+    <img id='h_dnld' src="images/download_b.png" alt="Download"  title="Download Current"
+	onclick="saveData();" height='54' class='mx-1' />
+    <img id='h_open' src="images/open.png" alt="Open Saved File"  title="Open Saved File"
+	onclick="openFile();" height='54' class='mx-1'/>
+    <img id='h_ret2NotesImg'  onclick='disp_notes();' src='images/list.jpg'
+	 title="Display Notes" alt="DisplayNotes" height='54' class='mx-1'/>
+    <img id='h_disp_settings' src="images/settings_2.jpg"  title="Display Settings" 
+	alt="dispSettings"  onclick="disp_settings();" height='54' class='mx-1'/>
+    </div>
 </div>
-<div id="modal2B" style="display:none; " class="modal" >
-<div class="col-3 modal-content float-top float-right">
-<span class="close"
-onclick = "{document.getElementById('modal2B').style.display = 'none';}"
->&times;</span>
-<p id="modal2M">Panduranga Naamamu Parama Punya Dhaaamamu..</p>
+
+<!-- <div id="modal3B" style="z-index:5;" class="modal" > -->
+<div id="modal3B" style="z-index:3;" class="modal d-none" > 
+    <div class="col-3 modal-content float-right">
+	<span class="close"
+	    onclick = "{document.getElementById('modal3B').style.display = 'none';}"
+	    >&times;
+	</span>
+	<p id="modal3M">Panduranga Naamamu Parama Punya Dhaaamamu..</p>
+    </div>
 </div>
+
+<div id="modal2B" style="z-index:5;display:none; " class="modal" >
+    <div class="col-3 modal-content float-top float-right">
+	<span class="close"
+	    onclick = "{document.getElementById('modal2B').style.display = 'none';}"
+	    >&times;
+	</span>
+	<p id="modal2M">Panduranga Naamamu Parama Punya Dhaaamamu..</p>
+    </div>
 </div>
+
+<div id="modalB" style="display:none;" class="modal" >
+    <div class="col-6 float-top float-right modal-content">
+	<span class="close"
+	    onclick = "{document.getElementById('modalB').style.display = 'none';}"
+	    >&times;
+	</span>
+	<p id="modalM">Panduranga Naamamu Parama Punya Dhaaamamu..</p>
+    </div>
+</div>
+
+
+
+
 
 <div class="row w-100 text-black ml-1" style="background-color:#ffffe9;">
     <div class="mx-1 text-center" id="first_col">
-	<br>
-	    <img id='ret2NotesImg'  onclick='disp_notes();' src='images/list.jpg'
-		 title="Display Notes" alt="DisplayNotes" height='31'/>
-	  <br>
-	  <img id='disp_settings' src="images/settings_2.jpg"  
-	      title="Display Settings" alt="dispSettings"  
-	      onclick="disp_settings();" height='27'/>
 	<hr>
-	<!-- <button class='btn btn-primary my-0 py-0' onclick="saveData();">Save</button> -->
-	<img id='dnld' src="images/download.png" alt="Download" onclick="saveData();" height='27' />
-
-	<hr>
-	<!-- onclick="download('the content of the file', 'filename.txt', 'text/plain');" -->
-	<!-- <button  id='startDraw' class='btn btn-primary my-0 py-0'  -->
-	    <!-- onclick="{ -->
-		  <!-- // ctx.canvas.width = document.getElementById('empty_image').offsetWidth; -->
-		  <!-- // ctx.canvas.height = document.getElementById('empty_image').offsetHeight; -->
-		<!-- document.getElementById('canvas').style.zIndex = '20'; -->
-	      <!-- }" -->
-	    <!-- >StartDrawing</button> -->
 	<div class="m-0 p-0 border border-5 border-info">
 	    Draw<br>
 	    <img id='clearCanvas' src="images/reset_a.jpg" alt="ClearDrawing" 
@@ -89,25 +115,13 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 		onclick="document.getElementById('strokeColor').innerHTML = 'magenta';"
 		style="background-color:magenta;"
 		class='btn my-0 py-0 mx-0 px-0'> PN </span><br>
-	<img id='undo' src="images/back.png"  class='my-0 py-0 mx-0 px-0' title='Undo Stroke'
-	alt="Undo Stroke" onclick="undo_stroke();" height='21' /> <br> 
-	<!-- <button  id='Screenshot' -->
-	<!-- class='btn btn-primary my-0 py-0' onclick="takeShot();">Screenshot</button> -->
-	<!-- <button  id='SaveDrawing'  -->
-	<!-- class='btn btn-primary my-1 py-0' onclick="save_drawing();">SaveDrawing</button>  -->
-	<img id='SaveDrawing' src="images/save_drawing.png"  title='Take Snapshot of Drawing'
-	alt="saveDrawing" onclick="save_drawing();" height='27' />
-
+	    <img id='undo' src="images/back.png"  class='my-0 py-0 mx-0 px-0' title='Undo Stroke'
+	    alt="Undo Stroke" onclick="undo_stroke();" height='21' /> <br> 
+	    <img id='SaveDrawing' src="images/save_drawing.png"  title='Take Snapshot of Drawing'
+	    alt="saveDrawing" onclick="save_drawing();" height='27' />
 	</div>
-	<!-- <button  id='ClearScreenshot' -->
-	<!-- class='btn btn-warning my-0 py-0 d-none' onclick="clearShot()">Clear-Screenshot</button> -->
-	<!-- <hr> -->
-	<!-- <span class='text-info font-weight-bold mx-0 px-0'>Gchr:</span><br> -->
-	<!-- <img id='gochar_clear' src="images/minus_c.png" alt="clear Gochar"  -->
-	<!-- onclick="removeAllGocharGr();" height='18' /> -->
-	<!-- <span id="g_loc"></span> -->
-	<!-- <span id="g_date"></span> -->
-	<!-- <span id="g_time"></span> -->
+	<!--  -->
+	<!--  -->
 	<div class='my-0 text-center'>
         	<br><hr class='my-0 py-0'> 
 	      <img id='plus_font' src="images/plus_c.png" alt="RashiNumIncrFontSize" 
@@ -117,176 +131,110 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 		/>
         	<br><hr class='my-1 py-0'> 
 	      <img id='plus_fontr' src="images/plus_c.png" alt="GrahaIncrFontSize" 
-		onclick="incr_font_size('graha',10);" height='27' title='Incr Graha FontSize'
+		onclick="incr_font_size('house',10);" height='27' title='Incr Graha FontSize'
 		/><br>G<br><img id='minus_fontr' src="images/minus_c.png" alt="GrahaDescrontSize" 
-		onclick="incr_font_size('graha',-10);" height='27' title='Decr Graha FontSize'
+		onclick="incr_font_size('house',-10);" height='27' title='Decr Graha FontSize'
 		/>
-		<!-- <br><hr class='my-0 py-0'> -->
-		<!-- <img id='plus_fontg' src="images/plus_c.png" alt="GocharGrIncrFontSize"  -->
-		<!-- onclick="incr_font_size('ggraha',10);" height='18' title='Incr GocharGraha FontSize' -->
-		<!-- /><br class='my-0 py-0'>GGr<br class='my-0 py-0'> -->
-		<!-- <img id='minus_fontg' src="images/minus_c.png" alt="GocharGrDescrontSize"  -->
-		<!-- onclick="incr_font_size('ggraha',-10);" height='18' title='Decr GocharGraha FontSize' -->
-		<!-- /> -->
+        	<br><hr class='my-1 py-0'> 
+	      <img id='show_rotate_links' src="images/rotate.png" alt="ShowRotateHouseLinks" 
+		onclick="disp_rotate_links('show');" height='27' title='Toggle show/hide House Rotate Links'/>
+	      <img id='hide_rotate_links' class='d-none' src="images/rotate.png" alt="HideRotateHouseLinks" 
+		onclick="disp_rotate_links('hide');" height='27' title='Toggle show/hide House Rotate Links'/>
+        	<br><hr class='my-1 py-0'> 
+	      <img id='show_degree' src="images/degree.png" alt="ShowDegree"  class='d-none' 
+		onclick="disp_degree('show');" height='27' title='Toggle show/hide Degree'/>
+	      <img id='hide_degree' src="images/degree.png" alt="HideDegree" 
+		onclick="disp_degree('hide');" height='27' title='Toggle show/hide Degree'/>
 	</div>
     </div>
     <div class="col-sm m-0 p-0">
 	<div class="row w-100 m-0 p-0 bg-white border border-5 border-info">
+	    <!--  DIV for list of tabs for openeed charts -->
 	    <div class="col-12 m-0 p-0" id='j_opened'></div>
 	</div>
 	<div id ='main_disp' class="row w-100 m-0 p-0">
 	<div id ='printme' class="row w-100 m-0 p-0">
 	    <div id='drawme' class="col-8 m-0 p-0">
 	      <img id='empty_image' src="images/empty.png" alt="Snow" 
-	      style="width:100%;position:absolute;z-index:1;">
+		  style="width:100%;position:absolute;z-index:1;">
 	      <canvas crossOrigin='anonymous' id="canvas" style='position:relative;z-index:1;'></canvas>  
-		  <div class="rb1 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h1'>1</div>
-		  <div class="rb2 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h2'>2</div>
-		  <div class="rb3 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h3'>3</div>
-		  <div class="rb4 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h4'>4</div>
-		  <div class="rb5 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h5'>5</div>
-		  <div class="rb6 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h6'>6</div>
-		  <div class="rb7 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h7'>7</div>
-		  <div class="rb8 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h8'>8</div>
-		  <div class="rb9 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h9'>9</div>
-		  <div class="rb10 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h10'>10</div>
-		  <div class="rb11 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h11'>11</div>
-		  <div class="rb12 h5 rashinum font-weight-bold text-black" 
-		       style="z-index:2;font-size: 120%; " 
-		      id='rashi_in_h12'>12</div>
-	      <div class="b1" style="z-index:2;" id='h1'><br><b>ASC</b> </div>
-	      <span onclick=rotate_by_house(2); style="z-index:2;" id='make_ascndnt_h2' 
-		  title='rotate_make_this_H1' class='small rotb2'>m</span> 
-	      <div class="b2" style="z-index:2;" id='h2'><br> </div>
-	      <span onclick=rotate_by_house(3); style="z-index:2;" id='make_ascndnt_h3' 
-		  title='rotate_make_this_H1' class='small rotb3'>m</span>
-	      <div class="b3" style="z-index:2;" id='h3'><br> </div>
-	      <span onclick=rotate_by_house(4); style="z-index:2;" id='make_ascndnt_h4' 
-		  title='rotate_make_this_H1' class='small rotb4'>m</span>
-	      <div class="b4" style="z-index:2;" id='h4'><br> </div>
-	      <span onclick=rotate_by_house(5); style="z-index:2;" id='make_ascndnt_h5' 
-		  title='rotate_make_this_H1' class='small rotb5'>m</span>
-	      <div class="b5" style="z-index:2;" id='h5'><br> </div>
-	      <span onclick=rotate_by_house(6); style="z-index:2;" id='make_ascndnt_h6' 
-		  title='rotate_make_this_H1' class='small rotb6'>m</span>
-	      <div class="b6" style="z-index:2;" id='h6'><br> </div>
-	      <span onclick=rotate_by_house(7); style="z-index:2;" id='make_ascndnt_h7' 
-		  title='rotate_make_this_H1' class='small rotb7'>m</span>
-	      <div class="b7" style="z-index:2;" id='h7'><br> </div>
-	      <span onclick=rotate_by_house(8); style="z-index:2;" id='make_ascndnt_h8' 
-		  title='rotate_make_this_H1' class='small rotb8'>m</span>
-	      <div class="b8" style="z-index:2;" id='h8'><br> </div>
-	      <span onclick=rotate_by_house(9); style="z-index:2;" id='make_ascndnt_h9' 
-		  title='rotate_make_this_H1' class='small rotb9'>m</span>
-	      <div class="b9" style="z-index:2;" id='h9'><br> </div>
-	      <span onclick=rotate_by_house(10); style="z-index:2;" id='make_ascndnt_h10' 
-		  title='rotate_make_this_H1' class='small rotb10'>m</span>
-	      <div class="b10" style="z-index:2;" id='h10'><br> </div>
-	      <span onclick=rotate_by_house(11); style="z-index:2;" id='make_ascndnt_h11' 
-		  title='rotate_make_this_H1' class='small rotb11'>m</span>
-	      <div class="b11" style="z-index:2;" id='h11'><br> </div>
-	      <span onclick=rotate_by_house(12); style="z-index:2;" id='make_ascndnt_h12' 
-		  title='rotate_make_this_H1' class='small rotb12'>m</span>
-	      <div class="b12" style="z-index:2;" id='h12'><br> </div>
-
-
-	      <div class="gb1 ggraha" 
-			  style="font-size: 90%;z-index:2;" id='gh1'> </div>
-	      <div class="gb2 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh2'> </div>
-	      <div class="gb3 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh3'> </div>
-	      <div class="gb4 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh4'> </div>
-	      <div class="gb5 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh5'> </div>
-	      <div class="gb6 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh6'> </div>
-	      <div class="gb7 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh7'> </div>
-	      <div class="gb8 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh8'> </div>
-	      <div class="gb9 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh9'> </div>
-	      <div class="gb10 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh10'> </div>
-	      <div class="gb11 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh11'> </div>
-	      <div class="gb12 ggraha" 
-		  style="font-size: 90%;z-index:2;" id='gh12'> </div>
-
-
-
+	      <!-- <div class=" p-1 m-1 chart_title h4 bg-warning text-danger font-weight-bold"   -->
+		    <!-- onclick="{  -->
+			<!-- document.getElementById('modal2B').style.display = 'block'; -->
+			<!-- document.getElementById('modal2M').innerHTML  = choose_view_generate_form();  -->
+		    <!-- }" -->
+	      <!-- style="z-index:3;font-size: 150%; "   -->
+	      <!-- id='chart_title'>D1</div>  -->
+	      <!-- List of divs for RASHINUM class rbN rb1 to rb12 -->
+	      <!-- <div class="rb1 h5 rashinum font-weight-bold text-black"  -->
+	      <!-- style="z-index:2;font-size: 120%; "  -->
+	      <!-- id='rashi_in_h1'>1</div> -->
+	      <!--  -->
+	      <!--  -->
+	      <!-- <div class="house b1" style="z-index:2;" id='h1'><br><b>ASC</b> </div> -->
+	      <!-- List of divs for ROTATE buttons class rotbN rotb1 to rotb12 -->
+	      <!-- <span onclick=rotate_by_house(2); style="z-index:2;" id='make_ascndnt_h2'  -->
+		  <!-- title='rotate_make_this_H1' class='rot small rotb2'>m</span>  -->
+	      <!--  -->
+	      <!--  -->
+	      <!-- List of divs for GocharGrahs buttons class gbN gb1 to gb12 -->
+	      <!-- <div class="gb1 ggraha"  -->
+		  <!-- style="font-size: 90%;z-index:2;" id='gh1'> </div> -->
 	      <!-- <div class="bottom-left">Bottom Left</div> -->
 	      <!-- <div class="top-left">Top Left</div> -->
 	      <!-- <div class="top-right">Top Right</div> -->
 	      <!-- <div class="bottom-right">Bottom Right</div> -->
 	      <!-- <div class="centered">Centered</div> -->
 	    </div>
-
-
-
-	    <div id="settings_panel" class="col-4 d-none m-0 p-0 text-primary">
-
-	    <span id='ret2Notes'  onclick='disp_notes();'
-	      class='btn btn-primary my-0 py-0 mx-0 px-0 h5'>Return-to--Notes
-	    <img id='ret2NotesImg2'  onclick='disp_notes();' src='images/list.jpg'
-		 title="Display Notes" alt="DisplayNotes" height='31'/></span> <br>
-
-	<span class='text-primary h5'>Lagna</span>
-	    <select onchange = "change_ascendant(document.getElementById('lagna').value);"
-		name="lagna" id="lagna">
-		<option value="XX">XX</option>
-		<option value="1">1:Mesha/Aires</option>
-		<option value="2">2:Vrishabha/Tauraus</option>
-		<option value="3">3:Mithuna/Gemini</option>
-		<option value="4">4:Karka/Cancer</option>
-		<option value="5">5:Simha/Leo</option>
-		<option value="6">6:Kanya/Virgo</option>
-		<option value="7">7:Tula/Libra</option>
-		<option value="8">8:Vrischika/Scorpio</option>
-		<option value="9">9:Dhanu/Saggitarius</option>
-	       <option value="10">10:Makara/Capricorn</option>
-	       <option value="11">11:Kumbha/Aquarius</option>
-	       <option value="12">12:Meen/Pisces</option>
-	    </select>
-	<br> 
-	<div class="row w-100">
-	    <div class="col-8">
-	    <input id='la_deg' type="text" style="width:54px"  
-	       placeholder='Deg' onchange="save_degree('La');"
-	    class='py-0 my-0 text-primary font-weight-bold h6'/>
-	    <input id='la_min' type="text" style="width:54px"  
-	       placeholder='Min' onchange="save_degree('La');"
-	    class='py-0 my-0 text-primary font-weight-bold h6'/>
-	    <input id='la_sec' type="text" style="width:54px"  
-	       placeholder='Sec' onchange="save_degree('La');"
-	    class='py-0 my-0 text-primary font-weight-bold h6'/>
-	    </div>
-	</div>
-	<br>
+	    <div id="settings_panel" class="col-6 d-none m-0 p-0 text-primary">
+		<span 
+		    onclick="{ document.getElementById('modalB').style.display = 'block';
+			document.getElementById('modalM').innerHTML  =  
+			    '<span class=\'h5 text-danger font-weight-bold\'>';
+			document.getElementById('modalM').innerHTML  +=  
+			    'Input ClipBoard from Jagannath Hora</span><br>';
+			document.getElementById('modalM').innerHTML  +=  
+			    '<textarea class=\'small mx-2 text-primary col-12\' id=\'free_form_settings\' +\
+			       name=\'free_form_settings\' rows=\'18\'>rama</textarea>';
+			document.getElementById('modalM').innerHTML  +=  
+		       '<span onclick=\'process_jh_freeForm_settings();\' +\
+			    class=\'btn btn-primary m-0 p-0\'>Import</span>';
+		    }"
+		    class='m-0 p-0 btn btn-info float-right'>JH-Import-FreeFromText</span><br>
+		<!--  -->
+		<span class='text-primary h5'>Lagna</span>
+		<select onchange = "change_ascendant(document.getElementById('lagna').value);"
+		    name="lagna" id="lagna">
+		    <option value="XX">XX</option>
+		    <option value="1">1:Mesha/Aires</option>
+		    <option value="2">2:Vrishabha/Tauraus</option>
+		    <option value="3">3:Mithuna/Gemini</option>
+		    <option value="4">4:Karka/Cancer</option>
+		    <option value="5">5:Simha/Leo</option>
+		    <option value="6">6:Kanya/Virgo</option>
+		    <option value="7">7:Tula/Libra</option>
+		    <option value="8">8:Vrischika/Scorpio</option>
+		    <option value="9">9:Dhanu/Saggitarius</option>
+		   <option value="10">10:Makara/Capricorn</option>
+		   <option value="11">11:Kumbha/Aquarius</option>
+		   <option value="12">12:Meen/Pisces</option>
+		</select>
+		<br> 
+		<div class="row w-100">
+		    <div class="col-8">
+		    <input id='la_deg' type="text" style="width:54px"  
+		       placeholder='Deg' onchange="save_degree('La');"
+		    class='py-0 my-0 text-primary font-weight-bold h6'/>
+		    <input id='la_min' type="text" style="width:54px"  
+		       placeholder='Min' onchange="save_degree('La');"
+		    class='py-0 my-0 text-primary font-weight-bold h6'/>
+		    <input id='la_sec' type="text" style="width:54px"  
+		       placeholder='Sec' onchange="save_degree('La');"
+		    class='py-0 my-0 text-primary font-weight-bold h6'/>
+		    </div>
+		</div>
+		<br>
+	<!-- SU SUN  -->
 	<div class="row w-100">
 	    <div class="col-1">
 		<span class='h3 graha font-weight-bold text-danger d-none' 
@@ -314,53 +262,52 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 		    <option value="h11">H11</option>
 		    <option value="h12">H12</option>
 		</select>
-		<input id='su_deg' type="text" style="width:54px"  
-		   placeholder='Deg' onchange="save_degree('Su');"
+		<input id='su_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Su');"
 		class='py-0 my-0 text-primary font-weight-bold h6'/>
-		<input id='su_min' type="text" style="width:54px"  
-		   placeholder='Min' onchange="save_degree('Su');"
+		<input id='su_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Su');"
 		class='py-0 my-0 text-primary font-weight-bold h6'/>
-		<input id='su_sec' type="text" style="width:54px"  
-		   placeholder='Sec' onchange="save_degree('Su');"
+		<input id='su_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Su');"
 		class='py-0 my-0 text-primary font-weight-bold h6'/>
+	    </div>
 	</div>
-    </div>
+	<!-- MO MOON  -->
 	<div class="row w-100">
 	    <div class="col-1">
-	<span class='h3 graha font-weight-bold text-success d-none' 
-	    style="font-size: 180%;" id='Mo'><br>Mo</span>
-	<span class='text-success h5'>Mo</span>
+		<span class='h3 graha font-weight-bold text-success d-none' 
+		    style="font-size: 180%;" id='Mo'><br>Mo</span>
+		<span class='text-success h5'>Mo</span>
 	    </div>
 	    <div class="col-8">
-	<select onchange = "{ 
-		var mo_h = document.getElementById('h_mo').value; 
-		place_graha_in_house('Mo',mo_h);
-		$('#Mo').detach().prependTo('#'+mo_h); 
-		$('#Mo').removeClass('d-none');}"
-	    name="h_mo" id="h_mo">
-	    <option value="XX">XX</option>
-	    <option value="h1">H1</option>
-	    <option value="h2">H2</option>
-	    <option value="h3">H3</option>
-	    <option value="h4">H4</option>
-	    <option value="h5">H5</option>
-	    <option value="h6">H6</option>
-	    <option value="h7">H7</option>
-	    <option value="h8">H8</option>
-	    <option value="h9">H9</option>
-	    <option value="h10">H10</option>
-	    <option value="h11">H11</option>
-	    <option value="h12">H12</option>
-	</select>
-	    <input id='mo_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Mo');"
-	    class='py-0 my-0 text-primary font-weight-bold h6'/>
-	    <input id='mo_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Mo');"
-	    class='py-0 my-0 text-primary font-weight-bold h6'/>
-	    <input id='mo_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Mo');"
-	    class='py-0 my-0 text-primary font-weight-bold h6'/>
+		<select onchange = "{ 
+			var mo_h = document.getElementById('h_mo').value; 
+			place_graha_in_house('Mo',mo_h);
+			$('#Mo').detach().prependTo('#'+mo_h); 
+			$('#Mo').removeClass('d-none');}"
+		    name="h_mo" id="h_mo">
+		    <option value="XX">XX</option>
+		    <option value="h1">H1</option>
+		    <option value="h2">H2</option>
+		    <option value="h3">H3</option>
+		    <option value="h4">H4</option>
+		    <option value="h5">H5</option>
+		    <option value="h6">H6</option>
+		    <option value="h7">H7</option>
+		    <option value="h8">H8</option>
+		    <option value="h9">H9</option>
+		    <option value="h10">H10</option>
+		    <option value="h11">H11</option>
+		    <option value="h12">H12</option>
+		</select>
+		<input id='mo_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Mo');"
+		class='py-0 my-0 text-primary font-weight-bold h6'/>
+		<input id='mo_min' type="text" style="width:54px"  placeholder='Min' onchange="save_degree('Mo');"
+		class='py-0 my-0 text-primary font-weight-bold h6'/>
+		<input id='mo_sec' type="text" style="width:54px"  placeholder='Sec' onchange="save_degree('Mo');"
+		class='py-0 my-0 text-primary font-weight-bold h6'/>
 	    </div>
 	</div>
 	<br>
+	<!-- JU JUPITER  -->
 	<div class="row w-100">
 	    <div class="col-1">
 	<span class='h3 graha graha font-weight-bold text-success d-none' 
@@ -574,9 +521,9 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	    </div>
 	    <div class="col-8">
 	<select onchange = "{ 
-		var ra_h = 'h' + document.getElementById('h_ra').value; 
+		var ra_h = document.getElementById('h_ra').value; 
 		place_graha_in_house('Ra',ra_h);
-		var ke_val = (parseInt(document.getElementById('h_ra').value)+6)%12
+		var ke_val = (parseInt(ra_h.substring(1))+6)%12
 		if (ke_val==0) { ke_val=12; }
 		var ke_h = 'h' + ke_val.toString(); 
 		place_graha_in_house('Ke',ke_h);
@@ -586,19 +533,19 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 		$('#Ke').removeClass('d-none');
 		}"
 	    name="h_ra" id="h_ra">
-	    <option value="0">XX</option>
-	    <option value="1">H1</option>
-	    <option value="2">H2</option>
-	    <option value="3">H3</option>
-	    <option value="4">H4</option>
-	    <option value="5">H5</option>
-	    <option value="6">H6</option>
-	    <option value="7">H7</option>
-	    <option value="8">H8</option>
-	    <option value="9">H9</option>
-	    <option value="10">H10</option>
-	    <option value="11">H11</option>
-	    <option value="12">H12</option>
+	    <option value="h0">XX</option>
+	    <option value="h1">H1</option>
+	    <option value="h2">H2</option>
+	    <option value="h3">H3</option>
+	    <option value="h4">H4</option>
+	    <option value="h5">H5</option>
+	    <option value="h6">H6</option>
+	    <option value="h7">H7</option>
+	    <option value="h8">H8</option>
+	    <option value="h9">H9</option>
+	    <option value="h10">H10</option>
+	    <option value="h11">H11</option>
+	    <option value="h12">H12</option>
 	</select>
 	    <input id='ra_deg' type="text" style="width:54px"  placeholder='Deg' onchange="save_degree('Ra');"
 	    class='py-0 my-0 text-primary font-weight-bold h6'/>
@@ -608,63 +555,70 @@ onclick = "{document.getElementById('modal2B').style.display = 'none';}"
 	    class='py-0 my-0 text-primary font-weight-bold h6'/>
 	    </div>
 	</div>
-	<hr>
-	<span class='text-info font-weight-bold'>Open Saved:</span>
-	<input type="file" name="file-input" id="file-input" multiple>
-	<br><pre id="file-content"></pre>
-	<span class='text-info font-weight-bold'>Gochar:</span>
-	<input type="file" name="gochar-input" id="gochar-input">
+	<!-- <hr> -->
+	<span class='text-info font-weight-bold'>Open Saved:</span> 
+	<input type="file" name="file-input" id="file-input" multiple> 
+	<!-- <br><pre id="file-content"></pre> -->
+	<!-- <span class='text-info font-weight-bold'>Gochar:</span> -->
+	<!-- <input type="file" name="gochar-input" id="gochar-input"> -->
 
 
-	    </div>
+    </div>
 
-
-
-
-	    <div id="notes_panel" class="col-4 m-0 p-0 text-primary">
-	  <img id='disp_settings2' src="images/settings_2.jpg"  
-	      title="Display Settings" alt="dispSettings"   class='mr-1'
-	      onclick="disp_settings();" height='18'/>
-	    File: <input id='j_filename' type="text" class='w-30 text-warning bg-secondary font-weight-bold h6'/>
-	    <br><span class='border border-5 border-danger my-2 mx-1 py-1'> View: 
-	       <!-- <select id='j_view' onchange = "change_view(document.getElementById('j_view').value);" -->
-	       <select id='j_view' onfocus = "save_view(this.value)" onchange = "change_view(this);"
-	       ></select>
-	       <script>
-		   views['Basic'] ={};
-		   var select = document.getElementById('j_view');
-		   for (v in views) {
-		       select.options[select.options.length] = new Option(v,v);
-		   }
-	       </script>
-	       <!-- <input id='j_view' type="text" class='w-25 text-warning bg-secondary font-weight-bold h6'/> -->
-	      <img id='save_view' src="images/save.png" alt="SaveView"  class='ml-2'
-	      onclick="save_view();" height='18'/>
-	      <img id='add_view_form' src="images/plus_c.png" alt="AddView"  class='mx-2'
-	      onclick="add_view_form();" height='18'/>
-	    </span>
-	    <!-- <img id='disp_settings' src="images/settings_2.jpg" alt="dispSettings"  class='mx-2' -->
-	    <!-- onclick="disp_settings();" height='18'/> -->
-	    <hr class='m-0 p-0 border-info'>
-	    <span id ='title' class='m-0 p-0'>Basic-Title:</span> 
-	    <input id='j_title' type="text" class='w-100 text-primary font-weight-bold h6'/>
-	    <span id ='notes' class='m-0 p-0'>Basic-Notes:</span> 
-	    <textarea class='w-100 text-primary h6' rows='11' id='j_notes'></textarea>
-	    <span id ='comments' class='m-0 p-0'>Basic-Comments:</span> 
-	    <textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
-	    <span id ='drawings' class='m-0 p-0'>Basic-Drawings:</span> <br>
-	    <span id ='j_drawings' class='m-0 p-0 w-90 text-wrap'></span> 
-	    </div>
+	<div id="notes_panel" class="col-4 m-0 p-0 text-primary">
+	<!-- 
+	    <img id='disp_settings2' src="images/settings_2.jpg"   
+	  title="Display Settings" alt="dispSettings"   class='mr-1'
+	  onclick="disp_settings();" height='18'/>
+	-->
+	File: <input id='j_filename' type="text" class='w-30 text-warning bg-secondary font-weight-bold h6'/>
+	<br><span class='border border-5 border-danger my-2 mx-1 py-1'> View: 
+	   <!-- <select id='j_view' onchange = "change_view(document.getElementById('j_view').value);" -->
+	   <select id='j_view' onfocus = "save_view(this.value)" onchange = "change_view(this);"
+	   ></select>
+	   <script>
+	       views['Basic'] ={};
+	       var select = document.getElementById('j_view');
+	       for (v in views) {
+		   select.options[select.options.length] = new Option(v,v);
+	       }
+	   </script>
+	   <!-- <input id='j_view' type="text" class='w-25 text-warning bg-secondary font-weight-bold h6'/> -->
+	  <img id='save_view' src="images/save.png" alt="SaveView"  class='ml-2'
+	  onclick="save_view();" height='18'/>
+	  <img id='add_view_form' src="images/plus_c.png" alt="AddView"  class='mx-2'
+	  onclick="add_view_form();" height='18'/>
+	</span>
+	<!-- <img id='disp_settings' src="images/settings_2.jpg" alt="dispSettings"  class='mx-2' -->
+	<!-- onclick="disp_settings();" height='18'/> -->
+	<hr class='m-0 p-0 border-info'>
+	<span id ='title' class='m-0 p-0'>Basic-Title:</span> 
+	<input id='j_title' type="text" class='w-100 text-primary font-weight-bold h6'/>
+	<span id ='notes' class='m-0 p-0'>Basic-Notes:</span> 
+	<textarea class='w-100 text-primary h6' rows='11' id='j_notes'></textarea>
+	<!--  
+	<span id ='comments' class='m-0 p-0'>Basic-Comments:</span> 
+	<textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
+	-->
+	<span id ='drawings' class='m-0 p-0'>Basic-Observations:</span> <br>
+	<span id ='j_drawings' class='m-0 p-0 w-90 text-wrap'></span> 
+	<br><span id ='comments' class='m-0 p-0'>Comments:</span> 
+	<span id ='j_comm_title' class='text-success font-weight-bold m-0 p-0'></span> <br>
+	<textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
 	</div>
-	</div>
+
+    </div>
+    </div>
 	<div class="row w-100 m-0 p-0 bg-white border border-5 border-info">
-	    <div class="col-12 m-0 p-0 " id="j_screenshots">
-	    <button id='chart_d1' onclick="chart_d1();" 
-		    class="font-weight-bold bg-warning btn-link border border-primary py-0 px-2 mx-0">D1</button>
-	    <button id='chart_d9' onclick="chart_d9();" 
-		    class="font-weight-bold text-warning btn-link border border-primary py-0 px-2 mx-0">D9</button>
-	    <!-- <button id='chart_d1d9' onclick="chart_d1d9();"  -->
-	    <!-- class="font-weight-bold text-warning btn-link border border-primary py-0 px-2 mx-0">D1+D9</button> -->
+	    <div class="col-12 m-0 p-0 " id="j_view_formats">
+	    <!-- <button id='chart_d1' onclick="chart_d1();"  -->
+		    <!-- class="font-weight-bold bg-warning btn-link border border-primary py-0 px-2 mx-0">D1</button> -->
+	    <button id='view_1x1' onclick="view_1x1();" 
+		    class="font-weight-bold text-warning btn-link border border-primary py-0 px-2 mx-0">1x1</button>
+	    <button id='view_1x2' onclick="view_1x2();"  
+	    class="font-weight-bold text-warning btn-link border border-primary py-0 px-2 mx-0">1x2</button> 
+	    <button id='view_2x2' onclick="view_2x2();"  
+	    class="font-weight-bold text-warning btn-link border border-primary py-0 px-2 mx-0">2x2</button> 
 	    </div>
 	</div>
     </div>
@@ -686,6 +640,9 @@ window.addEventListener('load', ()=>{
     document.addEventListener('mouseup', stopPainting);
     document.addEventListener('mousemove', sketch);
     window.addEventListener('resize', resize);
+    // chart_d1();
+    initialize_l_out();
+    view_1x1();
 });
 //
 const canvas = document.querySelector('#canvas');
@@ -711,8 +668,8 @@ let paint = false;
 // let lines = [];
 // let lines_by_color = [];
 // let grahas_in_rashi = {};
-// let ascendant_rashi_num = "1";
-// let curr_h1_rashi_num = "";
+// let rashiNum_asc = "1";
+// let rashiNum_h1 = "";
 for (let i=1; i<=12; i++) { grahas_in_rashi[i.toString()] = []; }
 // Updates the coordianates of the cursor when
 // an event e is triggered to the coordinates where
@@ -724,7 +681,7 @@ function getPosition(event){
     // coord.y = event.clientY;
     // alert(coord.x);
     coord.x = event.clientX - document.getElementById('first_col').offsetWidth;
-    coord.y = event.clientY - document.getElementById('header').offsetHeight - document.getElementById('j_opened').offsetHeight-document.getElementById('j_screenshots').offsetHeight;
+    coord.y = event.clientY - document.getElementById('header').offsetHeight - document.getElementById('j_opened').offsetHeight-document.getElementById('j_view_formats').offsetHeight;
 }
 // The following functions toggle the flag to start
 // and stop drawing
