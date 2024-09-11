@@ -1606,6 +1606,8 @@ function view_1x2() {
 }
 
 function view_2x2() {
+    // console.log(l_out);
+    // console.log(divisional_data);
     if (typeof divisional_data['d1'] === 'undefined') { initialize_div_d1(); }
     if (typeof l_out['211'] === 'undefined') { initialize_l_out('211'); }
     if (typeof l_out['212'] === 'undefined') { initialize_l_out('212'); }
@@ -1820,6 +1822,7 @@ function view_1x1(loc='00'){
     } else {
 	disp_degree('hide');
     }
+    view_dasha();
 }
 
 
@@ -2249,7 +2252,349 @@ function createDiv(parentId, topPos, leftPos, width, height) {
     $("#" + parentId).append(divElem);
 }
 
+function view_dasha() {
+    // console.log(divisional_data);
+    prep_lookup_data1();
+    var moon_deg = divisional_data["d1"]["degree_of_grahas"]['Mo'][0];
+    var moon_min = divisional_data["d1"]["degree_of_grahas"]['Mo'][1];
+    var moon_sec = divisional_data["d1"]["degree_of_grahas"]['Mo'][2];
+    var moon_tot_sec = (parseInt(moon_deg)*60+parseInt(moon_min))*60+parseFloat(moon_sec);
+    // var moon_tot_sec = (parseInt(moon_deg)*60+parseInt(moon_min))*60+parseFloat(moon_sec);
+    // console.log(moon_deg + "moon_deg " + moon_min + " moon_min " + moon_sec + " moon_sec");
+    // console.log(moon_tot_sec + " is the moon_tot_sec");
+    // find moon rashi
+    var moon_rashiNum ='';
+    for (c_rashiNum in divisional_data["d1"]['grahas_in_rashi']) {
+	if (divisional_data["d1"]['grahas_in_rashi'][c_rashiNum].includes('Mo')) { 
+	    moon_rashiNum = c_rashiNum;
+	    break;
+	}
+    }
+    // console.log(moon_rashiNum + " is the moon_rashiNum");
+    moon_tot_sec += (parseInt(moon_rashiNum)-1)*30*3600;
+    // console.log(moon_tot_sec + " is the moon_tot_sec");
+    moon_pada_cnt = moon_tot_sec/(200*60) ; // 3.33 deg = 200 mins
+    // moon_pada_cnt_0 = moon_tot_sec/(200*60) ; // 3.33 deg = 200 mins
+    // moon_pada_cnt = Math.floor(moon_pada_cnt_0) ; // 3.33 deg = 200 mins
+    // console.log(moon_pada_cnt + " is the moon_pada_cnt");
+    //
+    naks_idx = moon_pada_cnt / 4;
+    // console.log(naks_idx + " is the naks_idx");
+    //
+    naks_idx_mod9 = Math.ceil(moon_pada_cnt / 4)%9;
+    // console.log(naks_idx_mod9 + " is the naks_idx_mod9");
+    //
+    birth_dasha_lord = lkup['dasha_order'][naks_idx_mod9-1];
+    // console.log(birth_dasha_lord + " is the birth_dasha_lord");
+    //
+    fraction_left = 1 - naks_idx%1 // N%1 gets the decimal portion of N
+    // console.log(fraction_left + " is the fraction_left");
+    //
+    years_birth_md = lkup['dasha_dur'][birth_dasha_lord]*fraction_left;
+    // console.log(years_birth_md + " is the years_birth_md of " + birth_dasha_lord);
+    //
+    years_since_bms = lkup['dasha_dur'][birth_dasha_lord]*(naks_idx%1);// birth_md_started
+    //
+    const date_x = new Date(document.getElementById('dob').value); 
+    let date_bms = new Date(document.getElementById('dob').value);// birth_md_start
+    date_bms.setDate(date_bms.getDate() - years_since_bms*year_days);
+    // console.log("dob is " + date_x);
+    var year_days =  365.25;
+    // display dasha years now
+    // var c_divStr = "";
+    var c_divStr = "<span class='text-info font-weight-bold'>Dasha</span><br>";
+    var curr_md_lord = birth_dasha_lord;
+    var curr_md_idx = '';
+    var date_str=""; var pre_str="";
+    let dlords_str = ''; let durations_str = ''; let beg_dates_str = '';
+    //
+    for (x = 0 ; x < lkup['dasha_order'].length ; x++){
+	curr_md_idx = (x+naks_idx_mod9-1)%lkup['dasha_order'].length;
+	curr_md_lord = lkup['dasha_order'][curr_md_idx];
+	if (x==0){ 
+	    md_dur = lkup['dasha_dur'][curr_md_lord]*fraction_left;
+	}
+	else  { md_dur = lkup['dasha_dur'][curr_md_lord] };
+	//
+	date_str = date_x.getFullYear() + "-" 
+	    + (parseInt(date_x.getMonth())+1) + "-" 
+	    + (parseInt(date_x.getDate())+1);
+	dlords_str = '[\''+curr_md_lord+'\']';
+	durations_str = '[\''+md_dur+'\']';
+	beg_dates_str = '[\''+date_str+'\']';
+	c_divStr += '<span class="text-primary"  id="md_'+curr_md_lord+'" ';
+	c_divStr += 'onclick="create_dasha_view('+dlords_str+','
+	    +beg_dates_str+','+durations_str+')"; '
+	c_divStr += ' >'+curr_md_lord+'</span> ';
+	c_divStr += '<span class="text-info"  id="md_toDate_'+curr_md_lord+'" ';
+	c_divStr += ' >'+ date_str + '</span> ';
+	c_divStr += '<span class="text-primary"  id="next_dur_'+curr_md_lord+'" ';
+	c_divStr += ' > next '+Math.round(md_dur*10)/10+'yr</span><br>';
+	date_x.setDate(date_x.getDate() + md_dur*year_days); // Add days
+	//
+	// pre_str = encodeURIComponent('<span onclick="view_dasha();">'+curr_md_lord+'</span>');
+	// c_divStr += '<span class="text-primary"  id="md_'+curr_md_lord+'" ';
+	// c_divStr += 'onclick="create_dasha_view(\''+date_str+'\',\''
+	    // +md_dur+'\',\''+curr_md_lord+'\',\''+pre_str+'\')"; '
+	// c_divStr += ' >'+curr_md_lord+'</span> ';
+	// c_divStr += '<span class="text-info"  id="md_toDate_'+curr_md_lord+'" ';
+	// c_divStr += ' >'+ date_str + '</span> ';
+	// c_divStr += '<span class="text-primary"  id="next_dur_'+curr_md_lord+'" ';
+	// c_divStr += ' > next '+Math.round(md_dur*10)/10+'yr</span><br>';
+	// // if (x==1) {
+	    // // c_divStr += create_dasha_view(date_str,md_dur,curr_md_lord);
+	// // }
+	// date_x.setDate(date_x.getDate() + md_dur*year_days); // Add days
+    }
+    // $(dasha_panel).append(c_divStr);
+    document.getElementById('dasha_panel').innerHTML = c_divStr;
+}
 
+function create_dasha_view0(c_beg_date,c_dur,parent_gr="",pre_str=""){
+    var c_date_x = new Date(c_beg_date);
+    var d_divStr = "";
+    var year_days =  365.25;
+    var curr_lord = parent_gr;
+    var date_str_x = '';
+    var curr_init_idx = lkup['dasha_order'].findIndex((val) => val === curr_lord);
+    // console.log("create_dasha_view: curr_init_idx: "+ curr_init_idx);
+    var curr_lord_idx = ''; var pre_str_x="";
+    for (y = 0 ; y < 9 ; y++){
+	curr_lord_idx = (curr_init_idx+y)%9;
+	curr_lord = lkup['dasha_order'][curr_lord_idx];
+	date_str_x = c_date_x.getFullYear() + "-"
+	    + (parseInt(c_date_x.getMonth())+1) + "-"
+	    + (parseInt(c_date_x.getDate())+1);
+	curr_dur = c_dur*lkup['dasha_frac'][curr_lord];
+	pre_str_x = pre_str + encodeURIComponent('<span onclick="create_dasha_view(\'' + c_beg_date + '\',\''+c_dur+'\',\''+parent_gr+'\',\''+pre_str+'\');"' + '>'+curr_lord+'</span>');
+	// console.log("create_dasha_view: curr_lord_idx: "+ curr_lord_idx);
+	d_divStr += decodeURIComponent(pre_str) + "-" 
+	+'<span class="text-primary ml-1"  id="d_'+curr_lord+'" ';
+	d_divStr += ' onclick="create_dasha_view(\''+date_str_x+'\',\''
+            +curr_dur+'\',\''+curr_lord+'\',\''+pre_str_x+'\');"';
+	d_divStr += ' >'+curr_lord+'</span> ';
+	d_divStr += '<span class="text-info"  id="md_toDate_'+curr_lord+'" ';
+	d_divStr += ' >'+ c_date_x.getFullYear()
+			+ "-" + (parseInt(c_date_x.getMonth())+1)
+			+ "-" + (parseInt(c_date_x.getDate())+1)+'</span> ';
+	d_divStr += '<span class="text-primary"  id="next_dur_'+curr_lord+'" ';
+	d_divStr += ' > next '+Math.round(curr_dur*10)/10+'yr</span><br>';
+	c_date_x.setDate(c_date_x.getDate() + curr_dur*year_days); // Add days
+    }
+    // return d_divStr;
+    document.getElementById('dasha_panel').innerHTML = d_divStr;
+}
+
+function create_dasha_view(dlords,beg_dates,durations) {
+    // console.log(dlords);
+    // console.log(beg_dates);
+    // console.log(durations);
+    // dlords = [ mdL, adL, pdL, sdL,prdL ]
+    // beg_dates = [mdStart, adStart,pdStart,sdStart]
+    // durations = needed?
+    let year_days =  365.256363;
+    let month_days =  30.4;
+    let level = dlords.length;
+    let d_divStr = "<span class='text-info font-weight-bold'>Dasha</span><br>";
+    let mdl_str=''; let adl_str='';
+    // console.log("level " + level)
+    if (level==0) {view_dasha();};
+    if (level>0) {
+	var curr_md_dur = parseFloat(durations[0]);
+	var curr_md_lord = dlords[0];
+	var curr_md_date = new Date(beg_dates[0]);
+	mdl_str = '<span onclick="view_dasha();">'+curr_md_lord+'</span>-';
+    }
+    //
+    if (level>1) {
+	var curr_ad_dur = parseFloat(durations[1]);
+	var curr_ad_lord = dlords[1];
+	var curr_ad_date = new Date(beg_dates[1]);
+	// generate AD lord string
+	dlords_str = '[\''+curr_md_lord+'\']';
+	durations_str = '[\''+curr_md_dur+'\']';
+	var md_date_str = curr_md_date.getFullYear() + "-" 
+		+ (parseInt(curr_md_date.getMonth())+1) + "-" 
+		+ (parseInt(curr_md_date.getDate())+1);
+	beg_dates_str = '[\''+md_date_str+'\']';
+	adl_str =  '<span class="text-primary" ';
+	adl_str += 'onclick="create_dasha_view('+dlords_str+','
+	    +beg_dates_str+','+durations_str+')"; '
+	adl_str += ' >'+curr_ad_lord+'</span>-';
+    }
+    if (level>2) {
+	var curr_pd_dur = parseFloat(durations[2]);
+	var curr_pd_lord = dlords[2];
+	var curr_pd_date = new Date(beg_dates[2]);
+	// generate AD lord string
+	dlords_str = '[\''+curr_md_lord+'\',\''+curr_ad_lord+'\']';
+	durations_str = '[\''+curr_md_dur+'\',\''+curr_ad_dur+'\']';
+	var ad_date_str = curr_ad_date.getFullYear() + "-" 
+		+ (parseInt(curr_ad_date.getMonth())+1) + "-" 
+		+ (parseInt(curr_ad_date.getDate())+1);
+	beg_dates_str = '[\''+md_date_str+'\',\''+ad_date_str+'\']';
+	pdl_str =  '<span class="text-primary" ';
+	pdl_str += 'onclick="create_dasha_view('+dlords_str+','
+	    +beg_dates_str+','+durations_str+')"; '
+	pdl_str += ' >'+curr_pd_lord+'</span>-';
+    }
+    //
+    var curr_lord_idx = '';
+    if (level==1) {
+	// show both MD-AD format
+	var curr_init_idx = lkup['dasha_order'].findIndex((val) => val === curr_md_lord);
+	// let mdl_str = '<span onclick="view_dasha();">'+curr_lord+'</span>';
+	let dlords_str = ''; let durations_str = ''; let beg_dates_str = '';
+	let c_dur = '';
+	for (y = 0 ; y < 9 ; y++){
+	    curr_lord_idx = (curr_init_idx+y)%9;
+	    curr_lord = lkup['dasha_order'][curr_lord_idx];
+	    date_str_x = curr_md_date.getFullYear() + "-" 
+		+ (parseInt(curr_md_date.getMonth())+1) + "-" 
+		+ (parseInt(curr_md_date.getDate())+1);
+	    c_dur = curr_md_dur*lkup['dasha_frac'][curr_lord];
+	    dlords_str = '[\''+dlords[0]+'\',\''+curr_lord+'\']';
+	    durations_str = '[\''+durations[0]+'\',\''+c_dur+'\']';
+	    beg_dates_str = '[\''+beg_dates[0]+'\',\''+date_str_x+'\']';
+	    d_divStr += mdl_str + "-";
+	    d_divStr += '<span onclick="create_dasha_view('
+		+ dlords_str +',' + beg_dates_str +',' + durations_str +');">';
+	    d_divStr += curr_lord + '</span>';
+	    d_divStr += '<span class="text-info"  id="md_toDate_'+curr_lord+'" ';
+	    d_divStr += ' >'+ date_str_x + '</span> ';
+	    d_divStr += '<span class="text-primary"  id="next_dur_'+curr_lord+'" ';
+	    if (c_dur<1) {
+		let c_dur_months = c_dur*12;
+		if (c_dur_months<1) {
+		    let c_dur_days = c_dur_months*month_days;
+		    d_divStr += ' > next '+Math.round(c_dur_days*10)/10+'Da</span><br>';
+		} else {
+		    d_divStr += ' > next '+Math.round(c_dur_months*10)/10+'Mo</span><br>';
+		}
+	    } else {
+		d_divStr += ' > next '+Math.round(c_dur*10)/10+'yr</span><br>';
+	    }
+	    curr_md_date.setDate(curr_md_date.getDate() + c_dur*year_days);
+	}
+    }
+    if (level==2) {
+	let dlords_str = ''; let durations_str = ''; let beg_dates_str = '';
+	// show MD-AD-PD format
+	let c_dur = '';
+	var curr_lord = (' ' + curr_ad_lord).slice(1);
+	var curr_init_idx = lkup['dasha_order'].findIndex((val) => val === curr_lord);
+	for (y = 0 ; y < 9 ; y++){
+	    curr_lord_idx = (curr_init_idx+y)%9;
+	    curr_lord = lkup['dasha_order'][curr_lord_idx];
+	    date_str_x = curr_ad_date.getFullYear() + "-" 
+		+ (parseInt(curr_ad_date.getMonth())+1) + "-" 
+		+ (parseInt(curr_ad_date.getDate())+1);
+	    c_dur = curr_ad_dur*lkup['dasha_frac'][curr_lord];
+	    dlords_str = '[\''+dlords[0]+'\','
+		+'\''+dlords[1]+'\','
+		+'\''+curr_lord+'\''
+	    +']';
+	    durations_str = '[\''+durations[0]+'\','
+		+'\''+durations[1]+'\','
+		+'\''+c_dur+'\''
+	    +']';
+	    beg_dates_str = '[\''+beg_dates[0]+'\','
+		+'\''+beg_dates[1]+'\','
+		+'\''+date_str_x+'\''
+	    +']';
+	    d_divStr += mdl_str + "-" + adl_str + "-";
+	    d_divStr += '<span onclick="create_dasha_view('
+		+ dlords_str +',' + beg_dates_str +',' + durations_str +');">';
+	    d_divStr += curr_lord + '</span>';
+	    d_divStr += '<span class="text-info"  id="md_toDate_'+curr_lord+'" ';
+	    d_divStr += ' >'+ date_str_x + '</span> ';
+	    d_divStr += '<span class="text-primary"  id="next_dur_'+curr_lord+'" ';
+	    if (c_dur<1) {
+		let c_dur_months = c_dur*12;
+		if (c_dur_months<1) {
+		    let c_dur_days = c_dur_months*month_days;
+		    d_divStr += ' > next '+Math.round(c_dur_days*10)/10+'Da</span><br>';
+		} else {
+		    d_divStr += ' > next '+Math.round(c_dur_months*10)/10+'Mo</span><br>';
+		}
+	    } else {
+		d_divStr += ' > next '+Math.round(c_dur*10)/10+'yr</span><br>';
+	    }
+	    curr_ad_date.setDate(curr_ad_date.getDate() + c_dur*year_days);
+	}
+    }
+    if (level==3) {
+	let dlords_str = ''; let durations_str = ''; let beg_dates_str = '';
+	// show MD-AD-PD-SD format
+	let c_dur = '';
+	var curr_lord = (' ' + curr_pd_lord).slice(1);
+	var curr_init_idx = lkup['dasha_order'].findIndex((val) => val === curr_lord);
+	for (y = 0 ; y < 9 ; y++){
+	    curr_lord_idx = (curr_init_idx+y)%9;
+	    curr_lord = lkup['dasha_order'][curr_lord_idx];
+	    date_str_x = curr_pd_date.getFullYear() + "-" 
+		+ (parseInt(curr_pd_date.getMonth())+1) + "-" 
+		+ (parseInt(curr_pd_date.getDate())+1);
+	    c_dur = curr_pd_dur*lkup['dasha_frac'][curr_lord];
+	    dlords_str = '[\''+dlords[0]+'\','
+		+'\''+dlords[1]+'\','
+		+'\''+dlords[2]+'\','
+		+'\''+curr_lord+'\''
+	    +']';
+	    durations_str = '[\''+durations[0]+'\','
+		+'\''+durations[1]+'\','
+		+'\''+durations[2]+'\','
+		+'\''+c_dur+'\''
+	    +']';
+	    beg_dates_str = '[\''+beg_dates[0]+'\','
+		+'\''+beg_dates[1]+'\','
+		+'\''+beg_dates[2]+'\','
+		+'\''+date_str_x+'\''
+	    +']';
+	    d_divStr += mdl_str + "-" + adl_str + "-" + pdl_str + "-";
+	    d_divStr += '<span onclick="create_dasha_view('
+		+ dlords_str +',' + beg_dates_str +',' + durations_str +');">';
+	    d_divStr += curr_lord + '</span>';
+	    d_divStr += '<span class="text-info"  ';
+	    d_divStr += ' >'+ date_str_x + '</span> ';
+	    d_divStr += '<span class="text-primary"  ';
+	    if (c_dur<1) {
+		let c_dur_months = c_dur*12;
+		if (c_dur_months<1) {
+		    let c_dur_days = c_dur_months*month_days;
+		    d_divStr += ' > next '+Math.round(c_dur_days*10)/10+'Da</span><br>';
+		} else {
+		    d_divStr += ' > next '+Math.round(c_dur_months*10)/10+'Mo</span><br>';
+		}
+	    } else {
+		d_divStr += ' > next '+Math.round(c_dur*10)/10+'yr</span><br>';
+	    }
+	    curr_pd_date.setDate(curr_pd_date.getDate() + c_dur*year_days);
+	}
+    }
+    document.getElementById('dasha_panel').innerHTML = d_divStr;
+}
+
+function prep_lookup_data1() {
+    lkup['dasha_order']=['Ke','Ve','Su','Mo','Ma','Ra','Ju','Sa','Me'];
+    lkup['dasha_dur'] = {};
+    lkup['dasha_dur']['Ke']=7; lkup['dasha_dur']['Ve']=20; lkup['dasha_dur']['Su']=6;
+    lkup['dasha_dur']['Mo']=10; lkup['dasha_dur']['Ma']=7; lkup['dasha_dur']['Ra']=18;
+    lkup['dasha_dur']['Ju']=16; lkup['dasha_dur']['Sa']=19; lkup['dasha_dur']['Me']=17;
+    lkup['naks_data'] = {}
+    //
+    lkup['dasha_frac']={};
+    // lkup['dasha_frac']['Ke']=0.05833; lkup['dasha_frac']['Ve']=0.16667;
+    // lkup['dasha_frac']['Su']=0.05000; lkup['dasha_frac']['Mo']=0.08333;
+    // lkup['dasha_frac']['Ma']=0.05833; lkup['dasha_frac']['Ra']=0.15000;
+    // lkup['dasha_frac']['Ju']=0.13333; lkup['dasha_frac']['Sa']=0.15833;
+    // lkup['dasha_frac']['Me']=0.14167;
+    lkup['dasha_frac']['Ke']=0.0583333333333333; lkup['dasha_frac']['Ve']=0.166666666666667;
+    lkup['dasha_frac']['Su']=0.05; lkup['dasha_frac']['Mo']=0.0833333333333333;
+    lkup['dasha_frac']['Ma']=0.0583333333333333; lkup['dasha_frac']['Ra']=0.15;
+    lkup['dasha_frac']['Ju']=0.133333333333333; lkup['dasha_frac']['Sa']=0.158333333333333;
+    lkup['dasha_frac']['Me']=0.141666666666667;
+}
 
 
 

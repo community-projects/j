@@ -15,6 +15,7 @@
     let lines = [];
     let views = {};
     let l_out = {}
+    let lkup = {}
     let curr_layout_name = '1x1';
     let drawings = {};
     views['Basic'] = {};
@@ -202,6 +203,7 @@
 		    }"
 		    class='m-0 p-0 btn btn-info float-right'>JH-Import-FreeFromText</span><br>
 		<!--  -->
+		<span class='text-primary h5'>DOB</span><input type='date' id='dob'value='1973-12-08'/><br>
 		<span class='text-primary h5'>Lagna</span>
 		<select onchange = "change_ascendant(document.getElementById('lagna').value);"
 		    name="lagna" id="lagna">
@@ -604,7 +606,8 @@
 	<span id ='j_drawings' class='m-0 p-0 w-90 text-wrap'></span> 
 	<br><span id ='comments' class='m-0 p-0'>Comments:</span> 
 	<span id ='j_comm_title' class='text-success font-weight-bold m-0 p-0'></span> <br>
-	<textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
+	<textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea><br>
+	<div id='dasha_panel' class='bg-light' style="height: 108x; overflow: auto"></div>
 	</div>
 
     </div>
