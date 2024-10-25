@@ -16,6 +16,8 @@
     let views = {};
     let l_out = {}
     let lkup = {}
+    let vars = {}
+    let curr_vars = {}
     let curr_layout_name = '1x1';
     let drawings = {};
     views['Basic'] = {};
@@ -23,11 +25,14 @@
     let grahas_in_rashi = {};
     let grList_by_dNum_raNum = {};
     let divisional_data = {};
+    let gochar_data = {};
+    let c_gchar = {};
     let degree_of_grahas = {};
     let retro_planet_list = [];
     let curr_drawing_idList = [];
     let rashiNum_asc = "1";
     let rashiNum_h1 = "";
+    let year_days =  365.256363;
     // $(function(){ 
     //  $("#settings_panel").load("settings.html");
     // });
@@ -38,7 +43,7 @@
 <div id='header' class="row w-100 ml-1">
     <div class="col-4 m-0 p-0">
     <h2>JGD Kundli</h2>
-    <p>Jai gurudev v2.9<small><i> 11Apr2024</i></small></p>
+    <p>Jai gurudev v3.6<small><i> 15Oct2024</i></small></p>
     </div>
     <div class="col-8 m-0 p-0">
     <!-- TOP MENU ICONs on the top -->
@@ -99,53 +104,59 @@
 		    document.getElementById('canvas').style.zIndex = '1';
 		    lines = [];
 		    lines_by_color =[];
-		  }" title='ClearDrawing' height='27' 
+		  }" title='ClearDrawing' height='21' 
 	      />
 	    <br>
 	    <span id='strokeColor' class='d-none'>green</span>
 	    <span id='blue' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'blue';"
-		class='btn btn-primary my-0 py-0 mx-0 px-0'> BL </span><br>
+		class='btn btn-primary my-0 py-0 mx-0 px-0 small'> BL </span><br>
 	    <span id='green' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'green';"
-		class='btn btn-success my-0 py-0 mx-0 px-0'> GR </span><br>
+		class='btn btn-success my-0 py-0 mx-0 px-0 small'> GR </span><br>
 	    <span id='red' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'red';"
-		class='btn btn-danger my-0 py-0 mx-0 px-0'> RE </span><br>
+		class='btn btn-danger my-0 py-0 mx-0 px-0 small'> RE </span><br>
 	    <span id='magenta' 
 		onclick="document.getElementById('strokeColor').innerHTML = 'magenta';"
 		style="background-color:magenta;"
-		class='btn my-0 py-0 mx-0 px-0'> PN </span><br>
+		class='btn my-0 py-0 mx-0 px-0 small'> PN </span><br>
 	    <img id='undo' src="images/back.png"  class='my-0 py-0 mx-0 px-0' title='Undo Stroke'
 	    alt="Undo Stroke" onclick="undo_stroke();" height='21' /> <br> 
 	    <img id='SaveDrawing' src="images/save_drawing.png"  title='Take Snapshot of Drawing'
-	    alt="saveDrawing" onclick="save_drawing();" height='27' />
+	    alt="saveDrawing" onclick="save_drawing();" height='21' />
 	</div>
 	<!--  -->
 	<!--  -->
 	<div class='my-0 text-center'>
         	<br><hr class='my-0 py-0'> 
 	      <img id='plus_font' src="images/plus_c.png" alt="RashiNumIncrFontSize" 
-		onclick="incr_font_size('rashinum',10);" height='27' title='Incr Rashi Num FontSize'
+		onclick="incr_font_size('rashinum',10);" height='21' title='Incr Rashi Num FontSize'
 		/><br>R<br><img id='minus_font' src="images/minus_c.png" alt="RashiNumDescrontSize" 
-		onclick="incr_font_size('rashinum',-10);" height='27' title='Decr Rashi Num FontSize'
+		onclick="incr_font_size('rashinum',-10);" height='21' title='Decr Rashi Num FontSize'
 		/>
         	<br><hr class='my-1 py-0'> 
 	      <img id='plus_fontr' src="images/plus_c.png" alt="GrahaIncrFontSize" 
-		onclick="incr_font_size('house',10);" height='27' title='Incr Graha FontSize'
-		/><br>G<br><img id='minus_fontr' src="images/minus_c.png" alt="GrahaDescrontSize" 
-		onclick="incr_font_size('house',-10);" height='27' title='Decr Graha FontSize'
+		onclick="incr_font_size('house',10);" height='21' title='Incr Graha FontSize'
+		/><br>P<br><img id='minus_fontr' src="images/minus_c.png" alt="GrahaDescrontSize" 
+		onclick="incr_font_size('house',-10);" height='21' title='Decr Graha FontSize'
+		/>
+        	<br><hr class='my-1 py-0'> 
+	      <img id='plus_fontg' src="images/plus_c.png" alt="GGrahaIncrFontSize" 
+		onclick="incr_font_size('gchar',10);" height='21' title='Incr GGraha FontSize'
+		/><br>G<br><img id='minus_fontg' src="images/minus_c.png" alt="GGrahaDescrontSize" 
+		onclick="incr_font_size('gchar',-10);" height='21' title='Decr GGraha FontSize'
 		/>
         	<br><hr class='my-1 py-0'> 
 	      <img id='show_rotate_links' src="images/rotate.png" alt="ShowRotateHouseLinks" 
-		onclick="disp_rotate_links('show');" height='27' title='Toggle show/hide House Rotate Links'/>
+		onclick="disp_rotate_links('show');" height='21' title='Toggle show/hide House Rotate Links'/>
 	      <img id='hide_rotate_links' class='d-none' src="images/rotate.png" alt="HideRotateHouseLinks" 
-		onclick="disp_rotate_links('hide');" height='27' title='Toggle show/hide House Rotate Links'/>
+		onclick="disp_rotate_links('hide');" height='21' title='Toggle show/hide House Rotate Links'/>
         	<br><hr class='my-1 py-0'> 
 	      <img id='show_degree' src="images/degree.png" alt="ShowDegree"  class='d-none' 
-		onclick="disp_degree('show');" height='27' title='Toggle show/hide Degree'/>
+		onclick="disp_degree('show');" height='21' title='Toggle show/hide Degree'/>
 	      <img id='hide_degree' src="images/degree.png" alt="HideDegree" 
-		onclick="disp_degree('hide');" height='27' title='Toggle show/hide Degree'/>
+		onclick="disp_degree('hide');" height='21' title='Toggle show/hide Degree'/>
 	</div>
     </div>
     <div class="col-sm m-0 p-0">
@@ -188,6 +199,10 @@
 	      <!-- <div class="centered">Centered</div> -->
 	    </div>
 	    <div id="settings_panel" class="col-6 d-none m-0 p-0 text-primary">
+		<!--  -->
+	<!-- <span onclick='disp_settings_resize();' class='text-danger h5 font-weight-bold'>Resize</span><br> -->
+		<span class='text-info h5 font-weight-bold'>Basic Details</span>
+		<span id='load_from_dpanchang' class='mx-1 p-0 btn btn-primary'>Load-from-DrikPanchang</span>
 		<span 
 		    onclick="{ document.getElementById('modalB').style.display = 'block';
 			document.getElementById('modalM').innerHTML  =  
@@ -201,9 +216,20 @@
 		       '<span onclick=\'process_jh_freeForm_settings();\' +\
 			    class=\'btn btn-primary m-0 p-0\'>Import</span>';
 		    }"
-		    class='m-0 p-0 btn btn-info float-right'>JH-Import-FreeFromText</span><br>
-		<!--  -->
-		<span class='text-primary h5'>DOB</span><input type='date' id='dob'value='1973-12-08'/><br>
+		    class='mx-1 p-0 btn btn-info float-right'>JHora-FreeFormText</span>
+		<br>
+		<span class='text-primary h5'>DOB</span>
+		<input onchange='save_vars();' type='date' id='dob'/>
+		<span class='text-primary h5'>GID</span>
+		<input onchange='save_vars();' type='text' style="width:108px"  id='gid' placeholder='GeoNameID'/>
+		<span class='text-primary h5'>TOB</span>
+		<input onchange='save_vars();' type='text' style="width:90px"  id='tob' placeholder='HH:MM:SS'/>
+		<span class='small text-secondary h6'>24Hr</span><br>
+		<span class='text-primary h5'>POB</span>
+		<input onchange='save_vars();' type='text' style="width:306px"  
+		    id='pob' placeholder='Place Of Birth'/>
+		<hr>
+		<span class='text-info h4'>D1-Chart:</span><br>
 		<span class='text-primary h5'>Lagna</span>
 		<select onchange = "change_ascendant(document.getElementById('lagna').value);"
 		    name="lagna" id="lagna">
@@ -596,18 +622,23 @@
 	<hr class='m-0 p-0 border-info'>
 	<span id ='title' class='m-0 p-0'>Basic-Title:</span> 
 	<input id='j_title' type="text" class='w-100 text-primary font-weight-bold h6'/>
-	<span id ='notes' class='m-0 p-0'>Basic-Notes:</span> 
-	<textarea class='w-100 text-primary h6' rows='11' id='j_notes'></textarea>
-	<!--  
-	<span id ='comments' class='m-0 p-0'>Basic-Comments:</span> 
-	<textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea>
-	-->
-	<span id ='drawings' class='m-0 p-0'>Basic-Observations:</span> <br>
-	<span id ='j_drawings' class='m-0 p-0 w-90 text-wrap'></span> 
-	<br><span id ='comments' class='m-0 p-0'>Comments:</span> 
-	<span id ='j_comm_title' class='text-success font-weight-bold m-0 p-0'></span> <br>
-	<textarea class='w-100 text-success h6 font-weight-bold' rows='4' id='j_comments'></textarea><br>
-	<div id='dasha_panel' class='bg-light' style="height: 108x; overflow: auto"></div>
+	<span id ='notes' class='m-1 p-0 note_obs bg-warning' 
+	      onclick='highlightJustme("note_obs","notes");displayJustme("tarea_note_obs","j_notes");'
+	    >Basic-Notes:</span> 
+	<span id ='drawings' 
+	      onclick='highlightJustme("note_obs","drawings");displayJustme("tarea_note_obs","j_obs");' 
+	    class='m-0 p-0 note_obs'>Basic-Observations:</span> <br>
+	<textarea class='tarea_note_obs w-100 text-primary h6 ' rows='6' id='j_notes'></textarea>
+	<span class='tarea_note_obs d-none' id='j_obs'>
+	    <span id ='j_drawings' class='m-0 p-0 w-90 text-wrap'></span>
+	    <br>
+	    <span id ='comments' class='m-0 p-0'>Comments:</span> 
+	    <span id ='j_comm_title' class='text-success font-weight-bold m-0 p-0'></span> 
+	    <br> 
+	    <textarea class='w-100 text-success h6 font-weight-bold' rows='6' id='j_comments'></textarea>
+	</span>
+	<br>
+	<div id='dasha_gochar_panel' class='bg-light' style="height: 108x; overflow: auto"></div>
 	</div>
 
     </div>
@@ -643,7 +674,7 @@ window.addEventListener('load', ()=>{
     document.addEventListener('mouseup', stopPainting);
     document.addEventListener('mousemove', sketch);
     window.addEventListener('resize', resize);
-    // chart_d1();
+    $("#drawme").resize(function(){ disp_layout(); });
     initialize_l_out();
     view_1x1();
 });

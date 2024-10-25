@@ -26,7 +26,8 @@ function update_settings(){
 	// console.log("house_rashiNum is now : " + house_rashiNum);
 	for (graha of divisional_data['d1']['grahas_in_rashi'][parseInt(house_rashiNum)])  {
 	    if (graha=='La' || graha=='Ke') continue;
-	    document.getElementById('h_'+ graha.toLowerCase()).value = "h" + house_rashiNum;
+	    // document.getElementById('h_'+ graha.toLowerCase()).value = "h" + house_rashiNum;
+	    document.getElementById('h_'+ graha.toLowerCase()).value = "h" + house.toString();
 	}
     }
 }
@@ -52,6 +53,26 @@ function disp_degree(action) {
     // console.log(l_out);
 }
 
+function displayJustme(my_class,my_id) {
+    var all_entries = document.querySelectorAll('.'+my_class);
+    for (x = 0 ; x < all_entries.length ; x++){
+	entry_id = all_entries[x].getAttribute("id");
+	$('#'+entry_id).addClass('d-none');
+    }
+    $('#'+my_id).removeClass('d-none');
+}
+
+function highlightJustme(my_class,my_id) {
+    var all_entries = document.querySelectorAll('.'+my_class);
+    for (x = 0 ; x < all_entries.length ; x++){
+	entry_id = all_entries[x].getAttribute("id");
+	// if (action==='show') { $('#'+entry_id).removeClass('d-none');}
+	// else { $('#'+entry_id).addClass('d-none');}
+	$('#'+entry_id).removeClass('bg-warning');
+    }
+    $('#'+my_id).addClass('bg-warning');
+}
+
 function disp_rotate_links(action) {
     if (action==='show') { 
 	$('#hide_rotate_links').removeClass('d-none');
@@ -72,9 +93,17 @@ function choose_view_generate_form(loc) {
     if (loc.length==0) { loc='00';}
     return '<span class=\'h5 text-danger font-weight-bold\'>'
     + 'Choose View</span><br>'
-    + '<span onclick="clear_all_view_divs(\''+loc+'\');" class="m-1 btn btn-link border border-danger">Clear-test</span>'
-    + '<span onclick="view_d1(\''+loc+'\');" class="m-1 btn btn-link border border-danger">D1-View</span>'
-    + '<span onclick="view_d9(\''+loc+'\');" class="m-1 btn btn-link border border-danger">D9-View</span>';
+    + '<span onclick="view_dN(\''+loc+'\',\'d3\');" class="m-1 btn btn-link border border-danger">D3</span>'
+    + '<span onclick="view_dN(\''+loc+'\',\'d4\');" class="m-1 btn btn-link border border-danger">D4</span>'
+    + '<span onclick="view_dN(\''+loc+'\',\'d7\');" class="m-1 btn btn-link border border-danger">D7</span>'
+    + '<span onclick="view_dN(\''+loc+'\',\'d9\');" class="m-1 btn btn-link border border-danger">D9</span>'
+    + '<span onclick="view_dN(\''+loc+'\',\'d10\');" class="m-1 btn btn-link border border-danger">D10</span><br>'
+    + '<span onclick="view_d1(\''+loc+'\');" class="m-1 btn btn-link border border-danger">D1</span>'
+    + '<span onclick="view_d1(\''+loc+'\',\'Mo\');" class="m-1 btn btn-link border border-danger">D1-Mo</span>'
+    + '<span onclick="view_d1(\''+loc+'\',\'Ve\');" class="m-1 btn btn-link border border-danger">D1-Ve</span>'
+    + '<span onclick="view_d1(\''+loc+'\',\'Ju\');" class="m-1 btn btn-link border border-danger">D1-Ju</span>';
+    // + '<span onclick="clear_all_view_divs(\''+loc+'\');" class="m-1 btn btn-link border border-danger">Clear-test</span>'
+    // + '<span onclick="view_d9(\''+loc+'\');" class="m-1 btn btn-link border border-danger">D9</span>'
 }
 
 function process_jh_freeForm_settings() {
@@ -90,13 +119,6 @@ function process_jh_freeForm_settings() {
     };
     if (typeof divisional_data['d1'] === 'undefined') { initialize_div_d1(); }
     if (typeof l_out[x_loc] === 'undefined') { initialize_l_out(x_loc); }
-    // if (typeof divisional_data['d1'] === 'undefined') { divisional_data['d1'] = {}; }
-    // if (typeof divisional_data['d1']['grahas_in_rashi'] === 'undefined') { 
-	// divisional_data['d1']['grahas_in_rashi']={};
-    // }
-    // if (typeof divisional_data['d1']['degree_of_grahas'] === 'undefined') { 
-	// divisional_data['d1']['degree_of_grahas']={};
-    // }
     //
     for (let raNum=1; raNum<=12; raNum++) { grahas_in_rashi[raNum.toString()]=[]; }
     //
@@ -191,16 +213,23 @@ function process_jh_freeForm_settings() {
 	    if (graha=='La' || graha=='Ke') continue;
 	    // console.log("graha is now " + graha);
 	    // console.log("settting h_" + graha.toLowerCase().value + " to h" + house_rashinum);
-	    document.getElementById('h_'+ graha.toLowerCase()).value = "h" + house_rashinum;
+	    document.getElementById('h_'+ graha.toLowerCase()).value = "h" + house.toString();
 	}
     }
-    calc_d9();
+    calc_all_divisional();
     // console.log("l_out here");
     // console.log(l_out);
     // console.log("divisional here");
     // console.log(divisional_data);
 }
 
+function calc_all_divisional(){ 
+    calc_div("d3");
+    calc_div("d4");
+    calc_div("d7");
+    calc_div("d9");
+    calc_div("d10");
+}
 
 function openFile() {
       var input = document.getElementById("file-input");
@@ -436,6 +465,7 @@ function save_drawing() {
     drawings[drawing_id] = {};
     // drawings[drawing_id]['lines'] = lines;
     drawings[drawing_id]['curr_layout_name'] = curr_layout_name;
+    drawings[drawing_id]['curr_vars'] = curr_vars;
     drawings[drawing_id]['title'] = drawing_id;
     drawings[drawing_id]['lines'] = structuredClone(lines);
     drawings[drawing_id]['lines_by_color'] = structuredClone(lines_by_color);
@@ -637,7 +667,9 @@ function obs_update_title_form(d_id) {
     document.getElementById('modal2M').innerHTML  += '<span class="btn btn-primary" onclick="update_obs_title(\''+d_id +'\');">Update</span>';
 }
 
-function disp_layout(l_view) {
+function disp_layout(l_view="") {
+    if (l_view.length==0) { l_view=curr_layout_name; }
+    // console.log(l_view + " is now l_view");
     if (l_view==='1x1') { view_1x1(); }
     if (l_view==='1x2') { view_1x2(); }
     if (l_view==='2x2') { view_2x2(); }
@@ -712,22 +744,21 @@ function disp_drawing(c_drawing_id){
     // $('#'+c_drawing_id).removeClass('d-none');
     $('#b'+c_drawing_id).addClass('bg-warning');
     disp_layout(curr_layout_name);
-}
-
-function change_ascendant(new_asc) {
-    // console.log(new_asc);
-    rashiNum_asc = new_asc.toString();
-    rashiNum_h1 = new_asc.toString();
-    place_rashi_num_in_houses(rashiNum_asc);
-    // for(let i=1; i<=12; i++) { 
-    //     var rnum = (parseInt(rashiNum_asc)+i-1)%12;
-    //     if (rnum==0) {rnum=12};
-    //     // change rashinum in this house
-    //     document.getElementById('rashi_in_h'+i.toString()).innerHTML = rnum.toString(); 
-    // }
     // 
-    // now populate grahas wher they belong
-    populate_graha_in_rashi();
+    if ("curr_vars" in l_data) {
+	curr_vars = l_data["curr_vars"];
+	deploy_curr_vars();
+    }
+}
+ 
+function change_ascendant(new_asc) {
+    // update rashiNum_asc in divisional_data['d1']
+    // console.log(new_asc);
+    divisional_data['d1']['rashiNum_asc'] = new_asc.toString();
+    place_rashi_num_in_houses(new_asc.toString());
+    // populate_graha_in_rashi();
+    calc_all_divisional();
+    view_d1('00');
 }
 
 
@@ -770,52 +801,97 @@ function display_saved_degree(c_dog={}) {
     if (d1_data==1) populate_graha_in_rashi();
 }
 
+
+function populate_all_ggraha_in_rashi(gchar_idx) {
+    // console.log(gochar_data);
+    // if (loc.length==0) { loc='00';}
+    const all_gr = ["Su","Ju","Sa","Me","Ra","Ke","Mo","Ma","Ve"];
+    var gc_grahas_in_rashi = {};
+    var gc_retro_list=[];
+    for (let r=1; r<=12; r++) gc_grahas_in_rashi[r]=[];
+    for (c_gr of all_gr) {
+	c_rashi = gochar_data[gchar_idx][c_gr]["rashi"];
+	c_retro = gochar_data[gchar_idx][c_gr]["retro"];
+	gc_grahas_in_rashi[c_rashi].push(c_gr);
+	if (parseInt(c_retro)==1) gc_retro_list.push(c_gr);
+    }
+    // console.log("gc_grahas_in_rashi");
+    // console.log(gc_grahas_in_rashi);
+    // console.log("gc_retro_list");
+    // console.log(gc_retro_list);
+    for (xloc of l_out['locList'][curr_layout_name]) {
+	for (let house=1; house<=12; house++) {
+	    // empty graha from house innerHTML
+	    rashiIdSuffix = house.toString() + "_" + xloc;
+	    document.getElementById('gh'+ rashiIdSuffix).innerHTML = '';
+	}
+	for (let house=1; house<=12; house++) {
+	    // get rashi in the house
+	    rashiIdSuffix = house.toString() + "_" + xloc;
+	    house_rashi = document.getElementById('rashi_in_h'+ rashiIdSuffix).innerHTML;
+	    // if ASC mark it so
+	    for ( graha of gc_grahas_in_rashi[house_rashi.toString()])  {
+		document.getElementById('gh'+ rashiIdSuffix).innerHTML += 
+		    '<span class="border border-danger text-primary font-weight-bold">'+graha + '</span>';
+		if (graha=='Ra' || graha=='Ke') continue;
+		if (gc_retro_list.includes(graha)) 
+		    document.getElementById('gh'+ rashiIdSuffix).innerHTML += "<span class='small'>(R)</span>";
+		document.getElementById('gh'+ rashiIdSuffix).innerHTML += " ";
+		// if (retro_planet_list.includes(graha)) 
+		    // document.getElementById('h'+ rashiIdSuffix).innerHTML +=
+			// "<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
+	    }
+	}
+    }
+    // console.log('about to create gchar_title');
+    remove_gchar_title();
+    create_gchar_title_div(gochar_data[gchar_idx]["g_event"]);
+    curr_vars['curr_gchar_idx'] = gchar_idx;
+}
+
+
+
+
 function populate_all_graha_in_rashi(loc="") {
-    //
     // console.log("populate_all_graha_in_rashi - l_out");
     // console.log(l_out);
     if (loc.length==0) { loc='00';}
     var c_arn = l_out[loc]['rashiNum_asc'];
     var c_gir = l_out[loc]['grahas_in_rashi'];
     var c_dog = l_out[loc]['degree_of_grahas'];
-    // console.log(c_gir);
+    var ketu_rashiIdSuffix = '';
     //
     var rashiIdSuffix = "";
     for (let house=1; house<=12; house++) {
-	// get rashi in the house
-	if (loc.length==0) {
-	    rashiIdSuffix = house.toString();
-	} else {
-	    rashiIdSuffix = house.toString() + "_" + loc;
-	    c_dog = {};
-	}
-	house_rashi = document.getElementById('rashi_in_h'+ rashiIdSuffix).innerHTML;
 	// empty graha from house innerHTML
+	rashiIdSuffix = house.toString() + "_" + loc;
 	document.getElementById('h'+ rashiIdSuffix).innerHTML = '';
+    }
+    for (let house=1; house<=12; house++) {
+	// get rashi in the house
+	rashiIdSuffix = house.toString() + "_" + loc;
+	// c_dog = {};
+	house_rashi = document.getElementById('rashi_in_h'+ rashiIdSuffix).innerHTML;
 	// if ASC mark it so
-	// if (house_rashi==rashiNum_asc.toString()) 
-	//     document.getElementById('h'+ rashiIdSuffix).innerHTML += '<br><b>ASC</b>';
 	if (house_rashi==c_arn.toString()) 
 	    document.getElementById('h'+ rashiIdSuffix).innerHTML += generate_string_gr_deg('La',loc);
 	if (typeof c_gir[house_rashi.toString()]!== 'undefined') {
 	    for ( graha of c_gir[house_rashi.toString()])  {
+		if (graha=='Ke') { continue; }
 		if (graha=='La') { continue; }
 		document.getElementById('h'+ rashiIdSuffix).innerHTML += generate_string_gr_deg(graha,loc);
 		if (retro_planet_list.includes(graha)) 
 		    document.getElementById('h'+ rashiIdSuffix).innerHTML +=
 			"<span id='sa_retro' class='h6 text-danger border-danger'>(R)</span>";
+		// get Ke also displayed
+		if (graha=='Ra') {
+		    ketu_house = (parseInt(house)+6)%12; if (ketu_house==0) { ketu_house=12;}
+		    ketu_rashiIdSuffix = ketu_house.toString() + "_" + loc;
+		    document.getElementById('h'+ketu_rashiIdSuffix).innerHTML += 
+			generate_string_gr_deg('Ke',loc);
+		}
 	    }
 	}
-	// // restore the graha font size if it was changed
-	// var inputs = document.getElementsByClassName('graha');
-	// for (x = 0 ; x < inputs.length ; x++){
-	    // if (inputs[x].id in font_size) 
-	    // if (loc.length>0) {
-		// inputs[x].style.fontSize =  (parseFloat(inputs[x].style.fontSize)- 10) + '%'; 
-	    // } else {
-		// inputs[x].style.fontSize = font_size[inputs[x].id];
-	    // }
-	// }
     }
 }
 
@@ -831,6 +907,7 @@ function populate_graha_in_rashi(c_arn="",c_gir={},c_dog={},loc="") {
     var rashiIdSuffix = "";
     for (let house=1; house<=12; house++) {
 	// get rashi in the house
+	if (loc.length==0) { loc='00';}
 	if (loc.length==0) {
 	    rashiIdSuffix = house.toString();
 	} else {
@@ -876,27 +953,37 @@ function place_graha_in_house(graha,house) {
 	for (let i=1; i<=12; i++) { grahas_in_rashi[i.toString()] = []; }
     }
     if (typeof divisional_data['d1'] === 'undefined') { divisional_data['d1'] = {}; }
-    if (typeof divisional_data['d1']['grahas_in_rashi'] === 'undefined') { 
+    if (!('grahas_in_rashi' in  divisional_data['d1'])) { 
+	// console.log("Initializing divisional_data d1 grahas_in_rashi");
 	divisional_data['d1']['grahas_in_rashi']={};
+    }
+    if (!(graha in divisional_data['d1']['degree_of_grahas'])) {
+	// console.log("Initializing divisional_data d1 degree_of_grahas for graha: " + graha);
+	divisional_data['d1']['degree_of_grahas'][graha]=[];
     }
     // console.log(grahas_in_rashi);
     // find rashi of the house
-    rashi_in_h1= document.getElementById('rashi_in_h1').innerHTML;
-    c_rashi=((parseInt(rashi_in_h1)+parseInt(house.substring(1))-1)%12); if (c_rashi==0) { c_rashi=12;}
-    // console.log(c_rashi.toString());
-    // make sure graha is pesent in just one place
+    rashiNum_h1= divisional_data['d1']['rashiNum_h1'];
+    c_rashi=((parseInt(rashiNum_h1)+parseInt(house.substring(1))-1)%12); 
+    if (c_rashi==0) { c_rashi=12;}
+    if (!(c_rashi.toString() in divisional_data['d1']['grahas_in_rashi'])) {
+	// console.log("Initializing divisional_data d1 grahas_in_rashi for rashi: " + c_rashi.toString());
+	divisional_data['d1']['grahas_in_rashi'][c_rashi.toString()]=[];
+    }
+    // make sure graha exists in just one house
     for (let i=1; i<=12; i++) { 
-	if (grahas_in_rashi[i.toString()].includes(graha)) {
-	    // unconditionally remove 
-	    const g_idx = grahas_in_rashi[i.toString()].indexOf(graha);
-	    // console.log("About to delete idx: " + g_idx + " for rashi " + i.toString());
-	    const x1 = grahas_in_rashi[i.toString()].splice(g_idx,1);
+	if (i.toString() in divisional_data['d1']['grahas_in_rashi']) {
+	    if (divisional_data['d1']['grahas_in_rashi'][i.toString()].includes(graha)) {
+		// unconditionally remove 
+		const g_idx = divisional_data['d1']['grahas_in_rashi'][i.toString()].indexOf(graha);
+		// console.log("About to delete idx: " + g_idx + " for rashi " + i.toString());
+		const x1 = divisional_data['d1']['grahas_in_rashi'][i.toString()].splice(g_idx,1);
+	    }
 	}
     }
-    // console.log(c_rashi.toString());
-    grahas_in_rashi[c_rashi.toString()].push(graha);
     divisional_data['d1']['grahas_in_rashi'][c_rashi.toString()].push(graha);
-    // console.log(grahas_in_rashi);
+    grahas_in_rashi = divisional_data['d1']['grahas_in_rashi'];
+    populate_all_graha_in_rashi();
 }
 
 function save_details() {
@@ -905,11 +992,14 @@ function save_details() {
     saveMe["rashiNum_asc"] = rashiNum_asc.toString();
     saveMe["divisional_data"] = divisional_data;
     saveMe["l_out"] = l_out;
+    saveMe["gochar_data"] = gochar_data;
     // saveMe["rashiNum_h1"] = document.getElementById('rashi_in_h1').innerHTML;
     // 
     saveMe["grahas_in_rashi"] = grahas_in_rashi;
     saveMe["degree_of_grahas"] = degree_of_grahas;
     saveMe["views"] = views;
+    saveMe["vars"] = vars;
+    saveMe["curr_vars"] = curr_vars;
     saveMe["retro_planet_list"] = retro_planet_list;
     // get fileName, title and Notes
     if (document.getElementById('j_filename').value) {
@@ -1069,7 +1159,13 @@ function generate_string_gr_deg(gr,loc) {
     // display Degrees
     let degStr="";
     if (gr  in c_dog) {
-	degStr += "<span id='deg_"+gr+"_"+loc+"' class='deg my-0 py-0 small font-weight-bold'>"+c_dog[gr][0]+"D</span>";
+	if (c_dog[gr].length>0) {
+	    degStr += "<span id='deg_"+gr+"_"+loc+"' class='deg my-0 py-0 small font-weight-bold'>"
+		+ c_dog[gr][0]+"D</span>";
+	} else {
+	    degStr += "<span id='deg_"+gr+"_"+loc+"' class='deg my-0 py-0 small font-weight-bold'>"
+		+ "xD</span>";
+	}
     }
     //
     if (red_gr_list.includes(gr)) 
@@ -1114,9 +1210,75 @@ function format_graha(gr,c_dog={}) {
     return returnStr;
 }
 
+function save_vars() {
+    // console.log('save_vars - ');
+    // Date of Birth
+    var x_dob = document.getElementById('dob').value; 
+    if (x_dob.toString().length>2)  { vars["dob"] = x_dob; }
+    // console.log(x_dob);
+    // Time of Birth : 24Hr format
+    var x_tob = document.getElementById('tob').value; 
+    if (x_tob.toString().length>2)  { vars["tob"] = x_tob; }
+    // console.log(x_tob);
+    // Place of Birth - String
+    var x_pob = document.getElementById('pob').value; 
+    if (x_pob.toString().length>2)  { vars["pob"] = x_pob; }
+    // console.log(x_pob);
+    // GeoNameID
+    var x_gid = document.getElementById('gid').value; 
+    if (x_gid.toString().length>2)  { vars["gid"] = x_gid; }
+    // console.log(x_gid);
+    //
+    console.log(vars);
+}
+
+function deploy_vars() {
+    // console.log("deploy_vars");
+    // console.log(vars);
+    if (typeof vars['dob'] !== 'undefined') { 
+	if (vars['dob'].toString().length>2)  {
+	    document.getElementById('dob').value = vars['dob']; 
+	}
+    }
+    if (typeof vars['tob'] !== 'undefined') { 
+	if (vars['tob'].toString().length>2)  {
+	    document.getElementById('tob').value = vars['tob']; 
+	}
+    }
+    if (typeof vars['pob'] !== 'undefined') { 
+	if (vars['pob'].toString().length>2)  {
+	    document.getElementById('pob').value = vars['pob']; 
+	}
+    }
+    if (typeof vars['gid'] !== 'undefined') { 
+	if (vars['gid'].toString().length>2)  {
+	    document.getElementById('gid').value = vars['gid']; 
+	}
+    }
+}
+
+function deploy_curr_vars(){
+    if (typeof curr_vars['curr_gchar_idx'] !== 'undefined') { 
+	// show gcharview
+	if (curr_vars['curr_gchar_idx'] in gochar_data) {
+	    view_gchar();
+	    highlightJustme('gcharL','GC'+curr_vars['curr_gchar_idx']);
+	    populate_all_ggraha_in_rashi(curr_vars['curr_gchar_idx']);
+	}
+    }
+}
+
 function loadData(l_data,make_tab=1) {
     initialize_l_out();
     // const l_data = JSON.parse(contents);
+    if ("vars" in l_data) {
+	vars = l_data["vars"];
+	deploy_vars();
+    }
+    if ("curr_vars" in l_data) {
+	curr_vars = l_data["curr_vars"];
+	deploy_curr_vars();
+    }
     if ("rashiNum_asc" in l_data) {
 	rashiNum_asc = parseInt(l_data["rashiNum_asc"]);
     }
@@ -1143,6 +1305,7 @@ function loadData(l_data,make_tab=1) {
 	initialize_l_out();
 	update_settings();
     }
+    if ("gochar_data" in l_data) { gochar_data = l_data["gochar_data"]; }
     // 
     if ("grahas_in_rashi" in l_data) {
 	grahas_in_rashi = l_data["grahas_in_rashi"];
@@ -1189,6 +1352,7 @@ function loadData(l_data,make_tab=1) {
 	for (d_id of views['Basic']['drawing_idList']) 
 	    document.getElementById('j_drawings').innerHTML += return_drawing_btnStr(d_id);
     }
+    calc_all_divisional();
     view_1x1('00');
     l_out_restore_fontSize();
     l_out['locList'] = {};
@@ -1343,6 +1507,10 @@ function retro_flag(graha) {
     }
     // console.log(retro_planet_list);
     // now populate grahas where they belong
+    rashiNum_asc = divisional_data["d1"]["rashiNum_asc"];
+    grahas_in_rashi = divisional_data["d1"]["grahas_in_rashi"];
+    degree_of_grahas = divisional_data["d1"]["degree_of_grahas"];
+    create_house_grahaDivs('00');
     populate_graha_in_rashi();
 }
 
@@ -1458,27 +1626,285 @@ function disp_settings(){
     $('#j_view_formats').addClass('d-none'); 
 }
 
+function disp_settings_resize() {
+    $('#drawme').removeClass('d-none');
+    $('#notes_panel').removeClass('d-none');
+    $('#settings_panel').removeClass('col-6'); 
+    $('#settings_panel').addClass('col-sm'); 
+}
+
 
 function save_degree(gr) {
-    degree_of_grahas[gr] = []
+    if (typeof divisional_data['d1']['degree_of_grahas']===undefined) {
+	// console.log("Initializing divisional_data d1 degree_of_grahas ");
+	divisional_data['d1']['degree_of_grahas']={};
+    }
+    // console.log(divisional_data['d1']);
+    if (!(gr in divisional_data['d1']['degree_of_grahas'])) {
+	// console.log("Initializing divisional_data d1 degree_of_grahas for gr: " + gr);
+	divisional_data['d1']['degree_of_grahas'][gr]=[];
+    }
+    // if (typeof divisional_data['d1']['degree_of_grahas'][gr]===undefined) {
+    // }
+    //
     let deg = document.getElementById(gr.toLowerCase()+'_deg').value; 
     let min = document.getElementById(gr.toLowerCase()+'_min').value; 
     let sec = document.getElementById(gr.toLowerCase()+'_sec').value; 
     if (deg.length==0) return;
-    degree_of_grahas[gr][0] = deg;
+    // console.log(divisional_data);
+    divisional_data['d1']['degree_of_grahas'][gr][0]= deg;
     if (min.length==0) min='0'; 
     if (sec.length==0) sec='0';
-    degree_of_grahas[gr][1] = min; 
-    degree_of_grahas[gr][2] = sec;
-    // console.log(degree_of_grahas);
-    // now populate grahas where they belong
-    divisional_data['d1']['degree_of_grahas']=degree_of_grahas;
-    populate_graha_in_rashi();
-    calc_d9();
+    divisional_data['d1']['degree_of_grahas'][gr][1] = min; 
+    divisional_data['d1']['degree_of_grahas'][gr][2] = sec;
+    degree_of_grahas = divisional_data['d1']['degree_of_grahas'];
+    calc_all_divisional();
+    copy_div_to_l_out();
+    view_1x1();
+}
+
+
+function calc_d4() {
+    // not working yet. wip
+    // logic: if <7.5 same, 7.5-15 -4th, 15-22.5 -7th, >22.5 10th
+    for (const c_gr in divisional_data["d1"]["degree_of_grahas"]) { 
+	// skip if no deg found. Not checking min/sec. only deg which is [0]
+	if (divisional_data["d1"]["degree_of_grahas"][c_gr][0].length==0) continue;
+	let c_deg=0;let c_min=0;let c_sec=0; let tot_sec=0;
+	c_deg=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][0]);
+	c_min=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][1]);
+	c_sec=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][2]);
+	tot_sec=60*60*c_deg + 60*c_min + c_sec;
+	let c_proceed=1;
+	for (let i=1; i<=12; i++) { 
+	    if (i.toString() in  divisional_data["d1"]["grahas_in_rashi"]) c_proceed =1;
+	    else continue;
+	    if (c_gr=='La')  {
+		if (parseInt(divisional_data['d1']["rashiNum_asc"]) ==  i) c_proceed =1;
+		else continue;
+	    } else {
+		if (divisional_data["d1"]["grahas_in_rashi"][i.toString()].includes(c_gr))  c_proceed =1;
+		else continue;
+	    }
+	    // c_gr present in rashi i
+	    // console.log(i +"is now i and C_gr is " + c_gr);
+	    // if degree below 10, count from same, between 10and 20 take 5 offset, if more take 9 offset
+	    d4_offset=Math.floor(tot_sec/(7.5*60*60)); // divivind by 7.5deg
+	    if (d4_offset==0) c_d4_rashi_num=i;
+	    if (d4_offset==1) c_d4_rashi_num=(i+3)%12; // 4th
+	    if (d4_offset==2) c_d4_rashi_num=(i+6)%12; // 7th
+	    if (d4_offset==3) c_d4_rashi_num=(i+9)%12; // 10th
+	    if (c_d4_rashi_num==0) c_d4_rashi_num=12;
+	    // console.log(c_d4_rashi_num + " is the c_d4_rashi_num for this gr: " + c_gr);
+	    c_d4_rashi_tsec = tot_sec % (10*60*60);
+	    if (i>3) c_d4_rashi_tsec += 7.5*60*60; // 4th onwards add 7.5
+	    if (i>6) c_d4_rashi_tsec += 7.5*60*60; // 7th onwards add another 7.5 - total 15
+	    if (i>9) c_d4_rashi_tsec += 7.5*60*60; // 10th onwards add yet another 7.5 - total 22.5
+	    // console.log(divisional_data);
+	    divisional_data["d4"]["grahas_in_rashi"][c_d4_rashi_num.toString()].push(c_gr);
+	    const [d4_c_deg,d4_c_min,d4_c_sec] = conv_sec_to_degMinSec(c_d4_rashi_tsec);
+	    divisional_data["d4"]["degree_of_grahas"][c_gr] = [d4_c_deg,d4_c_min,d4_c_sec];
+	    //
+	    if (c_gr=='La') 
+		divisional_data['d4']["rashiNum_asc"] = c_d4_rashi_num.toString();
+	}
+    }
+    // console.log(divisional_data);
+}
+
+function calc_d3() {
+    // if odd, start from self. if even start 9th from self
+    for (const c_gr in divisional_data["d1"]["degree_of_grahas"]) { 
+	// skip if no deg found. Not checking min/sec. only deg which is [0]
+	if (divisional_data["d1"]["degree_of_grahas"][c_gr][0].length==0) continue;
+	let c_deg=0;let c_min=0;let c_sec=0; let tot_sec=0;
+	c_deg=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][0]);
+	c_min=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][1]);
+	c_sec=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][2]);
+	tot_sec=60*60*c_deg + 60*c_min + c_sec;
+	// if odd, start from self. if even start 9th from self
+	let c_proceed=1;
+	for (let i=1; i<=12; i++) { 
+	    if (i.toString() in  divisional_data["d1"]["grahas_in_rashi"]) c_proceed =1;
+	    else continue;
+	    if (c_gr=='La')  {
+		if (parseInt(divisional_data['d1']["rashiNum_asc"]) ==  i) c_proceed =1;
+		else continue;
+	    } else {
+		if (divisional_data["d1"]["grahas_in_rashi"][i.toString()].includes(c_gr))  c_proceed =1;
+		else continue;
+	    }
+	    // c_gr present in rashi i
+	    // console.log(i +"is now i and C_gr is " + c_gr);
+	    // if degree below 10, count from same, between 10and 20 take 5 offset, if more take 9 offset
+	    d3_offset=Math.floor(tot_sec/(10*60*60));
+	    if (d3_offset==0) c_d3_rashi_num=i;
+	    if (d3_offset==1) c_d3_rashi_num=(i+4)%12;
+	    if (d3_offset==2) c_d3_rashi_num=(i+8)%12;
+	    if (c_d3_rashi_num==0) c_d3_rashi_num=12;
+	    // console.log(c_d3_rashi_num + " is the c_d3_rashi_num for this gr: " + c_gr);
+	    c_d3_rashi_tsec = tot_sec % (10*60*60);
+	    if (i>4) c_d3_rashi_tsec += 10*60*60;
+	    if (i>8) c_d3_rashi_tsec += 10*60*60;
+	    // console.log(divisional_data);
+	    divisional_data["d3"]["grahas_in_rashi"][c_d3_rashi_num.toString()].push(c_gr);
+	    const [d3_c_deg,d3_c_min,d3_c_sec] = conv_sec_to_degMinSec(c_d3_rashi_tsec);
+	    divisional_data["d3"]["degree_of_grahas"][c_gr] = [d3_c_deg,d3_c_min,d3_c_sec];
+	    // console.log(c_gr + ' D3 is ' + c_d3_rashi_num);
+	    // console.log([d3_c_deg,d3_c_min,d3_c_sec]);
+	    //
+	    if (c_gr=='La') 
+		divisional_data['d3']["rashiNum_asc"] = c_d3_rashi_num.toString();
+	}
+    }
+    // console.log("calc_div : divisional_data AT END with d3 ");
+    // console.log(divisional_data);
+}
+
+function calc_d10() {
+    // if odd, start from self. if even start 9th from self
+    for (const c_gr in divisional_data["d1"]["degree_of_grahas"]) { 
+	// skip if no deg found. Not checking min/sec. only deg which is [0]
+	if (divisional_data["d1"]["degree_of_grahas"][c_gr][0].length==0) continue;
+	let c_deg=0;let c_min=0;let c_sec=0; let tot_sec=0;
+	c_deg=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][0]);
+	c_min=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][1]);
+	c_sec=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][2]);
+	tot_sec=60*60*c_deg + 60*c_min + c_sec;
+	// if odd, start from self. if even start 9th from self
+	let c_proceed=1;
+	for (let i=1; i<=12; i++) { 
+	    if (i.toString() in  divisional_data["d1"]["grahas_in_rashi"]) c_proceed =1;
+	    else continue;
+	    if (c_gr=='La')  {
+		if (parseInt(divisional_data['d1']["rashiNum_asc"]) ==  i) c_proceed =1;
+		else continue;
+	    } else {
+		if (divisional_data["d1"]["grahas_in_rashi"][i.toString()].includes(c_gr))  c_proceed =1;
+		else continue;
+	    }
+	    // c_gr present in rashi i
+	    d10_offset=Math.floor(tot_sec/(3*60*60));
+	    if (i%2==1) {
+		// gr in D1 in odd rashi count from self
+		c_d10_rashi_num=(i+d10_offset)%12;
+	    }
+	    if (i%2==0) {
+		// gr in D1 in even rashi -start from 9th house
+		c_d10_rashi_num=(i+8+d10_offset)%12;
+	    }
+	    if (c_d10_rashi_num==0) c_d10_rashi_num=12;
+	    c_d10_rashi_tsec = tot_sec % (3*60*60);
+	    c_d10_rashi_tsec += (i-1)*(3*30*30);
+	    if (c_d10_rashi_num%2==1) {
+		// dest is odd rashi. using truth table analysis the following should work
+		var dplus2 = (c_d10_rashi_num+2)%12;
+		if (dplus2==0) dplus2=12;
+		var dplus5 = (c_d10_rashi_num+5)%12;
+		if (dplus5==0) dplus5=12;
+		if (i>dplus2) c_d10_rashi_tsec -= (3*30*30);
+		if (i>dplus5) c_d10_rashi_tsec -= (3*30*30);
+	    }
+	    if (c_d10_rashi_num%2==0) {
+		// dest is even rashi. using truth table analysis the following should work
+		var dplus1 = (c_d10_rashi_num+1)%12;
+		if (dplus1==0) dplus1=12;
+		var dplus6 = (c_d10_rashi_num+6)%12;
+		if (dplus6==0) dplus6=12;
+		if (i>dplus1) c_d10_rashi_tsec -= (3*30*30);
+		if (i>dplus6) c_d10_rashi_tsec -= (3*30*30);
+	    }
+	    divisional_data["d10"]["grahas_in_rashi"][c_d10_rashi_num.toString()].push(c_gr);
+	    const [d10_c_deg,d10_c_min,d10_c_sec] = conv_sec_to_degMinSec(c_d10_rashi_tsec);
+	    divisional_data["d10"]["degree_of_grahas"][c_gr] = [d10_c_deg,d10_c_min,d10_c_sec];
+	    // console.log(c_gr + ' D10 is ' + c_d10_rashi_num);
+	    // console.log([d10_c_deg,d10_c_min,d10_c_sec]);
+	    //
+	    if (c_gr=='La') 
+		divisional_data['d10']["rashiNum_asc"] = c_d10_rashi_num.toString();
+	}
+    }
+    // console.log("calc_div : divisional_data AT END with d10 ");
+    // console.log(divisional_data);
+}
+
+function calc_div(divN="d9") {
+    //Used for D7, D9 . NOT for D10
+    // console.log("calc_div : divisional_data AT BEG with divN: " + divN);
+    // console.log(divisional_data);
+    divisional_data[divN]={}; 
+    divisional_data[divN]["grahas_in_rashi"]={};
+    for (let i=1; i<=12; i++)  
+	divisional_data[divN]["grahas_in_rashi"][i.toString()] = []; 
+    divisional_data[divN]["degree_of_grahas"]={};
+    divisional_data[divN]["rashiNum_asc"]="";
+    // console.log("calc_div : divisional_data NOW with divN: " + divN);
+    // console.log(divisional_data);
+    if (divN=='d10') return calc_d10();
+    if (divN=='d3') return calc_d3();
+    if (divN=='d4') return calc_d4();
+    var lagna_done = 0;
+    for (const c_gr in divisional_data["d1"]["degree_of_grahas"]) { 
+	// skip if no deg found. Not checking min/sec. only deg which is [0]
+	// if (divN=='d9') console.log(c_gr);
+	if (divisional_data["d1"]["degree_of_grahas"][c_gr][0].length==0) continue;
+	// if (divN=='d9') console.log(c_gr);
+	let c_deg=0;let c_min=0;let c_sec=0; let tot_sec=0;
+	c_deg=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][0]);
+	c_min=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][1]);
+	c_sec=parseInt(divisional_data["d1"]["degree_of_grahas"][c_gr][2]);
+	tot_sec=60*60*c_deg + 60*c_min + c_sec;
+	// if (divN=='d9') console.log(c_deg + "d " + c_min + "m" + c_sec + "s -> tot:" + tot_sec);
+	for (let i=1; i<=12; i++) { 
+	    if (i.toString() in  divisional_data["d1"]["grahas_in_rashi"]) { 
+		if (divisional_data["d1"]["grahas_in_rashi"][i.toString()].includes(c_gr))  {
+		    tot_sec += (i-1)*30*60*60;
+		    if (c_gr=='La') { lagna_done=1; }
+		}
+	    }
+	}
+	if (c_gr=='La' && lagna_done==0) { tot_sec += (parseInt(rashiNum_asc)-1)*30*60*60; }
+	//
+	// set the variable for each div
+	let divide_by_num=1;
+	// if (divN=='d9') divide_by_num= 3*60*60+20*60; // 3deg 20min
+	if (divN=='d9') divide_by_num= 30*60*60/9; // 3deg 20min
+	if (divN=='d7') divide_by_num= 30*60*60/7; // 3deg 20min
+	// console.log(c_gr + ' tot_sec is ' + tot_sec);
+	c_dN_tot_rashis = Math.floor(tot_sec/divide_by_num); // Integer Part ONLY. 
+	c_dN_rashi_num = (c_dN_tot_rashis % 12)+1; // remainder 
+	c_dN_rasi_totsecs = tot_sec - c_dN_tot_rashis*(divide_by_num);
+	c_dN_rasi_totsecs += (Math.floor(c_dN_tot_rashis/12))*(divide_by_num);
+	const [dN_c_deg,dN_c_min,dN_c_sec] = conv_sec_to_degMinSec(c_dN_rasi_totsecs)
+	// console.log(c_gr + ' DN is ' + c_dN_rashi_num);
+	// if (divN=='d9') console.log([dN_c_deg,dN_c_min,dN_c_sec]);
+	if (divisional_data[divN]["grahas_in_rashi"]==undefined) {
+	    divisional_data[divN]["grahas_in_rashi"]={};
+	    for (let i=1; i<=12; i++)  
+		divisional_data[divN]["grahas_in_rashi"][i.toString()] = []; 
+	}
+	if (divisional_data[divN]["grahas_in_rashi"][c_dN_rashi_num.toString()] == undefined) {
+	    divisional_data[divN]["grahas_in_rashi"][c_dN_rashi_num.toString()] = [];
+	}
+	divisional_data[divN]["grahas_in_rashi"][c_dN_rashi_num.toString()].push(c_gr);
+	//
+	if (divisional_data[divN]["degree_of_grahas"]==undefined) {
+	    divisional_data[divN]["degree_of_grahas"]={};
+	}
+	divisional_data[divN]["degree_of_grahas"][c_gr] = [dN_c_deg,dN_c_min,dN_c_sec];
+	//
+	if (c_gr=='La')  {
+	    divisional_data[divN]["rashiNum_asc"] = c_dN_rashi_num.toString();
+	}
+    }
+    // console.log("calc_div : divisional_data AT END with divN: " + divN);
+    // console.log(divisional_data);
 }
 
 function calc_d9() {
+    // calc_div('d9');
     divisional_data["d9"] = {};
+    // console.log(degree_of_grahas);
     for (const c_gr in degree_of_grahas) { 
 	// skip if no deg found. Not checking min/sec. only deg which is [0]
 	if (degree_of_grahas[c_gr][0].length==0) continue;
@@ -1488,8 +1914,11 @@ function calc_d9() {
 	c_sec=parseInt(degree_of_grahas[c_gr][2]);
 	tot_sec=60*60*c_deg + 60*c_min + c_sec;
 	for (let i=1; i<=12; i++) { 
-	    if (grahas_in_rashi[i.toString()].includes(c_gr)) 
-		tot_sec += (i-1)*30*60*60;
+	    if (i.toString() in  grahas_in_rashi) { 
+		if (grahas_in_rashi[i.toString()].includes(c_gr))  {
+		    tot_sec += (i-1)*30*60*60;
+		}
+	    }
 	}
 	if (c_gr=='La') {
 	    tot_sec += (parseInt(rashiNum_asc)-1)*30*60*60;
@@ -1519,6 +1948,7 @@ function calc_d9() {
 	if (c_gr=='La') 
 	    divisional_data["d9"]["rashiNum_asc"] = c_d9_rashi_num.toString();
     }
+    // console.log("calc_div : divisional_data AT END with d9 ");
     // console.log(divisional_data);
 }
 
@@ -1574,20 +2004,23 @@ function view_1x2() {
 	divId=' id="chart_'+ xloc+ '" ';
 	divElem = '<div '+ divStyle + divId + '><\/div>';
 	$("#drawme").append(divElem);
-	if (Object.keys(l_out[xloc]['grahas_in_rashi']).length ==0) { 
-	    // console.log("l_out - grahas_in_rashi for loc " + xloc + " is zero length");
-	    window[l_out['defaultView'][xloc]](xloc); 
-	} else {
-	    create_house_rashinums(xloc);
-	    c_rashiNum_h1 = l_out[xloc]["rashiNum_h1"];
-	    place_rashi_num_in_houses(c_rashiNum_h1,xloc);
-	    //
-	    create_house_grahaDivs(xloc);
-	    populate_all_graha_in_rashi(xloc); // this also brings the degree info
-	    //
-	    create_house_rotate_links(xloc);
-	    create_chart_title_div(xloc);
-	    l_out_restore_fontSize();
+	if ('grahas_in_rashi' in l_out[xloc]) {
+	    if (Object.keys(l_out[xloc]['grahas_in_rashi']).length ==0) { 
+		// console.log("l_out - grahas_in_rashi for loc " + xloc + " is zero length");
+		window[l_out['defaultView'][xloc]](xloc); 
+	    } else {
+		create_house_rashinums(xloc);
+		c_rashiNum_h1 = l_out[xloc]["rashiNum_h1"];
+		place_rashi_num_in_houses(c_rashiNum_h1,xloc);
+		//
+		create_house_grahaDivs(xloc);
+		create_house_gcharDivs(xloc);
+		populate_all_graha_in_rashi(xloc); // this also brings the degree info
+		//
+		create_house_rotate_links(xloc);
+		create_chart_title_div(xloc);
+		l_out_restore_fontSize();
+	    }
 	}
 	// create_house_rashinums(xloc);
 	// place_rashi_num_in_houses(rashiNum_asc,xloc);
@@ -1644,6 +2077,7 @@ function view_2x2() {
 	    place_rashi_num_in_houses(c_rashiNum_h1,xloc);
 	    //
 	    create_house_grahaDivs(xloc);
+	    create_house_gcharDivs(xloc);
 	    populate_all_graha_in_rashi(xloc); // this also brings the degree info
 	    //
 	    create_house_rotate_links(xloc);
@@ -1678,6 +2112,8 @@ function clear_all_view_divs(loc="") {
 	    // console.log("view_1x2: view =" + xview + " loc: " + xloc);
 	    remove_house_rashinums(xloc);
 	    remove_house_grahaDivs(xloc);
+	    remove_house_gcharDivs(xloc);
+	    remove_gchar_title();
 	    remove_house_rotate_links(xloc);
 	    remove_chart_title(xloc);
 	}
@@ -1685,7 +2121,7 @@ function clear_all_view_divs(loc="") {
 }
 
 
-function view_d1(loc){
+function view_d1(loc,gr_in_asc=""){
     // console.log("view_d1 - divisional_data");
     // console.log(divisional_data);
     if (loc.length==0) { loc='00'; }
@@ -1703,7 +2139,8 @@ function view_d1(loc){
     grahas_in_rashi = divisional_data["d1"]["grahas_in_rashi"];
     degree_of_grahas = divisional_data["d1"]["degree_of_grahas"];
     l_out[loc] = divisional_data['d1'];
-    l_out[loc]["chart_title"] = 'D1';
+	l_out[loc]["chart_title"] = 'D1';
+    if (gr_in_asc.length>0) { l_out[loc]["chart_title"] += "-"+ gr_in_asc.toUpperCase(); }
     l_out[loc]['rashiNum_h1'] = rashiNum_asc.toString();
     //
     create_house_rashinums(loc);
@@ -1716,20 +2153,32 @@ function view_d1(loc){
     create_chart_title_div(loc);
     // chart_d1();
     l_out_restore_fontSize(); // restore rashiNum and graha fontSize
+    // Now rotate the chart if necessary
+    // find out which rashi Mo is and then rotate by that rashi
+    if (gr_in_asc.length>0) {
+	for (c_rashiNum in divisional_data["d1"]['grahas_in_rashi']) {
+	    if (divisional_data["d1"]['grahas_in_rashi'][c_rashiNum].includes(gr_in_asc)) { 
+		rotate_by_rashi(c_rashiNum.toString(),loc);
+		break;
+	    }
+	}
+    }
+    if (l_out['settings']['disp_degree']==1) {disp_degree('show');} 
+    else {disp_degree('hide');}
 }
 
 
-function view_d9(loc){
+function view_dN(loc,divN="d9"){
     if (loc.length==0) { loc='00'; }
-    if (typeof divisional_data['d9'] === 'undefined') { return; }
+    if (typeof divisional_data[divN] === 'undefined') { return; }
     // clean up any older divs if present
     clear_all_view_divs(loc);
     //
-    rashiNum_asc = divisional_data["d9"]["rashiNum_asc"];
-    grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
-    degree_of_grahas = divisional_data["d9"]["degree_of_grahas"];
-    l_out[loc] = divisional_data['d9'];
-    l_out[loc]["chart_title"] = 'D9';
+    rashiNum_asc = divisional_data[divN]["rashiNum_asc"];
+    grahas_in_rashi = divisional_data[divN]["grahas_in_rashi"];
+    degree_of_grahas = divisional_data[divN]["degree_of_grahas"];
+    l_out[loc] = divisional_data[divN];
+    l_out[loc]["chart_title"] = divN.toUpperCase();
     l_out[loc]['rashiNum_h1'] = rashiNum_asc
     //
     create_house_rashinums(loc);
@@ -1741,7 +2190,41 @@ function view_d9(loc){
     create_house_rotate_links(loc);
     create_chart_title_div(loc);
     l_out_restore_fontSize(); // restore rashiNum and graha fontSize
+    if (l_out['settings']['disp_degree']==1) {disp_degree('show');} 
+    else {disp_degree('hide');}
 }
+
+function view_d3(loc) { view_dN(loc,'d3'); }
+function view_d4(loc) { view_dN(loc,'d4'); }
+function view_d7(loc) { view_dN(loc,'d7'); }
+function view_d9(loc) { view_dN(loc,'d9'); }
+function view_d10(loc) { view_dN(loc,'d10'); }
+
+// function view_d9(loc){
+    // if (loc.length==0) { loc='00'; }
+    // if (typeof divisional_data['d9'] === 'undefined') { return; }
+    // // clean up any older divs if present
+    // clear_all_view_divs(loc);
+    // //
+    // rashiNum_asc = divisional_data["d9"]["rashiNum_asc"];
+    // grahas_in_rashi = divisional_data["d9"]["grahas_in_rashi"];
+    // degree_of_grahas = divisional_data["d9"]["degree_of_grahas"];
+    // l_out[loc] = divisional_data['d9'];
+    // l_out[loc]["chart_title"] = 'D9';
+    // l_out[loc]['rashiNum_h1'] = rashiNum_asc
+    // //
+    // create_house_rashinums(loc);
+    // place_rashi_num_in_houses(rashiNum_asc,loc);
+    // //
+    // create_house_grahaDivs(loc);
+    // populate_all_graha_in_rashi(loc); // this also brings the degree info
+    // //
+    // create_house_rotate_links(loc);
+    // create_chart_title_div(loc);
+    // l_out_restore_fontSize(); // restore rashiNum and graha fontSize
+    // if (l_out['settings']['disp_degree']==1) {disp_degree('show');} 
+    // else {disp_degree('hide');}
+// }
 
 
 function l_out_restore_fontSize() {
@@ -1776,7 +2259,9 @@ function l_out_restore_fontSize() {
 
 function view_1x1(loc='00'){
     // console.log("view_1x1: l_out");
-    // console.log(l_out);
+    // console.log(curr_vars);
+    if (!('flask_checked' in curr_vars)) curr_vars['flask_checked'] = 0;
+    if (curr_vars['flask_checked']==0) flask_check();
     if (typeof divisional_data['d1'] === 'undefined') { initialize_div_d1(); }
     if (typeof l_out['00'] === 'undefined') { initialize_l_out('00'); }
     if (loc.length==0) { loc='00'; }
@@ -1823,6 +2308,40 @@ function view_1x1(loc='00'){
 	disp_degree('hide');
     }
     view_dasha();
+    create_house_gcharDivs('00');
+}
+    // if (gochar_data.length==0)
+	// gochar_data.push({
+	    // 'date':'08/07/1999',  'g_event':'Marriage',
+	    // 'mdl': 'Ra', 'adl': 'Ju', 'pdl': 'Ma',
+	    // "Ju":{"deg":"01","min":"53","rashi":"1","sec":"00"},
+	    // "Ke":{"deg":"20","min":"52","rashi":"2","sec":"51"},
+	    // "La":{"deg":"04","min":"46","rashi":"3","sec":"36"},
+	    // "Ma":{"deg":"07","min":"12","rashi":"4","sec":"34"},
+	    // "Me":{"deg":"11","min":"55","rashi":"5","sec":"29"},
+	    // "Mo":{"deg":"04","min":"17","rashi":"6","sec":"29"},
+	    // "Ra":{"deg":"20","min":"52","rashi":"7","sec":"51"},
+	    // "Sa":{"deg":"01","min":"20","rashi":"8","sec":"33"},
+	    // "Su":{"deg":"20","min":"08","rashi":"11","sec":"46"},
+	    // "Ve":{"deg":"05","min":"16","rashi":"12","sec":"19"}
+	// });
+
+function copy_div_to_l_out() {
+    // l_out['locList']['1x1']=['00'];
+    for (xview in l_out['locList']) {
+	for (xloc of l_out['locList'][xview]) {
+	    if (!(Object.keys(l_out).includes(xloc))) continue;
+	    if (!(Object.keys(l_out[xloc]).includes('chart_title'))) continue;
+	    // we have chart_title defined in this xloc
+	    var c_divN =  l_out[xloc]['chart_title'].toLowerCase();
+	    if (!(Object.keys(divisional_data).includes(c_divN))) continue;
+	    // we now have data from divisional_data to copy
+	    l_out[xloc]['grahas_in_rashi']= divisional_data[c_divN]['grahas_in_rashi'];
+	    l_out[xloc]['rashiNum_asc']= divisional_data[c_divN]['rashiNum_asc'];
+	    l_out[xloc]['degree_of_grahas']= divisional_data[c_divN]['degree_of_grahas'];
+	    l_out[xloc]['rashiNum_h1']= divisional_data[c_divN]['rashiNum_asc'];
+	}
+    }
 }
 
 
@@ -1876,7 +2395,7 @@ function initialize_l_out(loc='00') {
     l_out['defaultView']['12']="view_d9";
     l_out['defaultView']['211']="view_d1";
     l_out['defaultView']['212']="view_d1";
-    l_out['defaultView']['221']="view_d1";
+    l_out['defaultView']['221']="view_d7";
     l_out['defaultView']['222']="view_d9";
     // console.log("initialize_l_out : l_out: ");
     // console.log(l_out);
@@ -2035,6 +2554,19 @@ function remove_house_rashinums(loc="") {
     }
 }
 
+function remove_house_gcharDivs(loc="") {
+    var cDiv =""; 
+    for (let i=1; i<=12; i++) {
+	if (loc.length==0) {
+	    idStrSuffix = i.toString();
+	} else {
+	    idStrSuffix = i.toString() + "_" + loc;
+	}
+	cDiv = document.getElementById('gh'+ idStrSuffix);
+	if (cDiv) { cDiv.remove(); }
+    }
+}
+
 function remove_house_grahaDivs(loc="") {
     var cDiv =""; 
     for (let i=1; i<=12; i++) {
@@ -2054,6 +2586,26 @@ function remove_house_grahaDivs(loc="") {
 	// if (cDiv) { cDiv.style.display = 'none'; }
     }
 }
+
+function  create_house_gcharDivs(loc="") {
+    var c_divStr = ""; var chartStr="";
+    for (let i=1; i<=12; i++) {
+	if (loc.length==0) {
+	    idStrSuffix = i.toString();
+	    chartStr = "#drawme";
+	} else {
+	    idStrSuffix = i.toString() + "_" + loc;
+	    chartStr = "#chart_"+loc;
+	}
+	c_divStr = '<div ';
+	c_divStr +=' class="gb'+i.toString()+' gchar "';
+	c_divStr += ' style="z-index:2;font-size: 90%; "';
+	c_divStr += ' id="gh'+idStrSuffix+'" ';
+	c_divStr += ' ><br></div>';
+	$(chartStr).append(c_divStr);
+    }
+}
+
 
 function  create_house_grahaDivs(loc="") {
     var c_divStr = ""; var chartStr="";
@@ -2092,7 +2644,7 @@ function remove_chart_title(loc=""){
 
 
 
-function create_chart_title_div(loc="") {
+function create_chart_title_div(loc="",gr="") {
     // <div class=" p-1 m-1 chart_title h4 bg-warning text-danger font-weight-bold"  
 	// onclick="{ 
 	    // document.getElementById('modal2B').style.display = 'block';
@@ -2114,7 +2666,7 @@ function create_chart_title_div(loc="") {
     }
     c_divStr = '<div ';
     // c_divStr +=' class="p-1 m-1 chart_title h4 bg-warning text-danger font-weight-bold"';
-    c_divStr +=' class="p-1 m-1 chart_title h4 bg-warning text-danger font-weight-bold" ' 
+    c_divStr +=' class="p-0 m-0 chart_title h4 bg-warning text-danger font-weight-bold" ' 
 	+ 'onclick="{ '
 	+   ' document.getElementById(\'modal2B\').style.display = \'block\'; '
 	+   ' document.getElementById(\'modal2M\').innerHTML  = choose_view_generate_form(\''+loc+'\'); '
@@ -2126,6 +2678,27 @@ function create_chart_title_div(loc="") {
 }
 
 
+function create_gchar_title_div(gchar_title) {
+    // console.log(gchar_title);
+    var t_divStr = ""; 
+    t_divStr = '<div ';
+    t_divStr +=' class="p-0 m-0 gchar_title h6 bg-warning text-primary font-weight-bold" ';
+    t_divStr += ' style="z-index:3;font-size: 99%; "';
+    t_divStr += ' id="gchar_title" ';
+    t_divStr += ' >'+gchar_title+'</div>';
+    // console.log(t_divStr);
+    $('#drawme').append(t_divStr);
+}
+
+
+function remove_gchar_title(){
+    var all_inputs = document.querySelectorAll('.gchar_title');
+    for (x = 0 ; x < all_inputs.length ; x++){
+	var myid = all_inputs[x].getAttribute("id");
+	cDiv = document.getElementById(myid);
+	if (cDiv) { cDiv.remove(); }
+    }
+}
 
 function create_house_rashinums(loc="") {
     // <div class="rb1 h5 rashinum font-weight-bold text-black"  
@@ -2196,8 +2769,10 @@ function place_rashi_num_in_houses(c_rashiNum_h1,loc="") {
     for (let i=1; i<=12; i++) {
 	house_rashi_num = ((parseInt(c_rashiNum_h1)+i-1)%12); 
 	if (house_rashi_num==0) { house_rashi_num=12;}
-	if (loc.length==0) idStrSuffix = i.toString();
-	else idStrSuffix = i.toString() + "_" + loc;
+	if (loc.length==0) { loc='00'; }
+	// if (loc.length==0) idStrSuffix = i.toString();
+	// else idStrSuffix = i.toString() + "_" + loc;
+	idStrSuffix = i.toString() + "_" + loc;
 	document.getElementById('rashi_in_h'+ idStrSuffix).innerHTML = 
 	    house_rashi_num.toString();
     }
@@ -2246,19 +2821,373 @@ function createDiv(parentId, topPos, leftPos, width, height) {
     divStyle += 'left: ' + leftPos.toString() + 'px;';
     divStyle += 'width: '+ width.toString() + 'px; ';
     divStyle += 'height: ' + height.toString() + 'px;"';
-    console.log(divStyle);
+    // console.log(divStyle);
     //
     var divElem = '<div '+ divStyle + '><\/div>';
     $("#" + parentId).append(divElem);
 }
 
+function disp_event_gchar(gchar_idx) {
+    console.log('here at disp_event_gchar ' + gchar_idx);
+
+}
+
+function del_gchar(gchar_id_to_delete){
+    // hide the element showing this entry in goChar
+    $('#M'+gchar_id_to_delete).addClass('d-none'); 
+    // console.log(gochar_data);
+    delete gochar_data[gchar_id_to_delete];
+    // console.log(gochar_data);
+}
+
+
+function view_gchar() {
+    for (xloc of l_out['locList'][curr_layout_name])  create_house_gcharDivs(xloc);
+    // var gchar_size = Object.keys(gochar_data).length;
+    // if (gchar_size==0)
+        // gochar_data['0'] = {
+            // 'date':'02/02/1929',  'g_event':'Marriage',
+            // 'mdl': 'Ra', 'adl': 'Ju', 'pdl': 'Ma',
+            // "Ju":{"deg":"22","min":"53","rashi":"1","sec":"00", "retro":0},
+            // "Ke":{"deg":"20","min":"52","rashi":"2","sec":"51", "retro":1},
+            // "La":{"deg":"04","min":"46","rashi":"3","sec":"36"},
+            // "Ma":{"deg":"07","min":"12","rashi":"4","sec":"34"},
+            // "Me":{"deg":"11","min":"55","rashi":"5","sec":"29"},
+            // "Mo":{"deg":"04","min":"17","rashi":"6","sec":"29"},
+            // "Ra":{"deg":"20","min":"52","rashi":"7","sec":"51"},
+            // "Sa":{"deg":"01","min":"20","rashi":"8","sec":"33"},
+            // "Su":{"deg":"20","min":"08","rashi":"9","sec":"46"},
+            // "Ve":{"deg":"05","min":"16","rashi":"10","sec":"19"}
+        // };
+    // // 
+    var c_divStr = '<div style="height: 234px; overflow: auto">';
+    c_divStr += get_gdc_menu_str();
+    if (curr_vars['flask_running']==1) {
+	c_divStr += "<img id='add_gchar_form' src='images/plus_c.png' alt='AddView'  class='mx-2' " + 
+	    "onclick='add_gchar_form();' height='18'/>";
+    } 
+    // c_divStr += "<img id='add_gchar_form' src='images/plus_c.png' alt='AddView'  class='mx-2' " + 
+	// "onclick='add_gchar_form();' height='18'/>";
+    c_divStr += "<br>";
+    // display data saved in gochar_data
+    // gochar_data = [ {date: mdl: adl: pdl: g_event: }..]
+    // gchar_size = Object.keys(gochar_data).length;
+    if (Object.keys(gochar_data).length>0) {
+	for (g in gochar_data) {
+	    gc_id = 'GC'+g;
+	    c_divStr += '<span id="M'+g+'">';
+	    c_divStr += "<img id='gc_clear"+gc_id+"' src='images/clear.png' alt='clearGChar'  " +
+		'class="m-0 p-0" onclick="del_gchar(\''+g+'\');" height="18"/>';
+	    c_divStr += '<span id="'+gc_id+'" ' +
+		' onclick="highlightJustme(\'gcharL\',\''+gc_id+'\');' +
+		' populate_all_ggraha_in_rashi(\''+ g +'\');" ' + 
+		'class="text-primary gcharL">'+
+		gochar_data[g]["g_event"]+"</span> / ";
+	    c_divStr += "<span class='text-success '>"+gochar_data[g]["date"]+"</span> / ";
+	    c_divStr += "<span class='text-info '>"+
+		gochar_data[g]["mdl"]+ "-" +
+		gochar_data[g]["adl"]+ "-" +
+		gochar_data[g]["pdl"]+ 
+		"</span> / ";
+	    c_divStr += '</span>';
+	    c_divStr += "<br>";
+	}
+    }
+    c_divStr += '</div>';
+    // allow user to add gochar of a date, if required
+    document.getElementById('dasha_gochar_panel').innerHTML = c_divStr;
+    highlightJustme('gdc','GoChar');
+}
+
+function add_gchar_form() {
+    document.getElementById('modal2B').style.display = 'block';
+    document.getElementById('modal2M').innerHTML  = 
+        '<div class="h5 font-weight-bold text-black"> Adding GoChar Data:</div>' +
+	"<input id='add_gchar_event' type='text' class='text-primary font-weight-bold h6' placeholder='Event'/>" +
+	"<br><input id='add_gchar_date' type='date' class='text-primary font-weight-bold h6'/>";
+    document.getElementById('modal2M').innerHTML  += 
+	"<span class='btn btn-primary' onclick='get_gchar();'>Add</span>";
+    document.getElementById('modal2M').innerHTML  += 
+	"<br><span class='small text-secondary'>Fetched from DrikPanchang using local Flask</span>";
+    document.getElementById('add_gchar_date').value  ='';
+}
+
+function put_leading_zeros(num, size) {
+    num = num.toString();
+    while (num.length < size) num = "0" + num;
+    return num;
+}
+
+// function get_data_from_drikpanchang(gchar_url) {
+    // const myHeaders = new Headers();
+    // myHeaders.append('Access-Control-Allow-Origin', '*');
+    // return fetch(gchar_url, {headers: myHeaders, method: 'GET'}) 
+	// .then((response)=> { return response.json() }) 
+	// .catch(error => { alert('FetchConnFailed!!'); return {}; });
+// }
+
+// function get_data_from_drikpanchangX(gchar_url) {
+    // const myHeaders = new Headers();
+    // myHeaders.append('Access-Control-Allow-Origin', '*');
+    // fetch(gchar_url, {headers: myHeaders, method: 'GET'}) 
+	// .then(response => {
+	    // if (!response.ok) { alert('FetchFailed!!'); return ; }
+	    // return response.json()
+	// }) 
+// }
+
+// async function wait_for_data_from_drikpanchang(gchar_url) {
+    // return await get_data_from_drikpanchang(gchar_url);
+// }
+
+function validate_time(timeString) {
+  // const regex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/; // HH:MM
+  const regex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/; // HH:MM:SS
+  return regex.test(timeString);
+}
+
+
+
+
+function read_d1_data_from_drikpanchang(c_d1) {
+    const all_gr = ["La","Su","Ju","Sa","Me","Ra","Mo","Ma","Ve"];
+    if (typeof divisional_data['d1']['degree_of_grahas']===undefined) {
+	// console.log("Initializing divisional_data d1 degree_of_grahas ");
+	divisional_data['d1']['degree_of_grahas']={};
+    }
+    if (typeof divisional_data['d1']['grahas_in_rashi']===undefined) {
+	// console.log("Initializing divisional_data d1 grahas_in_rashi ");
+	divisional_data['d1']['grahas_in_rashi']={};
+    }
+    retro_planet_list = [];
+    for (c_gr of all_gr) {
+	if (!(c_gr in divisional_data['d1']['degree_of_grahas'])) {
+	    // console.log("Initializing divisional_data d1 degree_of_grahas for gr: " + gr);
+	    divisional_data['d1']['degree_of_grahas'][c_gr]=[];
+	}
+    }
+    for (let raNum=1; raNum<=12; raNum++) { 
+	divisional_data['d1']['grahas_in_rashi'][raNum.toString()]=[]; 
+    }
+    //
+    for (c_gr of all_gr) {
+	c_rashi = c_d1[c_gr]["rashi"];
+	c_deg = c_d1[c_gr]["deg"];
+	c_min = c_d1[c_gr]["min"];
+	c_sec = c_d1[c_gr]["sec"];
+	//
+	c_retro = c_d1[c_gr]["retro"];
+	if (parseInt(c_retro)==1) {
+	    if (c_gr!='Ra' && c_gr!='Ke') {
+		retro_planet_list.push(c_gr);
+		document.getElementById(c_gr+'_retrocbox').checked=true;
+	    }
+	} 
+	//
+	if (c_gr=='La') {
+	    divisional_data["d1"]["rashiNum_asc"] = c_rashi;
+	    divisional_data["d1"]["rashiNum_h1"] = c_rashi;
+	    var d1_rashiNum_asc = c_rashi;
+	}
+	//
+	divisional_data['d1']['grahas_in_rashi'][c_rashi].push(c_gr);
+	divisional_data['d1']['degree_of_grahas'][c_gr][0]= c_deg;
+	divisional_data['d1']['degree_of_grahas'][c_gr][1] = c_min; 
+	divisional_data['d1']['degree_of_grahas'][c_gr][2] = c_sec;
+	document.getElementById(c_gr.toLowerCase()+'_deg').value = c_deg;
+	document.getElementById(c_gr.toLowerCase()+'_min').value = c_min;
+	document.getElementById(c_gr.toLowerCase()+'_sec').value = c_sec;
+    }
+    //
+    degree_of_grahas = divisional_data['d1']['degree_of_grahas'];
+    grahas_in_rashi = divisional_data['d1']['grahas_in_rashi'];
+    //
+    for (let house=1; house<=12; house++) {
+	// get rashi in the house
+	var house_rashiNum = (parseInt(d1_rashiNum_asc)+house-1)%12;
+	if (house_rashiNum==0) {house_rashiNum=12};
+	if (house_rashiNum==d1_rashiNum_asc) 
+	    document.getElementById('lagna').value = house_rashiNum;
+	for (graha of divisional_data['d1']['grahas_in_rashi'][parseInt(house_rashiNum)])  {
+	    if (graha=='La' || graha=='Ke') continue;
+	    document.getElementById('h_'+ graha.toLowerCase()).value = "h" + house.toString();
+	}
+    }
+    calc_all_divisional();
+    copy_div_to_l_out();
+    view_1x1();
+}
+
+
+
+function flask_check() {
+    curr_vars['flask_checked']=1;
+    curr_vars['flask_running']=1;
+    let e1_url = 'http://127.0.0.1:5000/?flaskCheck=1'
+    const myHeaders = new Headers();
+    myHeaders.append('Access-Control-Allow-Origin', '*');
+    fetch(e1_url, {headers: myHeaders, method: 'GET'}) 
+	.then(response => response.json()) 
+	.catch(error => { curr_vars['flask_running']=0; });
+    setTimeout(function(){ 
+	var rama = 'krishna';
+	if (curr_vars['flask_running']==0) {
+	    $('#load_from_dpanchang').removeClass('btn-primary'); 
+	    $('#load_from_dpanchang').addClass('btn-secondary'); 
+	} else {
+	    // document.getElementById('load_from_dpanchang').click = load_d1_from_drikpanchang;
+	    document.getElementById('load_from_dpanchang').addEventListener(
+		"click", load_d1_from_drikpanchang,false);
+	    alert('btn enabled');
+	}
+    }, 2000);
+}
+
+function load_d1_from_drikpanchang(){
+    console.log(vars);
+    let d1_date = document.getElementById('dob').value;
+    let d1_time = document.getElementById('tob').value;
+    let d1_gid = document.getElementById('gid').value;
+    if (d1_date.length==0 || d1_time==0 || d1_gid.length==0 || !validate_time(d1_time)) {
+	alert('Date/GeonameId/Time missing OR invalid!! ');
+	return;
+    }
+    var d1_dateTS = Date.parse(d1_date); 
+    var d1_dateObj = new Date(d1_dateTS);
+    // make date in mm/dd//yyyy format
+    use_d1_date = 
+	put_leading_zeros((parseInt(d1_dateObj.getDate())+1),2) + 
+	"/" +  
+	put_leading_zeros((parseInt(d1_dateObj.getMonth())+1),2) + 
+	"/" + d1_dateObj.getFullYear(); 
+    let d1_url = 'http://127.0.0.1:5000/?geoname_id=1269843';
+    d1_url += '&g_date='+use_d1_date;
+    d1_url += '&g_time='+d1_time;
+    console.log(d1_url);
+    const myHeaders = new Headers();
+    myHeaders.append('Access-Control-Allow-Origin', '*');
+    var c_d1 = {};
+    fetch(d1_url, {headers: myHeaders, method: 'GET'}) 
+	.then(response => response.json()) 
+	.then(data => Object.assign(c_d1, data)) 
+	.catch(error => { alert('FetchConnFailed!!'); return; });
+    // wait for 8 seconds before proceeding : 8000
+    setTimeout(function(){ 
+	alert('Jai Gurudev!!');
+	if (Object.keys(c_d1).length>0) { read_d1_data_from_drikpanchang(c_d1); }
+    }, 8000);
+    // console.log('get_gchar - BB');
+    // console.log(d1_data);
+}
+
+function get_gchar(){
+    // user has filled the date in add_gchar_form and clicked on Add
+    // console.log('get_gchar - AA');
+    // console.log(gochar_data);
+    let gchar_date = document.getElementById('add_gchar_date').value;
+    let gchar_event = document.getElementById('add_gchar_event').value;
+    if (gchar_event.length==0) gchar_event='UNK';
+    var dasha_lords = find_dasha_lords_for_date(gchar_date);
+    // console.log(dasha_lords);
+    // return;
+    var gchar_dateTS = Date.parse(gchar_date); 
+    var gchar_dateObj = new Date(gchar_dateTS);
+    // make date in mm/dd//yyyy format
+    use_gchar_date = 
+	put_leading_zeros((parseInt(gchar_dateObj.getDate())+1),2) + 
+	"/" +  
+	put_leading_zeros((parseInt(gchar_dateObj.getMonth())+1),2) + 
+	"/" + gchar_dateObj.getFullYear(); 
+    // make idx in yyyymmdd format
+    var use_gcharIdx = gchar_dateObj.getFullYear() + 
+	put_leading_zeros((parseInt(gchar_dateObj.getMonth())+1),2) +
+	put_leading_zeros((parseInt(gchar_dateObj.getDate())+1),2) ; 
+    let gchar_url = 'http://127.0.0.1:5000/?geoname_id=1269843';
+    gchar_url += '&g_date='+use_gchar_date;
+    console.log(gchar_url);
+    document.getElementById('modal2B').style.display = 'none';
+    const myHeaders = new Headers();
+    myHeaders.append('Access-Control-Allow-Origin', '*');
+    var gchar_size = Object.keys(gochar_data).length;
+    var c_gchar = {};
+    fetch(gchar_url, {headers: myHeaders, method: 'GET'}) 
+	.then(response => response.json()) 
+	.then(data => Object.assign(c_gchar, data)) 
+	.catch(error => { alert('FetchConnFailed!!'); return; });
+    // console.log(use_gcharIdx + ' is the use_gcharIdx');
+    // console.log(gochar_data);
+    // wait for 8 seconds before proceeding : 8000
+    setTimeout(function(){ 
+	alert('here');
+	if (Object.keys(c_gchar).length>0) {
+	    c_gchar.g_event = gchar_event;
+	    c_gchar.date = use_gchar_date;
+	    c_gchar.mdl = dasha_lords[0];
+	    c_gchar.adl = dasha_lords[1];
+	    c_gchar.pdl = dasha_lords[2];
+	    gochar_data[use_gcharIdx] = c_gchar;
+	    view_gchar();
+	}
+    }, 8000);
+    // console.log('get_gchar - BB');
+    // console.log(gochar_data);
+}
+
+    // const c_gchar = wait_for_data_from_drikpanchang(gchar_url);
+    // (async () => {
+	// const c_gchar = await get_data_from_drikpanchang(gchar_url);
+    // })();
+    // const c_gchar = get_data_from_drikpanchang(gchar_url);
+    // fetch('http://127.0.0.1:5000/?geoname-id=4459467', {headers: myHeaders, method: 'GET'}) 
+	// .then(response => response.json()) 
+	// .then(data => gochar_data.push(data));
+    // let c_gochar_data={};
+    // fetch('http://127.0.0.1:5000/?geoname-id=4459467', {headers: myHeaders, method: 'GET'}) 
+	// .then(response => {
+	    // if (!response.ok) { throw new Error('Network response was not ok'); }
+	    // response.json();
+	// })
+	// .then(data => gochar_data.push(data));
+	// .then(data => console.log(data));
+
+function get_gdc_menu_str(){
+    return "<span id='Dasha' onclick='view_dasha();' " +
+	" class='gdc text-info font-weight-bold'>Dasha</span> / " + 
+	"<span id='GoChar' onclick='view_gchar();' " +
+	" class='gdc text-info font-weight-bold'>GoChar</span>";
+}
+
 function view_dasha() {
+    for (xloc of l_out['locList'][curr_layout_name])  remove_house_gcharDivs(xloc);
+    remove_gchar_title();
+    var c_divStr = '<div style="height: 234px; overflow: auto">';
+    c_divStr += get_gdc_menu_str();
+    // c_divStr += "<span onclick='view_gchar();' class='text-info font-weight-bold'>GoChar</span><br>";
+    c_divStr += "<br>";
+    var c_dob = document.getElementById('dob').value; 
+    // console.log(c_dob);
+    if (c_dob.toString().length<2)  {
+	c_divStr += '<span class="text-danger">DOB not set</span>';
+	document.getElementById('dasha_gochar_panel').innerHTML =  c_divStr;
+	return;
+    }
     // console.log(divisional_data);
     prep_lookup_data1();
-    var moon_deg = divisional_data["d1"]["degree_of_grahas"]['Mo'][0];
-    var moon_min = divisional_data["d1"]["degree_of_grahas"]['Mo'][1];
-    var moon_sec = divisional_data["d1"]["degree_of_grahas"]['Mo'][2];
+    var moon_deg="0"; var moon_min="0"; var moon_sec="0";
+    if (divisional_data["d1"]["degree_of_grahas"]['Mo']==undefined) {
+	c_divStr += '<span class="text-danger">No Mo Data set</span>';
+	document.getElementById('dasha_gochar_panel').innerHTML =  c_divStr;
+	return;
+    }
+    moon_deg = divisional_data["d1"]["degree_of_grahas"]['Mo'][0];
+    moon_min = divisional_data["d1"]["degree_of_grahas"]['Mo'][1];
+    moon_sec = divisional_data["d1"]["degree_of_grahas"]['Mo'][2];
     var moon_tot_sec = (parseInt(moon_deg)*60+parseInt(moon_min))*60+parseFloat(moon_sec);
+    if (moon_tot_sec.toString().length<2)  {
+	c_divStr += '<span class="text-danger">Mo Degree not set</span>';
+        document.getElementById('dasha_gochar_panel').innerHTML =  c_divStr;
+        return;
+    }
     // var moon_tot_sec = (parseInt(moon_deg)*60+parseInt(moon_min))*60+parseFloat(moon_sec);
     // console.log(moon_deg + "moon_deg " + moon_min + " moon_min " + moon_sec + " moon_sec");
     // console.log(moon_tot_sec + " is the moon_tot_sec");
@@ -2284,11 +3213,13 @@ function view_dasha() {
     naks_idx_mod9 = Math.ceil(moon_pada_cnt / 4)%9;
     // console.log(naks_idx_mod9 + " is the naks_idx_mod9");
     //
-    birth_dasha_lord = lkup['dasha_order'][naks_idx_mod9-1];
+    var birth_dasha_lord = lkup['dasha_order'][naks_idx_mod9-1];
     // console.log(birth_dasha_lord + " is the birth_dasha_lord");
+    divisional_data["d1"]['birth_dasha_lord'] = birth_dasha_lord;
     //
     fraction_left = 1 - naks_idx%1 // N%1 gets the decimal portion of N
     // console.log(fraction_left + " is the fraction_left");
+    divisional_data["d1"]['birth_dasha_fraction_left'] = fraction_left;
     //
     years_birth_md = lkup['dasha_dur'][birth_dasha_lord]*fraction_left;
     // console.log(years_birth_md + " is the years_birth_md of " + birth_dasha_lord);
@@ -2298,27 +3229,34 @@ function view_dasha() {
     const date_x = new Date(document.getElementById('dob').value); 
     let date_bms = new Date(document.getElementById('dob').value);// birth_md_start
     date_bms.setDate(date_bms.getDate() - years_since_bms*year_days);
+    // date_bms_str = get_date_str(date_bms);
     // console.log("dob is " + date_x);
-    var year_days =  365.25;
     // display dasha years now
     // var c_divStr = "";
-    var c_divStr = "<span class='text-info font-weight-bold'>Dasha</span><br>";
     var curr_md_lord = birth_dasha_lord;
     var curr_md_idx = '';
     var date_str=""; var pre_str="";
     let dlords_str = ''; let durations_str = ''; let beg_dates_str = '';
+    let disp_dur =''; let bd_xtra_disp_str=''; let disp_date_str ='';
     //
     for (x = 0 ; x < lkup['dasha_order'].length ; x++){
 	curr_md_idx = (x+naks_idx_mod9-1)%lkup['dasha_order'].length;
 	curr_md_lord = lkup['dasha_order'][curr_md_idx];
 	if (x==0){ 
-	    md_dur = lkup['dasha_dur'][curr_md_lord]*fraction_left;
+	    disp_dur = lkup['dasha_dur'][curr_md_lord]*fraction_left;
+	    bd_xtra_disp_str = get_date_str(date_bms);
+	    date_str = get_date_str(date_bms);
+	    disp_date_str = get_date_str(date_x);
 	}
-	else  { md_dur = lkup['dasha_dur'][curr_md_lord] };
+	else  { disp_dur = lkup['dasha_dur'][curr_md_lord] 
+	    date_str = get_date_str(date_x);
+	    disp_date_str = get_date_str(date_x);
+	};
+	md_dur = lkup['dasha_dur'][curr_md_lord] ;
 	//
-	date_str = date_x.getFullYear() + "-" 
-	    + (parseInt(date_x.getMonth())+1) + "-" 
-	    + (parseInt(date_x.getDate())+1);
+	// date_str = date_x.getFullYear() + "-" 
+	    // + (parseInt(date_x.getMonth())+1) + "-" 
+	    // + (parseInt(date_x.getDate())+1);
 	dlords_str = '[\''+curr_md_lord+'\']';
 	durations_str = '[\''+md_dur+'\']';
 	beg_dates_str = '[\''+date_str+'\']';
@@ -2327,33 +3265,24 @@ function view_dasha() {
 	    +beg_dates_str+','+durations_str+')"; '
 	c_divStr += ' >'+curr_md_lord+'</span> ';
 	c_divStr += '<span class="text-info"  id="md_toDate_'+curr_md_lord+'" ';
-	c_divStr += ' >'+ date_str + '</span> ';
+	c_divStr += ' >'+ disp_date_str + '</span> ';
 	c_divStr += '<span class="text-primary"  id="next_dur_'+curr_md_lord+'" ';
-	c_divStr += ' > next '+Math.round(md_dur*10)/10+'yr</span><br>';
-	date_x.setDate(date_x.getDate() + md_dur*year_days); // Add days
-	//
-	// pre_str = encodeURIComponent('<span onclick="view_dasha();">'+curr_md_lord+'</span>');
-	// c_divStr += '<span class="text-primary"  id="md_'+curr_md_lord+'" ';
-	// c_divStr += 'onclick="create_dasha_view(\''+date_str+'\',\''
-	    // +md_dur+'\',\''+curr_md_lord+'\',\''+pre_str+'\')"; '
-	// c_divStr += ' >'+curr_md_lord+'</span> ';
-	// c_divStr += '<span class="text-info"  id="md_toDate_'+curr_md_lord+'" ';
-	// c_divStr += ' >'+ date_str + '</span> ';
-	// c_divStr += '<span class="text-primary"  id="next_dur_'+curr_md_lord+'" ';
-	// c_divStr += ' > next '+Math.round(md_dur*10)/10+'yr</span><br>';
-	// // if (x==1) {
-	    // // c_divStr += create_dasha_view(date_str,md_dur,curr_md_lord);
-	// // }
-	// date_x.setDate(date_x.getDate() + md_dur*year_days); // Add days
+	c_divStr += ' > next '+Math.round(disp_dur*10)/10+'yr</span>';
+	if (bd_xtra_disp_str.length>0) {
+	    c_divStr += ' MD started since ' + bd_xtra_disp_str;
+	    bd_xtra_disp_str='';
+	}
+	c_divStr += '<br>';
+	date_x.setDate(date_x.getDate() + disp_dur*year_days); // Add days
     }
-    // $(dasha_panel).append(c_divStr);
-    document.getElementById('dasha_panel').innerHTML = c_divStr;
+    c_divStr += '</div>';
+    document.getElementById('dasha_gochar_panel').innerHTML = c_divStr;
+    highlightJustme('gdc','Dasha');
 }
 
 function create_dasha_view0(c_beg_date,c_dur,parent_gr="",pre_str=""){
     var c_date_x = new Date(c_beg_date);
     var d_divStr = "";
-    var year_days =  365.25;
     var curr_lord = parent_gr;
     var date_str_x = '';
     var curr_init_idx = lkup['dasha_order'].findIndex((val) => val === curr_lord);
@@ -2362,9 +3291,10 @@ function create_dasha_view0(c_beg_date,c_dur,parent_gr="",pre_str=""){
     for (y = 0 ; y < 9 ; y++){
 	curr_lord_idx = (curr_init_idx+y)%9;
 	curr_lord = lkup['dasha_order'][curr_lord_idx];
-	date_str_x = c_date_x.getFullYear() + "-"
-	    + (parseInt(c_date_x.getMonth())+1) + "-"
-	    + (parseInt(c_date_x.getDate())+1);
+	// date_str_x = c_date_x.getFullYear() + "-"
+	    // + (parseInt(c_date_x.getMonth())+1) + "-"
+	    // + (parseInt(c_date_x.getDate())+1);
+	date_str_x = get_date_str(c_date_x);
 	curr_dur = c_dur*lkup['dasha_frac'][curr_lord];
 	pre_str_x = pre_str + encodeURIComponent('<span onclick="create_dasha_view(\'' + c_beg_date + '\',\''+c_dur+'\',\''+parent_gr+'\',\''+pre_str+'\');"' + '>'+curr_lord+'</span>');
 	// console.log("create_dasha_view: curr_lord_idx: "+ curr_lord_idx);
@@ -2374,15 +3304,16 @@ function create_dasha_view0(c_beg_date,c_dur,parent_gr="",pre_str=""){
             +curr_dur+'\',\''+curr_lord+'\',\''+pre_str_x+'\');"';
 	d_divStr += ' >'+curr_lord+'</span> ';
 	d_divStr += '<span class="text-info"  id="md_toDate_'+curr_lord+'" ';
-	d_divStr += ' >'+ c_date_x.getFullYear()
-			+ "-" + (parseInt(c_date_x.getMonth())+1)
-			+ "-" + (parseInt(c_date_x.getDate())+1)+'</span> ';
+	// d_divStr += ' >'+ c_date_x.getFullYear()
+			// + "-" + (parseInt(c_date_x.getMonth())+1)
+			// + "-" + (parseInt(c_date_x.getDate())+1)+'</span> ';
+	d_divStr += ' >'+ get_date_str(c_date_x) +'</span> ';
 	d_divStr += '<span class="text-primary"  id="next_dur_'+curr_lord+'" ';
 	d_divStr += ' > next '+Math.round(curr_dur*10)/10+'yr</span><br>';
 	c_date_x.setDate(c_date_x.getDate() + curr_dur*year_days); // Add days
     }
     // return d_divStr;
-    document.getElementById('dasha_panel').innerHTML = d_divStr;
+    document.getElementById('dasha_gochar_panel').innerHTML = d_divStr;
 }
 
 function create_dasha_view(dlords,beg_dates,durations) {
@@ -2392,30 +3323,42 @@ function create_dasha_view(dlords,beg_dates,durations) {
     // dlords = [ mdL, adL, pdL, sdL,prdL ]
     // beg_dates = [mdStart, adStart,pdStart,sdStart]
     // durations = needed?
-    let year_days =  365.256363;
     let month_days =  30.4;
     let level = dlords.length;
-    let d_divStr = "<span class='text-info font-weight-bold'>Dasha</span><br>";
+    // let d_divStr = "<span class='text-info font-weight-bold'>Dasha</span><br>";
+    var d_divStr = '<div style="height: 234px; overflow: auto">';
+    d_divStr += get_gdc_menu_str();
+    d_divStr += '<br>';
     let mdl_str=''; let adl_str='';
     // console.log("level " + level)
     if (level==0) {view_dasha();};
     if (level>0) {
+	// pick up maha dasha MD details
 	var curr_md_dur = parseFloat(durations[0]);
 	var curr_md_lord = dlords[0];
 	var curr_md_date = new Date(beg_dates[0]);
 	mdl_str = '<span onclick="view_dasha();">'+curr_md_lord+'</span>-';
+	// check if this is birth dasha being sought
+	// console.log(curr_md_lord);
+	// if (curr_md_lord==divisional_data["d1"]['birth_dasha_lord']) {
+	    // // birth dasha requested
+	    // // console.log('birth dasha requested - ' + curr_md_lord);
+	    // // curr_md_date is actually the birth date
+	// }
     }
     //
     if (level>1) {
+	// pick up anthar dasha AD details
 	var curr_ad_dur = parseFloat(durations[1]);
 	var curr_ad_lord = dlords[1];
 	var curr_ad_date = new Date(beg_dates[1]);
 	// generate AD lord string
 	dlords_str = '[\''+curr_md_lord+'\']';
 	durations_str = '[\''+curr_md_dur+'\']';
-	var md_date_str = curr_md_date.getFullYear() + "-" 
-		+ (parseInt(curr_md_date.getMonth())+1) + "-" 
-		+ (parseInt(curr_md_date.getDate())+1);
+	// var md_date_str = curr_md_date.getFullYear() + "-" 
+		// + (parseInt(curr_md_date.getMonth())+1) + "-" 
+		// + (parseInt(curr_md_date.getDate())+1);
+	var md_date_str = get_date_str(curr_md_date);
 	beg_dates_str = '[\''+md_date_str+'\']';
 	adl_str =  '<span class="text-primary" ';
 	adl_str += 'onclick="create_dasha_view('+dlords_str+','
@@ -2423,15 +3366,17 @@ function create_dasha_view(dlords,beg_dates,durations) {
 	adl_str += ' >'+curr_ad_lord+'</span>-';
     }
     if (level>2) {
+	// pick up pratyantar dasha PD details
 	var curr_pd_dur = parseFloat(durations[2]);
 	var curr_pd_lord = dlords[2];
 	var curr_pd_date = new Date(beg_dates[2]);
 	// generate AD lord string
 	dlords_str = '[\''+curr_md_lord+'\',\''+curr_ad_lord+'\']';
 	durations_str = '[\''+curr_md_dur+'\',\''+curr_ad_dur+'\']';
-	var ad_date_str = curr_ad_date.getFullYear() + "-" 
-		+ (parseInt(curr_ad_date.getMonth())+1) + "-" 
-		+ (parseInt(curr_ad_date.getDate())+1);
+	// var ad_date_str = curr_ad_date.getFullYear() + "-" 
+		// + (parseInt(curr_ad_date.getMonth())+1) + "-" 
+		// + (parseInt(curr_ad_date.getDate())+1);
+	var ad_date_str = get_date_str(curr_ad_date);
 	beg_dates_str = '[\''+md_date_str+'\',\''+ad_date_str+'\']';
 	pdl_str =  '<span class="text-primary" ';
 	pdl_str += 'onclick="create_dasha_view('+dlords_str+','
@@ -2445,14 +3390,25 @@ function create_dasha_view(dlords,beg_dates,durations) {
 	var curr_init_idx = lkup['dasha_order'].findIndex((val) => val === curr_md_lord);
 	// let mdl_str = '<span onclick="view_dasha();">'+curr_lord+'</span>';
 	let dlords_str = ''; let durations_str = ''; let beg_dates_str = '';
-	let c_dur = '';
+	let c_dur = ''; let tot_frac = 0; 
+	// let bd_xtra_disp_str = '';// birthdasha
 	for (y = 0 ; y < 9 ; y++){
 	    curr_lord_idx = (curr_init_idx+y)%9;
 	    curr_lord = lkup['dasha_order'][curr_lord_idx];
-	    date_str_x = curr_md_date.getFullYear() + "-" 
-		+ (parseInt(curr_md_date.getMonth())+1) + "-" 
-		+ (parseInt(curr_md_date.getDate())+1);
+	    // date_str_x = curr_md_date.getFullYear() + "-" 
+		// + (parseInt(curr_md_date.getMonth())+1) + "-" 
+		// + (parseInt(curr_md_date.getDate())+1);
+	    date_str_x = get_date_str(curr_md_date);
+	    tot_frac += lkup['dasha_frac'][curr_lord];
 	    c_dur = curr_md_dur*lkup['dasha_frac'][curr_lord];
+	    //
+	    // if MDL is birthDashaL means curr_md_date=birthdate
+	    // if (curr_md_lord==divisional_data["d1"]['birth_dasha_lord']) {
+		// // birth dasha requested
+		// // curr_md_date is actually the birth date
+		// // need to skip this lord if date is before birthdate
+	    // }
+	    //
 	    dlords_str = '[\''+dlords[0]+'\',\''+curr_lord+'\']';
 	    durations_str = '[\''+durations[0]+'\',\''+c_dur+'\']';
 	    beg_dates_str = '[\''+beg_dates[0]+'\',\''+date_str_x+'\']';
@@ -2467,13 +3423,19 @@ function create_dasha_view(dlords,beg_dates,durations) {
 		let c_dur_months = c_dur*12;
 		if (c_dur_months<1) {
 		    let c_dur_days = c_dur_months*month_days;
-		    d_divStr += ' > next '+Math.round(c_dur_days*10)/10+'Da</span><br>';
+		    d_divStr += ' > next '+Math.round(c_dur_days*10)/10+'Da</span>';
 		} else {
-		    d_divStr += ' > next '+Math.round(c_dur_months*10)/10+'Mo</span><br>';
+		    d_divStr += ' > next '+Math.round(c_dur_months*10)/10+'Mo</span>';
 		}
 	    } else {
-		d_divStr += ' > next '+Math.round(c_dur*10)/10+'yr</span><br>';
+		d_divStr += ' > next '+Math.round(c_dur*10)/10+'yr</span>';
 	    }
+	    // if (bd_xtra_disp_str.length>0)  {
+		// d_divStr += ' MD started since ' + bd_xtra_disp_str;
+		// bd_xtra_disp_str='';
+	    // }
+	    d_divStr += '<br>';
+	    //
 	    curr_md_date.setDate(curr_md_date.getDate() + c_dur*year_days);
 	}
     }
@@ -2486,9 +3448,10 @@ function create_dasha_view(dlords,beg_dates,durations) {
 	for (y = 0 ; y < 9 ; y++){
 	    curr_lord_idx = (curr_init_idx+y)%9;
 	    curr_lord = lkup['dasha_order'][curr_lord_idx];
-	    date_str_x = curr_ad_date.getFullYear() + "-" 
-		+ (parseInt(curr_ad_date.getMonth())+1) + "-" 
-		+ (parseInt(curr_ad_date.getDate())+1);
+	    // date_str_x = curr_ad_date.getFullYear() + "-" 
+		// + (parseInt(curr_ad_date.getMonth())+1) + "-" 
+		// + (parseInt(curr_ad_date.getDate())+1);
+	    date_str_x = get_date_str(curr_ad_date);
 	    c_dur = curr_ad_dur*lkup['dasha_frac'][curr_lord];
 	    dlords_str = '[\''+dlords[0]+'\','
 		+'\''+dlords[1]+'\','
@@ -2532,9 +3495,10 @@ function create_dasha_view(dlords,beg_dates,durations) {
 	for (y = 0 ; y < 9 ; y++){
 	    curr_lord_idx = (curr_init_idx+y)%9;
 	    curr_lord = lkup['dasha_order'][curr_lord_idx];
-	    date_str_x = curr_pd_date.getFullYear() + "-" 
-		+ (parseInt(curr_pd_date.getMonth())+1) + "-" 
-		+ (parseInt(curr_pd_date.getDate())+1);
+	    // date_str_x = curr_pd_date.getFullYear() + "-" 
+		// + (parseInt(curr_pd_date.getMonth())+1) + "-" 
+		// + (parseInt(curr_pd_date.getDate())+1);
+	    date_str_x = get_date_str(curr_pd_date);
 	    c_dur = curr_pd_dur*lkup['dasha_frac'][curr_lord];
 	    dlords_str = '[\''+dlords[0]+'\','
 		+'\''+dlords[1]+'\','
@@ -2572,8 +3536,129 @@ function create_dasha_view(dlords,beg_dates,durations) {
 	    curr_pd_date.setDate(curr_pd_date.getDate() + c_dur*year_days);
 	}
     }
-    document.getElementById('dasha_panel').innerHTML = d_divStr;
+    d_divStr += '</div>';
+    document.getElementById('dasha_gochar_panel').innerHTML = d_divStr;
+    highlightJustme('gdc','Dasha');
 }
+
+
+
+
+function find_dasha_lords_for_date(req_date) {
+    var req_dateTS = Date.parse(req_date); 
+    const req_dateObj = new Date(req_dateTS); 
+    var c_dob = document.getElementById('dob').value; 
+    if (c_dob.toString().length<2)  { return 'DOB not set'; }
+    const date_x = new Date(c_dob); 
+    if (req_dateObj<date_x) { return 'pre Birth Date';}
+    prep_lookup_data1(); // all dasha dur and order ready : Obj: lkup is ready
+    var moon_deg="0"; var moon_min="0"; var moon_sec="0";
+    if (divisional_data["d1"]["degree_of_grahas"]['Mo']==undefined) {
+	return 'Mo degree not set';
+    }
+    moon_deg = divisional_data["d1"]["degree_of_grahas"]['Mo'][0];
+    moon_min = divisional_data["d1"]["degree_of_grahas"]['Mo'][1];
+    moon_sec = divisional_data["d1"]["degree_of_grahas"]['Mo'][2];
+    var moon_tot_sec = (parseInt(moon_deg)*60+parseInt(moon_min))*60+parseFloat(moon_sec);
+    // find moon rashi
+    var moon_rashiNum ='';
+    for (c_rashiNum in divisional_data["d1"]['grahas_in_rashi']) {
+	if (divisional_data["d1"]['grahas_in_rashi'][c_rashiNum].includes('Mo')) { 
+	    moon_rashiNum = c_rashiNum;
+	    break;
+	}
+    }
+    moon_tot_sec += (parseInt(moon_rashiNum)-1)*30*3600;
+    moon_pada_cnt = moon_tot_sec/(200*60) ; // 3.33 deg = 200 mins
+    // moon_pada_cnt_0 = moon_tot_sec/(200*60) ; // 3.33 deg = 200 mins
+    // moon_pada_cnt = Math.floor(moon_pada_cnt_0) ; // 3.33 deg = 200 mins
+    // console.log(moon_pada_cnt + " is the moon_pada_cnt");
+    //
+    naks_idx = moon_pada_cnt / 4;
+    naks_idx_mod9 = Math.ceil(moon_pada_cnt / 4)%9;
+    var birth_dasha_lord = lkup['dasha_order'][naks_idx_mod9-1];
+    // console.log(birth_dasha_lord + " is the birth_dasha_lord");
+    divisional_data["d1"]['birth_dasha_lord'] = birth_dasha_lord;
+    fraction_left = 1 - naks_idx%1 // N%1 gets the decimal portion of N
+    divisional_data["d1"]['birth_dasha_fraction_left'] = fraction_left;
+    years_birth_md = lkup['dasha_dur'][birth_dasha_lord]*fraction_left;
+    years_since_bms = lkup['dasha_dur'][birth_dasha_lord]*(naks_idx%1);// birth_md_started
+    //
+    // const date_x = new Date(document.getElementById('dob').value); 
+    let date_bms = new Date(c_dob);// birth_md_start 
+    date_bms.setDate(date_bms.getDate() - years_since_bms*year_days);
+    // date_bms_str = get_date_str(date_bms);
+    // console.log("dob is " + date_x);
+    var curr_md_lord = birth_dasha_lord;
+    var curr_md_idx = ''; var mdl='XX'; var adl='XX'; var pdl='XX';
+    var date_str=""; var pre_str="";
+    let dlords_str = ''; let durations_str = ''; let md_start_date = '';
+    let md_dur =''; let ad_dur=''; let disp_date_str ='';
+    //
+    for (x = 0 ; x < lkup['dasha_order'].length ; x++){
+	curr_md_idx = (x+naks_idx_mod9-1)%lkup['dasha_order'].length;
+	curr_md_lord = lkup['dasha_order'][curr_md_idx];
+	if (x==0){ 
+	    md_dur = lkup['dasha_dur'][curr_md_lord]*fraction_left; 
+	    md_start_date = new Date(date_bms);
+	} else  { 
+	    md_dur = lkup['dasha_dur'][curr_md_lord] 
+	    md_start_date = new Date(date_x);
+	};
+	date_x.setDate(date_x.getDate() + md_dur*year_days); // Add days for current MD
+	if (req_dateObj<date_x) { 
+	    mdl = curr_md_lord; 
+	    break;
+	}
+    }
+    // now let us find ADL
+    // console.log('next start date ' + md_start_date);
+    date_y = new Date(md_start_date);
+    // console.log('md duration is :' +md_dur);
+    for (x = 0 ; x < lkup['dasha_order'].length ; x++){
+	// curr_adl_idx = curr_md_idx + x;
+	curr_adl_idx = (curr_md_idx + x)%lkup['dasha_order'].length;
+	curr_ad_lord = lkup['dasha_order'][curr_adl_idx];
+	ad_dur = md_dur*lkup['dasha_frac'][curr_ad_lord];
+	ad_start_date = new Date(date_y);
+	date_y.setDate(date_y.getDate() + ad_dur*year_days); // Add days for current AD
+	if (req_dateObj<date_y) { 
+	    adl = curr_ad_lord; 
+	    break;
+	}
+    }
+    // now let us find PDL
+    date_z = new Date(ad_start_date);
+    // console.log('ad duration is :' +ad_dur);
+    for (y = 0 ; y < lkup['dasha_order'].length ; y++){
+	// curr_pdl_idx = curr_adl_idx + y;
+	curr_pdl_idx = (curr_adl_idx + y)%lkup['dasha_order'].length;
+	curr_pd_lord = lkup['dasha_order'][curr_pdl_idx];
+	// console.log('checking for pdl:' + curr_pd_lord );
+	pd_dur = ad_dur*lkup['dasha_frac'][curr_pd_lord];
+	pd_start_date = new Date(date_z);
+	date_z.setDate(date_z.getDate() + pd_dur*year_days); // Add days for current AD
+	// console.log(' current date_z: ' + date_z);
+	if (req_dateObj<date_z) { 
+	    pdl = curr_pd_lord; 
+	    break;
+	}
+    }
+    return [mdl,adl,pdl];
+    // Now have mdl - to find now adl
+}
+
+
+
+
+
+function get_date_str(date_obj) {
+    return date_obj.getFullYear() + "-" 
+	+ (parseInt(date_obj.getMonth())+1) + "-" 
+	+ (parseInt(date_obj.getDate())+1);
+}
+
+
 
 function prep_lookup_data1() {
     lkup['dasha_order']=['Ke','Ve','Su','Mo','Ma','Ra','Ju','Sa','Me'];
